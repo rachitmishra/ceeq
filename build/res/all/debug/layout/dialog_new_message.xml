@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#f2f2f2"
+    android:orientation="vertical"
+    android:padding="8dp" >
+
+    <EditText
+        android:id="@+id/newMessage"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_margin="0dp"
+        android:background="@drawable/ic_bg_text"
+        android:ems="10"
+        android:gravity="left"
+        android:inputType="text|textMultiLine" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:background="@drawable/ic_bg_shadow" />
+
+</LinearLayout><!-- From: file:/D:/git/ceeq/ceeq/res/layout/dialog_new_message.xml -->

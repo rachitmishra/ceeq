@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#f2f2f2"
+    android:orientation="vertical"
+    android:padding="8dp" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:padding="8dp"
+        android:text="@string/help_note_27"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/text_dark"
+        android:textSize="12sp" />
+
+    <EditText
+        android:id="@+id/newMessage"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_margin="0dp"
+        android:background="@drawable/ic_bg_text"
+        android:ems="10"
+        android:gravity="left"
+        android:hint="@string/help_note_26"
+        android:inputType="text|textMultiLine"
+        android:textSize="14sp" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:background="@drawable/ic_bg_shadow" />
+
+</LinearLayout><!-- From: file:/D:/git/ceeq/ceeq/res/layout/dialog_feedback.xml -->

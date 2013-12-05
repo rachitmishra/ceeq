@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#f2f2f2"
+    android:orientation="vertical"
+    android:padding="8dp" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_bg_white"
+        android:orientation="vertical" >
+
+        <EditText
+            android:id="@+id/oldPinNumber"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_margin="0dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/ic_bg_text"
+            android:ems="10"
+            android:hint="@string/enter_your_old_pin"
+            android:inputType="numberPassword" >
+
+            <requestFocus />
+        </EditText>
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/ic_bg_shadow_light" />
+
+        <EditText
+            android:id="@+id/newPinNumber"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_margin="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/ic_bg_text"
+            android:ems="10"
+            android:hint="@string/enter_6_digit_new_pin"
+            android:inputType="numberPassword" />
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="@drawable/ic_bg_shadow_light" />
+    </LinearLayout>
+
+</LinearLayout><!-- From: file:/D:/git/ceeq/ceeq/res/layout/dialog_new_pin.xml -->

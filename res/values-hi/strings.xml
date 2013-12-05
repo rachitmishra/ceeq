@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- App -->
+    <string name="app_name">सीक</string>
+    <string name="app_id">413219985467370</string>
+    <string name="app_version">1.0.0 बीटा </string>
+    <string name="app_settings">सेटिंग्स</string>
+    <string name="app_status">स्थिति </string>
+    <string name="app_welcome">नमस्ते </string>
+    <string name="app_exit">बंद करें </string>
+    <string name="blank"></string>
+    <string name="coming_soon">जल्द आ रहा है ..</string>
+    <string name="google">गूगल</string>
+    <string name="play_services">प्ले सुविधाएं</string>
+    <string name="feedback">सुझाव एवं सन्देश</string>
+    <string name="_">" : "</string>
+    <string name="ceeq_india">©सीक भारत</string>
+    <string name="ceeq_link">www.ceeq.in</string>
+    <string name="ceeq_support_email">support@ceeq.in</string>
+
+    <!-- Help Strings -->
+    <string name="restore">प्रस्थापन</string>
+    <string name="delete">हटायें</string>
+    <string name="properties">विवरण</string>
+
+    <!-- Menu Strings -->
+    <string name="help">सहायता</string>
+    <string name="settings">सेटिंग्स</string>
+    <string name="mfeedback">सुझाव</string>
+    <string name="share">शेयर</string>
+    <string name="about">हमारे बारे में</string>
+    <string name="privacy">आपके डाटा की गोपनीयता</string>
+    <string name="exit">इस एप्प को बंद करें</string>
+
+    <!-- Tab Titles -->
+    <string name="tabHome">मुख्य</string>
+    <string name="tabBackup">डाटा संरक्षण </string>
+    <string name="tabSecurity">मोबाइल सुरक्षा</string>
+    <string name="tabSpam">कॉल सुरक्षा </string>
+
+    <!-- Button Strings -->
+    <string name="quickBackup"> तीव्र डाटा संचयन  </string>
+    <string name="quickRestore">तीव्र डाटा  रिस्टोर  </string>
+    <string name="viewBackups">संचयित डाटा देखें </string>
+    <string name="wipe">फॉर्मेट करें </string>
+    <string name="activate">चालू करें</string>
+    <string name="backupButton">डाटा संचयन करें</string>
+    <string name="unlock">खोलें</string>
+    <string name="unlock_b">सिम बदलाव</string>
+
+    <!-- Hint Strings -->
+    <string name="hintLock">फ़ोन लॉक करें </string>
+
+    <!-- Dialog box Strings -->
+    <string name="yes">हाँ </string>
+    <string name="no">नहीं </string>
+    <string name="cancel">रद्द करें </string>
+    <string name="next">आगे </string>
+    <string name="save">संरक्षित करें </string>
+    <string name="finish">बंद करें </string>
+    <string name="close">बंद करें </string>
+    <string name="backup">संचय करें  </string>
+    <string name="done">ठीक है</string>
+    <string name="later">बाद में</string>
+    <string name="okay">ठीक है </string>
+    <string name="note">ध्यान दें </string>
+    <string name="send">भेजें</string>
+    <string name="enable">चालू करें</string>
+
+    <!-- EditText Hints -->
+    <string name="new_emergency_message">नया आपातकालीन सन्देश</string>
+    <string name="enter_your_old_pin">पुराना पिन लिखें</string>
+    <string name="enter_6_digit_pin">6 अंक का नया पिन लिखें</string>
+    <string name="enter_6_digit_new_pin">6 अंक का नया पिन लिखें</string>
+
+    <!-- Toggle Titles -->
+    <string name="protect_me">स्वतः रक्षा</string>
+    <string name="stealth_mode">सॉफ्टवेयर गोपनीयता</string>
+    <string name="auto_track">स्वतः खोज</string>
+    <string name="auto_blips">स्वतः सन्देश</string>
+    <string name="auto_backup">स्वतः संचयन</string>
+    <string name="device_admin">फोन प्रशासन</string>
+    <string name="online_sync">ऑनलाइन डाटा संचय</string>
+
+    <!-- Preference Strings -->
+    <string name="termsconditions">नियम  और शर्तें </string>
+    <string name="device_locked">मोबाइल लॉक है</string>
+    <string name="digitalclock">Digital_Clock</string>
+    <string name="ceeq_logo">Ceeq_Logo</string>
+    <string name="enter_device_passcode">अपना पिन लिखें</string>
+    <string name="made_india">निर्मित  ♥ भारत </string>
+
+    <!-- Activity Titles -->
+    <string name="title_activity_playservice">गूगल प्ले</string>
+    <string name="title_activity_display_backups">संचयित डाटा</string>
+
+    <!-- User Help Notes -->
+    <string name="help_note_1">मोबाइल प्रशासन चालू करें, इससे आपका फोन और अधिक सुरछित करनें में इस सॉफ्टवेयर को मदद मिलती है</string>
+    <string name="help_note_2">आपातकालीन संपर्कों को आपका फोन खोने की स्थिति में संपर्क किया जायेगा, परेशान न हों, आपका बैलेंस फालतू खर्च नहीं होगा</string>
+    <string name="help_note_3">इस से आपके सारे संपर्क, सन्देश, सेटिंग्स  और स्व खोज डाटा मिट जायेगा </string>
+    <string name="help_note_4">आप इस सॉफ्टवेयर के बटन और सन्देश छुपा रहे हैं  \n\nफिर भी आप इस सॉफ्टवेयर को  *#2337#* डायल करके खोल सकते हैं \n\nध्यान रहे स्व संचय और स्व खोज बंद नहीं होगी</string>
+    <string name="help_note_5">और विकल्पों के लिए फाइल को कुछ समय के लिए दबाएँ</string>
+    <string name="help_note_6">कोई डाटा संचय फाइलें नहीं हैं</string>
+    <string name="help_note_7">Ceeq is an app to protect you and your device, to backup your data. It provides features such as remote commands, auto backups and much more. \nVisit http://ceeq.in/about to read more about us.</string>
+    <string name="help_note_8">GPS is required for accuracy while getting the location of device, in distress situations or while using the application.</string>
+    <string name="help_note_9">Device administrator feature helps the application to wipe, lock your device remotely.</string>
+    <string name="help_note_10">Remote Commands are messages which you may send in case your device is lost. 
+				\n\n To use a remote command, type the remote command, followed by your pin ex. CEEQ LOCATE 000000. 
+				\n\n The main remote commands are 
+				\n1. CEEQ ALARM : sounds a loud alarm on your mobile, 
+				\n2. CEEQ LOCK : locks your device, 
+				\n3. CEEQ ERASE : completely erases your device of any data, 
+				\n4. CEEQ NOW : sends you the current sim number, imsi number and other mobile details, 
+				\n5. CEEQ CALLS : sends you the last 10 called numbers, 
+				\n6. CEEQ SPY : spies on the device location and calls and send them to you, 
+				\n7. CEEQ LOCATE : sends you the last stored location, and any new location if location of mobile changes.</string>
+    <string name="help_note_11">We have explained each and every permission at http://www.ceeq.in/permissions. \nStill, they are just required to give you most features.</string>
+    <string name="help_note_12">Protect me feature has been added for distress situations, just double tap power button and rapidly tap Home button to send an SOS message to your emergency contact.\nThe same message will be posted to you social accounts too.</string>
+    <string name="help_note_13">Online Sync, saves your backup data over Google Drive, which are used to restore data if in case you loose your phone or SD card.</string>
+    <string name="help_note_14">One click backup simply backs up everything i.e contacts, messages, call logs, etc just by one click.</string>
+    <string name="help_note_15">Stealth Mode hides the application icon &amp; its notifications.\nDon\'t worry you can still launch the application by dialing *#*#2337#*#*. Note, it won\'t stops the background process such as Auto Backups, or device Tracking</string>
+    <string name="help_note_16">We highly respect your privacy and data, and so this application in no way collects any data from your mobile.\nWe just store your email address, so you can access the application from the web, seriously that\'s all we need.</string>
+    <string name="help_note_17">Yup, we are right at your back.\nContact us anytime by sending us your message at \nsupport@ceeq.in \nor visiting and posting at \nhttp://ceeq.in/contact, \nwe will contact you within minutes, okay mostly in an hour ;).</string>
+    <string name="help_note_18">This project has been developed for SCHOLARLY purposes, and it is being shared with you for FREE so that you can enjoy our work and your gadget is safe too.\nIf you have any suggestions, or found bugs, any feedbacks, you can shout at us at support@ceeq.in.\nThis project by no means collects any user data for any purpose.</string>
+    <string name="help_note_19">Connect your social accounts</string>
+    <string name="help_note_20">P.S. Your Google account is connected.</string>
+    <string name="help_note_21">Add an emergency message.</string>
+    <string name="help_note_22">Autoblip will inform you about phone details and location on low battery.</string>
+    <string name="help_note_23">Please Enable Device Administration to access all features of the application, such as Device Wipe, Locking, Encryption etc.</string>
+    <string name="help_note_24">Emergency Contacts will be contacted in case you or your mobile are in trouble. Don\'t worry you can change it any time in settings.</string>
+    <string name="help_note_25">Enabling Device Administration enables all the security features of the application such as remote wipe, remote lock, remote commands.</string>
+
+    <!-- About Page -->
+    <string name="connected_account">जुड़ा हुआ गूगल अकाउंट</string>
+    <string name="your_name">आपका नाम</string>
+    <string name="current_sim_number">सिम नंबर</string>
+    <string name="current_user_imsi_number">उपभोक्ता IMSI नंबर</string>
+    <string name="current_iemi_number">मोबाइल IEMI नंबर</string>
+    <string name="total_storage_available_storage">कुल जगह : उपलब्ध जगह</string>
+    <string name="total_ram_available_ram">कुल RAM : उपलब्ध RAM</string>
+    <string name="total_applications">कुल एप्लीकेशन</string>
+    <string name="device_pixel_density">मोबाइल का पिक्सेल घनत्व</string>
+    <string name="device_size">मोबाइल का आकार</string>
+    <string name="gps_status">जीपीएस स्थिति</string>
+    <string name="device_admin_status">मोबाइल प्रशासन स्थिति</string>
+    <string name="current_mobile_operator">मोबाइल ऑपरेटर</string>
+
+    <!-- App Status Strings -->
+    <string name="app_status_good">सुरछित</string>
+    <string name="app_status_bad">असुरछित</string>
+    <string name="status_note_0">आप सुरछित हैं </string>
+    <string name="status_note_1">स्वतः संचयन बंद है </string>
+    <string name="status_note_2">स्वतः खोज बंद है</string>
+    <string name="status_note_3">जीपीएस बंद है</string>
+    <string name="status_note_4">मोबाइल प्रशासन बंद है</string>
+    <string name="notifications">सन्देश</string>
+    <string name="status_note_5">आखिरी संचयन तीन दिवस पूर्व हुआ था</string>
+    <string name="status_note_6">अभी कोई संचयन नहीं किया गया है</string>
+    <string name="status_note_7">आज</string>
+    <string name="status_note_8">कल</string>
+    <string name="status_note_9">दो दिवस पूर्व</string>
+    <string name="status_note_10">तीन दिवस पूर्व</string>
+    <string name="status_note_11">एक सप्ताह पूर्व</string>
+
+    <!-- Others -->
+    <string name="file_name">File Name</string>
+    <string name="file_type">File Type</string>
+    <string name="file_size">File Size</string>
+    <string name="file_creation_date">File creation date</string>
+    <string name="intent_type">Intent type</string>
+    <string name="wipe_external_storage">मेमोरी कार्ड भी फॉर्मेट करें</string>
+    <string name="next_backup_in">अगला डाटा संचयन</string>
+    <string name="choose_a_contact">आपातकालीन संपर्क चुनें </string>
+    <string name="status">स्थिति</string>
+
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="green">#9c0 </color>
+    <color name="red">#FC3632</color>
+    <color name="blue">#09c</color>
+    <color name="background">#f2f2f2</color>
+    <color name="light_blue">#500099cc</color>
+    <color name="transparent">#ffffffff</color>
+    <color name="text_dark">#252525</color>
+    <color name="text_medium">#454545</color>
+    <color name="text_light">#606060</color>
+    <color name="pressed_actionbar">#CC0099CC</color>
+</resources>

@@ -1,0 +1,129 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ic_bg_main"
+    android:orientation="vertical"
+    android:padding="0dp"
+    tools:context=".Lockscreen"
+    tools:ignore="MergeRootFrame,UselessParent" >
+
+    <ImageView
+        android:id="@+id/status_image"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:background="#0099cc"
+        android:contentDescription="@string/ceeq_logo"
+        android:scaleType="center"
+        android:src="@drawable/ic_app_header" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="#0099cc"
+        android:gravity="center_horizontal"
+        android:onClick="unlock"
+        android:padding="8dp"
+        android:text="@string/device_locked"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#f4f4f4" />
+
+    <!--
+          <DigitalClock
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:background="#0099cc"
+        android:gravity="center_horizontal"
+        android:padding="8dp"
+        android:text="@string/digitalclock"
+        android:textColor="#f4f4f4"
+        android:textSize="32sp" />
+    -->
+
+    <EditText
+        android:id="@+id/type2"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_margin="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/ic_bg_text"
+        android:ems="10"
+        android:hint="@string/enter_6_digit_pin"
+        android:inputType="numberPassword"
+        android:padding="8dp"
+        android:textColor="#434343"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp" >
+
+        <Button
+            android:id="@+id/unlock"
+            style="@style/buttons"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1.5"
+            android:text="@string/unlock" />
+
+        <Button
+            android:id="@+id/unlock_b"
+            style="@style/buttons"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="@string/unlock_b" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/showError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:paddingBottom="4dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="4dp"
+        android:text=""
+        android:textColor="#f02" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom" >
+
+            <TextView
+                android:id="@+id/uwarn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#fafafa"
+                android:gravity="center_horizontal"
+                android:padding="8dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#ff3366"
+                android:textSize="13sp"
+                tools:ignore="SelectableText" />
+
+            <SurfaceView
+                android:id="@+id/sv"
+                android:layout_width="4dp"
+                android:layout_height="4dp"
+                android:layout_gravity="right|bottom" />
+        </FrameLayout>
+    </LinearLayout>
+
+</LinearLayout>
