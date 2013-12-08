@@ -7,17 +7,18 @@
 
 package in.ceeq.receivers;
 
+import in.ceeq.helpers.Logger;
+import in.ceeq.services.Commander;
+import in.ceeq.services.Commander.Command;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-
-import in.ceeq.services.Commander;
-import in.ceeq.services.Commander.Command;
 
 public class PowerButton extends BroadcastReceiver {
 	private int pressure;
 
 	public PowerButton() {
+		Logger.d("SOS signal received...");
 	}
 
 	@Override

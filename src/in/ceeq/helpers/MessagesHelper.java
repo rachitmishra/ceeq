@@ -65,10 +65,12 @@ public class MessagesHelper {
 			Logger.d(message);
 			break;
 		case NOW:
-			message = getNowMessage();
+			message = getDetailsMessage();
+			Logger.d(message);
 			break;
 		case PROTECT_ME:
 			message = getProtectMeMessage();
+			Logger.d(message);
 			break;
 		case SIM_CHANGE:
 			message = getSimChangeMessage();
@@ -185,14 +187,19 @@ public class MessagesHelper {
 	 * @return
 	 */
 	public String getProtectMeMessage() {
-		return preferencesHelper.getString("emergencyMessageProtect")
+		return "Help "
+				+ preferencesHelper
+						.getString(PreferencesHelper.ACCOUNT_USER_NAME)
+				+ preferencesHelper
+						.getString(PreferencesHelper.DISTRESS_MESSAGE)
 				+ "\n"
 				+ "Last User Location : "
-				+ preferencesHelper.getString("lastLocation")
+				+ getLocationMessage()
 				+ "\n"
 				+ "Battery Status : "
-				+ helpers.getBatteryLevel()
-				+ "Ceeq will send you regular location updates every 5 minutes.\n";
+				+ (helpers.getBatteryLevel() * 100)
+				+ "%"
+				+ "\nCeeq will send you regular location updates every 5 minutes.\n";
 	}
 
 	/**
@@ -200,7 +207,7 @@ public class MessagesHelper {
 	 * 
 	 * @return
 	 */
-	public String getNowMessage() {
+	public String getDetailsMessage() {
 		return "Current \n" + "Sim Number : "
 				+ phoneHelper.getData(Phone.SIM_ID) + "\n" + "Sim Operator : "
 				+ phoneHelper.getData(Phone.OPERATOR) + "\n"

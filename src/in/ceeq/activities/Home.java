@@ -1,6 +1,7 @@
 package in.ceeq.activities;
 
 import hirondelle.date4j.DateTime;
+import in.ceeq.Launcher;
 import in.ceeq.R;
 import in.ceeq.actions.Backup;
 import in.ceeq.actions.Receiver;
@@ -27,12 +28,12 @@ import org.apache.http.protocol.HTTP;
 
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnKeyListener;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -73,6 +74,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.facebook.LoggingBehavior;
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -116,8 +118,6 @@ public class Home extends FragmentActivity {
 	private ViewPager pager;
 	private AlertDialog.Builder builder;
 	private LayoutInflater inflater;
-	private BroadcastReceiver powerButtonReceiver, scheduledBackupsReceiver,
-			lowBatteryReceiver, outgoingCallsReceiver;
 	private static LinearLayout timer;
 	private static ProgressBar progressBar;
 	private PreferencesHelper preferencesHelper;
@@ -136,7 +136,7 @@ public class Home extends FragmentActivity {
 		this.title = drawerTitle = getTitle();
 
 		setupHelpers();
-		// checkPlayServices();
+		checkPlayServices();
 		setupFacebookConnect(savedInstanceState);
 		setupPager();
 		setupDrawer();
@@ -163,6 +163,10 @@ public class Home extends FragmentActivity {
 		getActionBar().setIcon(R.drawable.ic_app_action_logo);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
+	}
+
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(Home.this, "5996b3d9");
 	}
 
 	private DrawerLayout drawerLayout;
@@ -474,19 +478,71 @@ public class Home extends FragmentActivity {
 
 	private DialogHelper dialogHelper;
 
+	private PackageManager packageManager;
+
 	private void setupStealthMode(ToggleButton toggle) {
+		packageManager = this.getPackageManager();
 		if (toggle.isChecked()) {
 			dialogHelper = new DialogHelper(toggle);
-			builder.setView(dialogHelper.getView(Dialog.PROTECT))
+			builder.setView(dialogHelper.getView(Dialog.STEALTH))
 					.setPositiveButton(R.string.enable,
-							dialogHelper.new DialogPositiveButtonPressed())
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									NotificationsHelper
+											.getInstance(Home.this)
+											.hideNotification(
+													NotificationsHelper.DEFAULT_NOTIFICATION_ID);
+									preferencesHelper
+											.setBoolean(
+													PreferencesHelper.NOTIFICATIONS_STATUS,
+													false);
+
+									try {
+										packageManager
+												.setComponentEnabledSetting(
+														new ComponentName(
+																Home.this,
+																Launcher.class),
+														PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+														PackageManager.DONT_KILL_APP);
+										try {
+											startActivity(new Intent(Home.this,
+													Launcher.class));
+										} catch (Exception e) {
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+
+									Receiver.getInstance(Home.this).register(
+											ReceiverType.OUTGOING_CALLS);
+									preferencesHelper
+											.setBoolean(
+													PreferencesHelper.STEALTH_MODE_STATUS,
+													true);
+									Toast.makeText(Home.this,
+											"Stealth Mode enabled.",
+											Toast.LENGTH_SHORT).show();
+
+								}
+							})
 					.setNegativeButton(R.string.cancel,
 							dialogHelper.new DialogNegativeButtonPressed())
 					.setOnKeyListener(
 							dialogHelper.new DialogBackButtonPressed())
 					.create().show();
 		} else {
+			getPackageManager().setComponentEnabledSetting(
+					new ComponentName(Home.this, Launcher.class),
+					PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+					PackageManager.DONT_KILL_APP);
+			NotificationsHelper.getInstance(Home.this).defaultNotification();
 			Receiver.getInstance(this).unregister(ReceiverType.OUTGOING_CALLS);
+			preferencesHelper.setBoolean(PreferencesHelper.STEALTH_MODE_STATUS,
+					false);
 			Toast.makeText(this, "Stealth Mode disabled.", Toast.LENGTH_SHORT)
 					.show();
 		}
@@ -690,6 +746,11 @@ public class Home extends FragmentActivity {
 				builder.setSingleChoiceItems(getChoices(), NONE,
 						new DialogOptionSelect());
 				break;
+
+			case FEEDBACK:
+				builder.setView(getView(Dialog.FEEDBACK));
+				builder.setPositiveButton(getPositiveButtonString(),
+						new DialogPositiveButtonPressed());
 			default:
 				break;
 			}
@@ -733,6 +794,7 @@ public class Home extends FragmentActivity {
 		}
 
 		public View getView(Dialog dialogType) {
+			this.dialogType = dialogType;
 			inflater = Home.this.getLayoutInflater();
 			switch (dialogType) {
 			case BLIP:
@@ -740,7 +802,9 @@ public class Home extends FragmentActivity {
 			case FEEDBACK:
 				return inflater.inflate(R.layout.dialog_feedback, null);
 			case STEALTH:
-				View view = inflater.inflate(R.layout.dialog_feedback, null);
+				return inflater.inflate(R.layout.dialog_stealth_mode, null);
+			case PROTECT:
+				View view = inflater.inflate(R.layout.dialog_protect_me, null);
 				Button facebookConnect = (Button) view
 						.findViewById(R.id.facebook_login);
 				LinearLayout socialBox = (LinearLayout) view
@@ -760,6 +824,7 @@ public class Home extends FragmentActivity {
 				});
 				return view;
 			default:
+				break;
 			}
 			return null;
 		}
@@ -798,21 +863,21 @@ public class Home extends FragmentActivity {
 				onOptionSelect(action);
 				dialog.dismiss();
 			}
-		}
 
-		public void onOptionSelect(int data) {
-			switch (dialogType) {
-			case BACKUP:
-				Backup.getInstance(Home.this).backup(data);
-				break;
-			case RESTORE:
-				Restore.getInstance(Home.this).restore(data);
-				break;
-			case WIPE:
-				break;
-			default:
-				break;
+			public void onOptionSelect(int data) {
+				switch (dialogType) {
+				case BACKUP:
+					Backup.getInstance(Home.this).backup(data);
+					break;
+				case RESTORE:
+					Restore.getInstance(Home.this).restore(data);
+					break;
+				case WIPE:
+					break;
+				default:
+					break;
 
+				}
 			}
 		}
 
@@ -822,33 +887,43 @@ public class Home extends FragmentActivity {
 				onPositiveButtonPressed();
 				dialog.dismiss();
 			}
+
+			public void onPositiveButtonPressed() {
+				switch (dialogType) {
+				case BLIP:
+					break;
+				case DEVICE_ADMIN:
+					break;
+				case FEEDBACK:
+
+					break;
+				case PROTECT:
+					Receiver.getInstance(Home.this).register(
+							ReceiverType.POWER_BUTTON);
+					preferencesHelper.setBoolean(
+							PreferencesHelper.PROTECT_ME_STATUS, true);
+					showToast("Protect me enabled. Just press power button 10 times for help.");
+					break;
+				case STEALTH:
+
+					break;
+				case WIPE:
+					break;
+				case WIPE_DEVICE:
+					break;
+				case WIPE_EXTERNAL_STORAGE:
+					break;
+				case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
+					break;
+				default:
+					break;
+
+				}
+			}
 		}
 
-		public void onPositiveButtonPressed() {
-			switch (dialogType) {
-			case BLIP:
-				break;
-			case DEVICE_ADMIN:
-				break;
-			case FEEDBACK:
-
-				break;
-			case PROTECT:
-				break;
-			case STEALTH:
-				break;
-			case WIPE:
-				break;
-			case WIPE_DEVICE:
-				break;
-			case WIPE_EXTERNAL_STORAGE:
-				break;
-			case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
-				break;
-			default:
-				break;
-
-			}
+		public void showToast(String message) {
+			Toast.makeText(Home.this, message, Toast.LENGTH_SHORT).show();
 		}
 
 		public class DialogNegativeButtonPressed implements

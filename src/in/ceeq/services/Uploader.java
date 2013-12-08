@@ -7,8 +7,12 @@
 
 package in.ceeq.services;
 
-import android.app.IntentService;
-import android.content.Intent;
+import in.ceeq.helpers.Helpers;
+import in.ceeq.helpers.PhoneHelper;
+import in.ceeq.helpers.PhoneHelper.Phone;
+import in.ceeq.helpers.PreferencesHelper;
+
+import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -18,11 +22,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.util.ArrayList;
-
-import in.ceeq.helpers.PhoneHelper;
-import in.ceeq.helpers.PhoneHelper.Phone;
-import in.ceeq.helpers.PreferencesHelper;
+import android.app.IntentService;
+import android.content.Intent;
 
 public class Uploader extends IntentService {
 
@@ -41,15 +42,20 @@ public class Uploader extends IntentService {
 	private static final String GCM_ID = "gcmid";
 	private static final String DEVICE_ADMIN = "deviceadmin";
 	private static final String ACTION = "action";
+	private static final String LATITUDE = "latitude";
+	private static final String LONGITUDE = "longitude";
+	private static final String MESSAGE = "message";
+	private static final String BATTERY = "battery";
 
 	public enum UploadType {
-		NEW, DATA, BLIP, FEEDBACK
+		NEW, DATA, BLIP, FEEDBACK, LOCATE
 	}
 
 	public static final String UPLOAD_STATUS_ACCOUNT = "upload_account_data";
 	public static final String UPLOAD_STATUS_DATA = "upload_user_data";
 	public static final String UPLOAD_STATUS_BLIP = "upload_blip";
 	public static final String UPLOAD_STATUS_FEEDBACK = "upload_feedback";
+	public static final String UPLOAD_STATUS_LOCATION = "upload_location";
 
 	public static final int HTTP_STATUS_SUCCESS = 200;
 	public static final int HTTP_STATUS_FAILURE = 404;
@@ -58,7 +64,7 @@ public class Uploader extends IntentService {
 
 	private PreferencesHelper preferencesHelper;
 	private PhoneHelper phoneHelper;
-	private boolean userData, newAccount, newFeedback, newBlip;
+	private boolean userData, newAccount, newFeedback, newBlip, newLocation;
 	private UploadType uploadType;
 
 	@Override
@@ -71,33 +77,52 @@ public class Uploader extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		clearPendingUploads();
 		uploadType = (UploadType) intent.getExtras().get(ACTION);
-		switch (uploadType) {
-			case NEW :
-				if (sendData(uploadRegistrationData())) {
-					newAccount = false;
-				}
-				break;
-			case DATA :
-				if (sendData(uploadBackupData())) {
-					userData = false;
-				}
-				break;
-			case FEEDBACK :
-				if (sendData(uploadFeedbackData())) {
-					newFeedback = false;
-				}
-				break;
-			case BLIP :
-				if (sendData(uploadBlipData())) {
-					newBlip = false;
-				}
-				break;
-		}
-
+		uploadData(uploadType);
 		setUploadStatus();
 	}
 
 	private void clearPendingUploads() {
+		if (preferencesHelper.getBoolean(UPLOAD_STATUS_ACCOUNT)) {
+			uploadData(UploadType.NEW);
+		} else if (preferencesHelper.getBoolean(UPLOAD_STATUS_DATA)) {
+			uploadData(UploadType.DATA);
+		} else if (preferencesHelper.getBoolean(UPLOAD_STATUS_FEEDBACK)) {
+			uploadData(UploadType.FEEDBACK);
+		} else if (preferencesHelper.getBoolean(UPLOAD_STATUS_BLIP)) {
+			uploadData(UploadType.BLIP);
+		} else if (preferencesHelper.getBoolean(UPLOAD_STATUS_LOCATION)) {
+			uploadData(UploadType.LOCATE);
+		}
+	}
+
+	private void uploadData(UploadType uploadType) {
+		switch (uploadType) {
+		case NEW:
+			if (sendData(uploadRegistrationData())) {
+				newAccount = false;
+			}
+			break;
+		case DATA:
+			if (sendData(uploadBackupData())) {
+				userData = false;
+			}
+			break;
+		case FEEDBACK:
+			if (sendData(uploadFeedbackData())) {
+				newFeedback = false;
+			}
+			break;
+		case BLIP:
+			if (sendData(uploadBlipData())) {
+				newBlip = false;
+			}
+			break;
+		case LOCATE:
+			if (sendData(uploadLocationData())) {
+				newLocation = false;
+			}
+			break;
+		}
 
 	}
 
@@ -110,6 +135,8 @@ public class Uploader extends IntentService {
 			preferencesHelper.setBoolean(UPLOAD_STATUS_FEEDBACK, false);
 		if (!newBlip)
 			preferencesHelper.setBoolean(UPLOAD_STATUS_BLIP, false);
+		if (!newLocation)
+			preferencesHelper.setBoolean(UPLOAD_STATUS_LOCATION, false);
 
 	}
 
@@ -120,10 +147,10 @@ public class Uploader extends IntentService {
 			httppost.setEntity(new UrlEncodedFormEntity(data));
 			HttpResponse response = httpclient.execute(httppost);
 			switch (response.getStatusLine().getStatusCode()) {
-				case HTTP_STATUS_SUCCESS :
-					return true;
-				default :
-					return false;
+			case HTTP_STATUS_SUCCESS:
+				return true;
+			default:
+				return false;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -175,15 +202,33 @@ public class Uploader extends IntentService {
 				.getString(PreferencesHelper.ACCOUNT_USER_ID)));
 		nameValuePairs.add(new BasicNameValuePair(USERNAME, preferencesHelper
 				.getString(PreferencesHelper.ACCOUNT_USER_NAME)));
-		nameValuePairs.add(new BasicNameValuePair("message", preferencesHelper
-				.getString("feedbackMessage")));
+		nameValuePairs.add(new BasicNameValuePair(MESSAGE, preferencesHelper
+				.getString(PreferencesHelper.FEEDBACK_MESSAGE)));
 		return nameValuePairs;
 	}
 
 	private ArrayList<NameValuePair> uploadBlipData() {
 		ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
 				3);
+		nameValuePairs.add(new BasicNameValuePair(LATITUDE, preferencesHelper
+				.getString(PreferencesHelper.LAST_LOCATION_LATITUDE)));
+		nameValuePairs.add(new BasicNameValuePair(LONGITUDE, preferencesHelper
+				.getString(PreferencesHelper.LAST_LOCATION_LONGITUDE)));
+		nameValuePairs.add(new BasicNameValuePair(BATTERY, Helpers.getInstance(
+				this).getBatteryLevel()
+				+ "%"));
+		return nameValuePairs;
+	}
 
+	private ArrayList<NameValuePair> uploadLocationData() {
+		ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+				3);
+		nameValuePairs.add(new BasicNameValuePair(LATITUDE, preferencesHelper
+				.getString(PreferencesHelper.LAST_LOCATION_LATITUDE)));
+		nameValuePairs.add(new BasicNameValuePair(LONGITUDE, preferencesHelper
+				.getString(PreferencesHelper.LAST_LOCATION_LONGITUDE)));
+		nameValuePairs.add(new BasicNameValuePair(GCM_ID, preferencesHelper
+				.getString(PreferencesHelper.GCM_REGISTRATION_ID)));
 		return nameValuePairs;
 	}
 

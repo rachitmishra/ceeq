@@ -31,10 +31,8 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.plus.PlusClient;
 import com.google.android.gms.plus.model.people.Person;
 
-public class Splash extends Activity
-		implements
-			ConnectionCallbacks,
-			OnConnectionFailedListener {
+public class Splash extends Activity implements ConnectionCallbacks,
+		OnConnectionFailedListener {
 
 	private boolean appHasInitialised, googleConnect;
 
@@ -51,6 +49,7 @@ public class Splash extends Activity
 	}
 
 	private PreferencesHelper preferencesHelper;
+
 	private void setupHelpers() {
 		preferencesHelper = new PreferencesHelper(this);
 	}
@@ -58,6 +57,7 @@ public class Splash extends Activity
 	private ProgressBar progreeBar;
 	private PlusClient plus;
 	private SignInButton button;
+
 	private void setupGoogleConnect() {
 		progreeBar = (ProgressBar) findViewById(R.id.connectProgress);
 		plus = new PlusClient.Builder(this, this, this).setActions(
@@ -116,14 +116,16 @@ public class Splash extends Activity
 		}
 	}
 
-	private static final int DELAY = 1;
-	private void delayedStart(final Class<?> activity) {
-		int secondsDelayed;
+	private static final int ONE_SECOND = 1;
+	private static final int ZERO_SECONDS = 0;
+
+	private void delayedStart(final Class<?> activity, int secondsDelayed) {
+
 		if (PreferencesHelper.getInstance(this).getBoolean(
 				PreferencesHelper.SPLASH_STATUS))
-			secondsDelayed = DELAY;
+			secondsDelayed = ONE_SECOND;
 		else
-			secondsDelayed = 0;
+			secondsDelayed = ZERO_SECONDS;
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
@@ -135,6 +137,7 @@ public class Splash extends Activity
 
 	private ConnectionResult connectionResult;
 	private static final int CONNECTION_FAILURE_REQUEST = 9010;
+
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
 		if (progreeBar.isActivated()) {
@@ -159,14 +162,15 @@ public class Splash extends Activity
 			plus.connect();
 		} else if (!appHasInitialised) {
 			button.setVisibility(View.INVISIBLE);
-			delayedStart(Firstrun.class);
+			delayedStart(Firstrun.class, ONE_SECOND);
 
 		} else {
 			button.setVisibility(View.INVISIBLE);
-			delayedStart(Home.class);
+			delayedStart(Home.class, ONE_SECOND);
 
 		}
 	}
+
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -185,7 +189,6 @@ public class Splash extends Activity
 
 	@Override
 	public void onConnected(Bundle connectionHint) {
-		progreeBar.setVisibility(View.GONE);
 		Person currentUser = plus.getCurrentPerson();
 		preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_ID,
 				plus.getAccountName());
@@ -201,8 +204,7 @@ public class Splash extends Activity
 
 		if (!appHasInitialised) {
 			button.setVisibility(View.INVISIBLE);
-			delayedStart(Firstrun.class);
-
+			delayedStart(Firstrun.class, ZERO_SECONDS);
 		}
 	}
 

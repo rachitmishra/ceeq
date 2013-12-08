@@ -39,6 +39,14 @@ public class Locations extends BroadcastReceiver {
 			break;
 		case PROTECT:
 			commands.putExtra(Commander.ACTION, Command.SEND_PROTECT_MESSAGE);
+			commands.putExtra(SENDER_ADDRESS,
+					intent.getExtras().getString(SENDER_ADDRESS));
+			break;
+		case NOW:
+			commands.putExtra(Commander.ACTION,
+					Command.SEND_CURRENT_DETAILS_MESSAGE);
+			commands.putExtra(SENDER_ADDRESS,
+					intent.getExtras().getString(SENDER_ADDRESS));
 			break;
 		default:
 			break;

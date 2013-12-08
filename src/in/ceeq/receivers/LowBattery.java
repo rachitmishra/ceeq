@@ -7,10 +7,11 @@
 
 package in.ceeq.receivers;
 
+import in.ceeq.services.Commander;
+import in.ceeq.services.Commander.Command;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
 
 public class LowBattery extends BroadcastReceiver {
 	public LowBattery() {
@@ -18,10 +19,9 @@ public class LowBattery extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		// context.startService(new Intent(Home.this,
-		// ServiceUploader.class).putExtra("action",
-		// Constants.UPLOAD_TYPE_BLIP));
-		Toast.makeText(context, "Low Battery", Toast.LENGTH_LONG).show();
+		Intent commands = new Intent(context, Commander.class);
+		commands.putExtra(Commander.ACTION, Command.SEND_BLIP_TO_SERVER);
+		context.startService(commands);
 
 	}
 }

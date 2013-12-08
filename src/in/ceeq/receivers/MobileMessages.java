@@ -53,7 +53,7 @@ public class MobileMessages extends WakefulBroadcastReceiver {
 				sendCommand.putExtra(Commander.ACTION, Command.WIPE);
 			} else if (messageText.contains("NOW")) {
 				sendCommand.putExtra(Commander.ACTION,
-						Command.SEND_CURRENT_DETAILS_MESSAGE);
+						Command.GET_LOCATION_FOR_CURRENT_DETAILS_MESSAGE);
 			} else if (messageText.contains("CALLS")) {
 				sendCommand.putExtra(Commander.ACTION,
 						Command.SEND_CALLS_DETAILS_MESSAGE);

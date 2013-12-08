@@ -36,7 +36,7 @@ public class Locater extends IntentService implements
 	public static final String ACTION = "action";
 
 	public enum RequestType {
-		BLIP, MESSAGE, SERVER, PROTECT
+		BLIP, MESSAGE, SERVER, PROTECT, NOW
 	}
 
 	private static final String SENDER_ADDRESS = "senderAddress";
@@ -89,8 +89,10 @@ public class Locater extends IntentService implements
 
 	@Override
 	public void onConnected(Bundle arg0) {
-		Logger.w("Location client connected...");
+		Logger.d("Location client connected...");
 		location = locationClient.getLastLocation();
+		if (location == null)
+			Logger.d("Location is null...");
 		preferencesHelper.setString(PreferencesHelper.LAST_LOCATION_LATITUDE,
 				location.getLatitude() + "");
 		preferencesHelper.setString(PreferencesHelper.LAST_LOCATION_LONGITUDE,
@@ -106,12 +108,18 @@ public class Locater extends IntentService implements
 			sendLocationUpdate.putExtra(SENDER_ADDRESS, senderAddress);
 			break;
 		case PROTECT:
+			sendLocationUpdate.putExtra(ACTION, RequestType.PROTECT);
+			sendLocationUpdate.putExtra(SENDER_ADDRESS, senderAddress);
+			break;
+		case NOW:
+			sendLocationUpdate.putExtra(ACTION, RequestType.NOW);
+			sendLocationUpdate.putExtra(SENDER_ADDRESS, senderAddress);
 			break;
 		case SERVER:
 			sendLocationUpdate.putExtra(ACTION, RequestType.SERVER);
 			break;
 		}
-		Logger.w("Broadcasting location update...");
+		Logger.d("Broadcasting location update...");
 		sendBroadcast(sendLocationUpdate);
 	}
 

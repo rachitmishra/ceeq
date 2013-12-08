@@ -7,6 +7,18 @@
 
 package in.ceeq.helpers;
 
+import hirondelle.date4j.DateTime;
+import in.ceeq.activities.Home.ComponentState;
+import in.ceeq.activities.Home.SwitchState;
+import in.ceeq.receivers.DeviceAdmin;
+import in.ceeq.receivers.LowBattery;
+import in.ceeq.receivers.OutgoingCalls;
+import in.ceeq.receivers.PowerButton;
+import in.ceeq.receivers.ScheduledBackups;
+
+import java.util.Locale;
+import java.util.TimeZone;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
@@ -25,18 +37,6 @@ import android.os.Environment;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-
-import java.util.Locale;
-import java.util.TimeZone;
-
-import hirondelle.date4j.DateTime;
-import in.ceeq.activities.Home.ComponentState;
-import in.ceeq.activities.Home.SwitchState;
-import in.ceeq.receivers.DeviceAdmin;
-import in.ceeq.receivers.LowBattery;
-import in.ceeq.receivers.OutgoingCalls;
-import in.ceeq.receivers.PowerButton;
-import in.ceeq.receivers.ScheduledBackups;
 
 public class Helpers {
 
@@ -131,12 +131,12 @@ public class Helpers {
 				.toString();
 	}
 
-	public String getBatteryLevel() {
+	public float getBatteryLevel() {
 		IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 		Intent batteryStatus = context.registerReceiver(null, ifilter);
 		int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
 		int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-		return (level / (float) scale) + "";
+		return (level / (float) scale);
 	}
 
 	public String getRegistrationId() {
@@ -175,24 +175,22 @@ public class Helpers {
 		AlarmManager alarms = (AlarmManager) context
 				.getSystemService(Context.ALARM_SERVICE);
 		switch (state) {
-			case OFF :
-				pi = PendingIntent.getBroadcast(context,
-						ALARM_ACTIVATION_REQUEST, new Intent(
-								"in.ceeq.ACTION_BACKUP"),
-						PendingIntent.FLAG_CANCEL_CURRENT);
-				alarms.cancel(pi);
+		case OFF:
+			pi = PendingIntent.getBroadcast(context, ALARM_ACTIVATION_REQUEST,
+					new Intent("in.ceeq.ACTION_BACKUP"),
+					PendingIntent.FLAG_CANCEL_CURRENT);
+			alarms.cancel(pi);
 
-				break;
-			case ON :
-				pi = PendingIntent.getBroadcast(context,
-						ALARM_ACTIVATION_REQUEST, new Intent(
-								"in.ceeq.ACTION_BACKUP"),
-						PendingIntent.FLAG_CANCEL_CURRENT);
-				alarms.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-						new DateTime(DateTime.today(TimeZone.getDefault())
-								+ " 02:00:00").getMilliseconds(TimeZone
-								.getDefault()), AlarmManager.INTERVAL_DAY, pi);
-				break;
+			break;
+		case ON:
+			pi = PendingIntent.getBroadcast(context, ALARM_ACTIVATION_REQUEST,
+					new Intent("in.ceeq.ACTION_BACKUP"),
+					PendingIntent.FLAG_CANCEL_CURRENT);
+			alarms.setInexactRepeating(AlarmManager.RTC_WAKEUP, new DateTime(
+					DateTime.today(TimeZone.getDefault()) + " 02:00:00")
+					.getMilliseconds(TimeZone.getDefault()),
+					AlarmManager.INTERVAL_DAY, pi);
+			break;
 		}
 
 	}
@@ -201,32 +199,31 @@ public class Helpers {
 		packageManager = context.getPackageManager();
 		ComponentName componentName = null;
 		switch (receiverName) {
-			case LOW_BATTERY_RECEIVER :
-				componentName = new ComponentName(context, LowBattery.class);
-				break;
-			case OUTGOING_CALLS_RECEIVER :
-				componentName = new ComponentName(context, OutgoingCalls.class);
-				break;
-			case POWER_BUTTON_RECEIVER :
-				componentName = new ComponentName(context, PowerButton.class);
-				break;
-			case SCHEDULED_BACKUPS_RECEIVER :
-				componentName = new ComponentName(context,
-						ScheduledBackups.class);
-				break;
+		case LOW_BATTERY_RECEIVER:
+			componentName = new ComponentName(context, LowBattery.class);
+			break;
+		case OUTGOING_CALLS_RECEIVER:
+			componentName = new ComponentName(context, OutgoingCalls.class);
+			break;
+		case POWER_BUTTON_RECEIVER:
+			componentName = new ComponentName(context, PowerButton.class);
+			break;
+		case SCHEDULED_BACKUPS_RECEIVER:
+			componentName = new ComponentName(context, ScheduledBackups.class);
+			break;
 		}
 
 		switch (state) {
-			case DISABLE :
-				packageManager.setComponentEnabledSetting(componentName,
-						PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-						PackageManager.DONT_KILL_APP);
-				break;
-			case ENABLE :
-				packageManager.setComponentEnabledSetting(componentName,
-						PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-						PackageManager.DONT_KILL_APP);
-				break;
+		case DISABLE:
+			packageManager.setComponentEnabledSetting(componentName,
+					PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+					PackageManager.DONT_KILL_APP);
+			break;
+		case ENABLE:
+			packageManager.setComponentEnabledSetting(componentName,
+					PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+					PackageManager.DONT_KILL_APP);
+			break;
 		}
 	}
 

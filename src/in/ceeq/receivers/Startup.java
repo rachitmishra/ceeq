@@ -7,20 +7,20 @@
 
 package in.ceeq.receivers;
 
+import hirondelle.date4j.DateTime;
+import in.ceeq.helpers.NotificationsHelper;
+import in.ceeq.helpers.PreferencesHelper;
+import in.ceeq.services.Commander;
+import in.ceeq.services.Commander.Command;
+
+import java.util.TimeZone;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
-
-import java.util.TimeZone;
-
-import hirondelle.date4j.DateTime;
-import in.ceeq.helpers.NotificationsHelper;
-import in.ceeq.helpers.PreferencesHelper;
-import in.ceeq.services.Commander;
-import in.ceeq.services.Commander.Command;
 
 public class Startup extends BroadcastReceiver {
 
@@ -55,12 +55,8 @@ public class Startup extends BroadcastReceiver {
 		try {
 			if (!tm.getSimSerialNumber().equals(
 					preferencesHelper.getString("simNumber"))) {
-				Intent i2 = new Intent(context,
-						in.ceeq.activities.Lockscreen.class);
-				i2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 				try {
-					context.startActivity(i2);
 					Intent commands = new Intent(context, Commander.class);
 					commands.putExtra(Commander.ACTION,
 							Command.SEND_SIM_CHANGE_MESSAGE);
@@ -73,6 +69,7 @@ public class Startup extends BroadcastReceiver {
 			e.printStackTrace();
 		}
 	}
+
 	public void scheduleAlarms(Context context) {
 		PendingIntent pi;
 		AlarmManager alarms = (AlarmManager) context

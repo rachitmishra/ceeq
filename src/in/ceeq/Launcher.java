@@ -7,8 +7,7 @@ package in.ceeq;
  *
  */
 
-import in.ceeq.services.Commander;
-import in.ceeq.services.Commander.Command;
+import in.ceeq.activities.Splash;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,10 +18,7 @@ public class Launcher extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_transparent);
-		// startActivity(new Intent(this, Home.class));
-
-		startService(new Intent(this, Commander.class).putExtra(
-				Commander.ACTION, Command.GET_LOCATION_FOR_MESSAGE));
+		startActivity(new Intent(this, Splash.class));
 		this.finish();
 	}
 }

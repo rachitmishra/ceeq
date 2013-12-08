@@ -9,6 +9,7 @@ package in.ceeq.services;
 
 import in.ceeq.R;
 import in.ceeq.actions.Backup;
+import in.ceeq.actions.Ring;
 import in.ceeq.actions.Siren;
 import in.ceeq.actions.Wipe;
 import in.ceeq.activities.Home;
@@ -41,7 +42,7 @@ public class Commander extends IntentService {
 	private static final String SENDER_ADDRESS = "senderAddress";
 
 	public enum Command {
-		SIREN_ON, SIREN_OFF, RINGER_ON, BACKUP, WIPE, LOCK, SEND_CALLS_DETAILS_MESSAGE, ENABLE_TRACKER, SEND_CURRENT_DETAILS_MESSAGE, SEND_PIN_FAIL_MESSAGE, GET_LOCATION_FOR_MESSAGE, GET_LOCATION_FOR_BLIP, GET_LOCATION_FOR_PROTECT, SEND_SIM_CHANGE_MESSAGE, SEND_PROTECT_MESSAGE, SEND_CURRENT_LOCATION_MESSAGE, SEND_NEW_LOCATION_MESSAGE, SEND_BLIP_TO_SERVER, SEND_LOCATION_TO_SERVER
+		SIREN_ON, SIREN_OFF, RINGER_ON, BACKUP, WIPE, LOCK, SEND_CALLS_DETAILS_MESSAGE, ENABLE_TRACKER, SEND_CURRENT_DETAILS_MESSAGE, SEND_PIN_FAIL_MESSAGE, GET_LOCATION_FOR_MESSAGE, GET_LOCATION_FOR_BLIP, GET_LOCATION_FOR_PROTECT, SEND_SIM_CHANGE_MESSAGE, SEND_PROTECT_MESSAGE, SEND_CURRENT_LOCATION_MESSAGE, SEND_NEW_LOCATION_MESSAGE, SEND_BLIP_TO_SERVER, SEND_LOCATION_TO_SERVER, GET_LOCATION_FOR_CURRENT_DETAILS_MESSAGE, RINGER_OFF
 	}
 
 	private NotificationManager mNotificationManager;
@@ -65,6 +66,12 @@ public class Commander extends IntentService {
 		case SIREN_OFF:
 			Siren.getInstance(this).stop();
 			break;
+		case RINGER_ON:
+			Ring.getInstance(this).start();
+			break;
+		case RINGER_OFF:
+			Ring.getInstance(this).stop();
+			break;
 		case BACKUP:
 			Backup.getInstance(this).backup(Backups.ACTION_TYPE_ALL);
 			break;
@@ -87,6 +94,12 @@ public class Commander extends IntentService {
 			getLocation.putExtra(ACTION, RequestType.MESSAGE).putExtra(
 					SENDER_ADDRESS, senderAddress);
 			startService(getLocation);
+			break;
+		case GET_LOCATION_FOR_CURRENT_DETAILS_MESSAGE:
+			Intent getNowLocation = new Intent(this, Locater.class);
+			getNowLocation.putExtra(ACTION, RequestType.NOW).putExtra(
+					SENDER_ADDRESS, senderAddress);
+			startService(getNowLocation);
 			break;
 		case GET_LOCATION_FOR_BLIP:
 			Intent getBlip = new Intent(this, Locater.class);
