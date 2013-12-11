@@ -1,0 +1,24 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+   <com.google.android.gms.plus.PlusOneButton
+       xmlns:plus="http://schemas.android.com/apk/lib/com.google.android.gms.plus"
+       android:id="@+id/plus_one_button"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_margin="12dp"
+       plus:annotation="inline"
+       plus:size="standard" />
+
+   <View
+       android:layout_width="match_parent"
+       android:layout_height="2dp"
+       android:layout_gravity="bottom"
+       android:layout_marginLeft="8dp"
+       android:layout_marginRight="8dp"
+       android:background="#555555"
+       android:paddingLeft="2dp"
+       android:paddingRight="2dp" />
+
+</FrameLayout>
