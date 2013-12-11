@@ -1,4 +1,5 @@
 package in.ceeq.helpers;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -45,6 +46,8 @@ public class PreferencesHelper {
 	public static final String DISTRESS_MESSAGE = "distressMessage";
 	public static final String LAST_LOCATION_LATITUDE = "lastLatitude";
 	public static final String LAST_LOCATION_LONGITUDE = "lastLongitude";
+	public static final String DEVICE_HAS_PASSWORD = "deviceHasPassword";
+	public static final String APP_UNINSTALL_PROTECTION = "appUninstallProtection";
 
 	public PreferencesHelper(Context context) {
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);

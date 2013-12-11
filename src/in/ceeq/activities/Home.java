@@ -4,6 +4,7 @@ import hirondelle.date4j.DateTime;
 import in.ceeq.Launcher;
 import in.ceeq.R;
 import in.ceeq.actions.Backup;
+import in.ceeq.actions.Protect;
 import in.ceeq.actions.Receiver;
 import in.ceeq.actions.Receiver.ReceiverType;
 import in.ceeq.actions.Restore;
@@ -134,7 +135,7 @@ public class Home extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 
 		setupActionbar();
-
+		setupBugsense();
 		setContentView(R.layout.activity_home);
 		this.title = drawerTitle = getTitle();
 
@@ -416,7 +417,8 @@ public class Home extends FragmentActivity {
 				break;
 			case 7:
 				builder.setView(inflater.inflate(R.layout.dialog_privacy, null))
-						.create().show();
+						.setPositiveButton(R.string.close, null).create()
+						.show();
 				break;
 			case 8:
 				Intent emailIntent = new Intent(Intent.ACTION_SEND)
@@ -435,7 +437,8 @@ public class Home extends FragmentActivity {
 				break;
 			case 9:
 				builder.setView(inflater.inflate(R.layout.dialog_about, null))
-						.create().show();
+						.setPositiveButton(R.string.close, null).create()
+						.show();
 				break;
 			case 10:
 				Intent rateIntent = new Intent(Intent.ACTION_VIEW)
@@ -653,7 +656,7 @@ public class Home extends FragmentActivity {
 							dialogHelper.new DialogBackButtonPressed())
 					.create().show();
 		} else {
-			Receiver.getInstance(this).unregister(ReceiverType.POWER_BUTTON);
+			Protect.getInstance(this).disable();
 			preferencesHelper.setBoolean(PreferencesHelper.PROTECT_ME_STATUS,
 					toggle.isChecked());
 			Toast.makeText(Home.this, "Protect me disabled.",
@@ -971,8 +974,7 @@ public class Home extends FragmentActivity {
 
 					break;
 				case PROTECT:
-					Receiver.getInstance(Home.this).register(
-							ReceiverType.POWER_BUTTON);
+					Protect.getInstance(Home.this).enable();
 					preferencesHelper.setBoolean(
 							PreferencesHelper.PROTECT_ME_STATUS, true);
 					showToast("Protect me enabled. Just press power button 10 times for help.");

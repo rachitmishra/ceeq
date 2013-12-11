@@ -53,7 +53,7 @@
         android:summary="Advance Settings"
         android:title="Advance" >
         <in.ceeq.activities.SwitchPreference_
-            android:key="preventUninstall"
+            android:key="uninstallProtection"
             android:title="Prevent Uninstall" />
     </PreferenceCategory>
     <PreferenceCategory
@@ -92,7 +92,7 @@
         </Preference>
 
         <in.ceeq.activities.SwitchPreference_
-            android:key="advertise"
+            android:key="advertiseState"
             android:title="Hide Ads" />
 
         <Preference android:title="Rate Us" >

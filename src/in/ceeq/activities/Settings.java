@@ -63,19 +63,17 @@ public class Settings extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case android.R.id.home :
-				NavUtils.navigateUpFromSameTask(this);
-				return true;
+		case android.R.id.home:
+			NavUtils.navigateUpFromSameTask(this);
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
 }
 
-class Preferences extends PreferenceFragment
-		implements
-			ConnectionCallbacks,
-			OnConnectionFailedListener {
+class Preferences extends PreferenceFragment implements ConnectionCallbacks,
+		OnConnectionFailedListener {
 
 	private static final int CONNECTION_FAILURE_REQUEST = 9020;
 	private PreferencesHelper preferencesHelper;
@@ -106,6 +104,11 @@ class Preferences extends PreferenceFragment
 		googleConnect = (Preference) findPreference("googleConnected");
 		googleConnect.setOnPreferenceChangeListener(new GoogleConnectListener(
 				getActivity(), plus));
+
+		googleConnect = (Preference) findPreference("uninstallProtection");
+		googleConnect
+				.setOnPreferenceChangeListener(new ActivateUninstallProtection(
+						getActivity(), getActivity()));
 	}
 
 	public void googleInitialize() {
@@ -197,31 +200,30 @@ class Preferences extends PreferenceFragment
 		Session.getActiveSession().onActivityResult(getActivity(), requestCode,
 				resultCode, data);
 		switch (requestCode) {
-			case Choose.CONTACT_ACTIVATION_REQUEST :
-				if (resultCode == Activity.RESULT_OK) {
-					Uri contactData = data.getData();
-					Cursor c = this.getActivity().getContentResolver()
-							.query(contactData, null, null, null, null);
-					if (c.moveToFirst()) {
-						preferencesHelper
-								.setString(
-										"emergencyName",
-										c.getString(c
-												.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
-						preferencesHelper
-								.setString(
-										"emergencyNumber",
-										c.getString(c
-												.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
+		case Choose.CONTACT_ACTIVATION_REQUEST:
+			if (resultCode == Activity.RESULT_OK) {
+				Uri contactData = data.getData();
+				Cursor c = this.getActivity().getContentResolver()
+						.query(contactData, null, null, null, null);
+				if (c.moveToFirst()) {
+					preferencesHelper
+							.setString(
+									"emergencyName",
+									c.getString(c
+											.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+					preferencesHelper
+							.setString(
+									"emergencyNumber",
+									c.getString(c
+											.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
 
-						Toast.makeText(getActivity(),
-								"Great, New Contact chosen.",
-								Toast.LENGTH_SHORT).show();
-					}
-				} else
-					Toast.makeText(getActivity(), "Aww, You cancelled !",
+					Toast.makeText(getActivity(), "Great, New Contact chosen.",
 							Toast.LENGTH_SHORT).show();
-				break;
+				}
+			} else
+				Toast.makeText(getActivity(), "Aww, You cancelled !",
+						Toast.LENGTH_SHORT).show();
+			break;
 		}
 
 	}
@@ -472,6 +474,47 @@ class ChangePinNumber extends DialogPreference {
 			}
 
 		});
+	}
+
+}
+
+class ActivateUninstallProtection implements OnPreferenceChangeListener {
+
+	private PreferencesHelper preferencesHelper;
+	private Context context;
+	private Activity activity;
+
+	public ActivateUninstallProtection(Context context, Activity activity) {
+		this.context = context;
+		this.activity = activity;
+		preferencesHelper = new PreferencesHelper(context);
+	}
+
+	@Override
+	public boolean onPreferenceChange(Preference preference, Object obj) {
+		if (Boolean.parseBoolean(obj.toString())) {
+			new AlertDialog.Builder(context)
+					.setTitle("")
+					.setView(
+							activity.getLayoutInflater().inflate(
+									R.layout.dialog_uninstall_protect, null))
+					.setPositiveButton(R.string.okay,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									preferencesHelper
+											.setBoolean(
+													PreferencesHelper.APP_UNINSTALL_PROTECTION,
+													true);
+								}
+							}).create().show();
+		} else {
+			Toast.makeText(context, R.string.toast_string_10,
+					Toast.LENGTH_SHORT).show();
+			preferencesHelper.setBoolean(
+					PreferencesHelper.APP_UNINSTALL_PROTECTION, false);
+		}
+		return true;
 	}
 
 }

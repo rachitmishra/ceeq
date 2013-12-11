@@ -9,6 +9,7 @@ package in.ceeq.services;
 
 import in.ceeq.R;
 import in.ceeq.actions.Backup;
+import in.ceeq.actions.Lock;
 import in.ceeq.actions.Ring;
 import in.ceeq.actions.Siren;
 import in.ceeq.actions.Wipe;
@@ -138,6 +139,7 @@ public class Commander extends IntentService {
 					PreferencesHelper.getInstance(this).getString(
 							PreferencesHelper.EMERGENCY_CONTACT_NUMBER),
 					MessageType.SIM_CHANGE);
+			Lock.getInstance(this).lock();
 			break;
 		case SEND_PIN_FAIL_MESSAGE:
 			MessagesHelper.getInstance(this).sendMessage(senderAddress,

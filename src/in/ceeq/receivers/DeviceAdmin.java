@@ -8,6 +8,7 @@
 package in.ceeq.receivers;
 
 import in.ceeq.R;
+import in.ceeq.actions.Lock;
 import in.ceeq.helpers.PreferencesHelper;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
@@ -29,7 +30,10 @@ public class DeviceAdmin extends DeviceAdminReceiver {
 	public CharSequence onDisableRequested(Context context, Intent intent) {
 		devicePolicyManager = (DevicePolicyManager) context
 				.getSystemService(Context.DEVICE_POLICY_SERVICE);
-		devicePolicyManager.lockNow();
+		if (PreferencesHelper.getInstance(context).getBoolean(
+				PreferencesHelper.APP_UNINSTALL_PROTECTION)) {
+			Lock.getInstance(context).lock();
+		}
 		return context.getString(R.string.help_note_35);
 	}
 
@@ -47,6 +51,7 @@ public class DeviceAdmin extends DeviceAdminReceiver {
 		super.onEnabled(context, intent);
 		devicePolicyManager = (DevicePolicyManager) context
 				.getSystemService(Context.DEVICE_POLICY_SERVICE);
+		Lock.getInstance(context).setInitialLockState();
 		PreferencesHelper.getInstance(context).setBoolean(
 				PreferencesHelper.DEVICE_ADMIN_STATUS, true);
 	}
@@ -74,6 +79,7 @@ public class DeviceAdmin extends DeviceAdminReceiver {
 	@Override
 	public void onPasswordSucceeded(Context context, Intent intent) {
 		super.onPasswordSucceeded(context, intent);
+		if (Lock.getInstance(context).getInitialLockState())
+			Lock.getInstance(context).remove();
 	}
-
 }

@@ -54,7 +54,9 @@
                         android:layout_height="wrap_content"
                         android:gravity="left"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="#09c" />
+                        android:textColor="#09c"
+                        tools:ignore="SelectableText" />
+
                 </LinearLayout>
 
                 <ImageView
@@ -102,9 +104,21 @@
             <View
                 android:layout_width="wrap_content"
                 android:layout_height="1dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="4dp"
                 android:layout_weight="1"
                 android:background="@drawable/ic_bg_shadow_light" />
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:layout_marginTop="4dp"
+                android:layout_weight="1"
+                android:text="@string/help_note_36"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/text_medium"
+                android:textSize="12sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
