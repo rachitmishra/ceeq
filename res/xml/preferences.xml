@@ -4,27 +4,28 @@
     <PreferenceCategory
         android:summary="General Settings"
         android:title="General" >
-        <in.ceeq.activity.SwitchPreference_
+        <in.ceeq.activities.SwitchPreference_
             android:key="splash"
             android:title="Show Splash Screen" />
-        <in.ceeq.activity.SwitchPreference_
+        <in.ceeq.activities.SwitchPreference_
             android:key="notifications"
             android:title="Show Notifications" />
     </PreferenceCategory>
     <PreferenceCategory
         android:summary="All the connected accounts for web services"
         android:title="Connected Accounts" >
-        <in.ceeq.activity.SwitchPreference_
+        <in.ceeq.activities.SwitchPreference_
             android:key="facebookConnected"
             android:title="Facebook" />
-        <in.ceeq.activity.SwitchPreference_
+        <in.ceeq.activities.SwitchPreference_
             android:key="googleConnected"
             android:title="Google" />
     </PreferenceCategory>
+    
     <PreferenceCategory
         android:summary="Security Settings"
         android:title="Security" >
-        <in.ceeq.activity.ChangePinNumber
+        <in.ceeq.activities.ChangePinNumber
             android:dialogLayout="@layout/dialog_new_pin"
             android:positiveButtonText="Save"
             android:title="Change PIN number" />
@@ -38,34 +39,42 @@
             android:title="Add more emergency contacts" >
         </Preference>
 
-        <in.ceeq.activity.ChangeEmergencyMessage
+        <in.ceeq.activities.ChangeEmergencyMessage
             android:dialogLayout="@layout/dialog_new_message"
             android:positiveButtonText="Save"
             android:title="Change emergency message" />
 
-        <in.ceeq.activity.ChangeDistressMessage
+        <in.ceeq.activities.ChangeDistressMessage
             android:dialogLayout="@layout/dialog_new_message"
             android:positiveButtonText="Save"
             android:title="Change distress message" />
     </PreferenceCategory>
     <PreferenceCategory
+        android:summary="Advance Settings"
+        android:title="Advance" >
+        <in.ceeq.activities.SwitchPreference_
+            android:key="preventUninstall"
+            android:title="Prevent Uninstall" />
+    </PreferenceCategory>
+    <PreferenceCategory
         android:summary="Get Help Online, Mail Us"
         android:title="Support" >
-        <Preference android:title="Email Support" >
+        <Preference android:title="Email support" >
+            <intent
+                android:action="android.intent.action.SEND"
+                android:data="@string/ceeq_support_email"
+                android:title="Email support" />
+        </Preference>
+        <Preference android:title="Support at web" >
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="http://ceeq.in/feedback" />
+                android:data="http://ceeq.in/support" />
         </Preference>
-        <Preference android:title="Help" >
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="http://ceeq.in/help" />
-        </Preference>
-        <Preference android:title="FAQs on web" >
+        <Preference android:title="FAQs at web" >
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="http://ceeq.in/faqs"
-                android:title="FAQs on Web" />
+                android:title="FAQs on web" />
         </Preference>
     </PreferenceCategory>
     <PreferenceCategory android:title="About" >
@@ -82,19 +91,19 @@
                 android:summary="Donate to keep this application on." />
         </Preference>
 
-        <in.ceeq.activity.SwitchPreference_
+        <in.ceeq.activities.SwitchPreference_
             android:key="advertise"
             android:title="Hide Ads" />
 
         <Preference android:title="Rate Us" >
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="http://play.google.com/in.ceeq" />
+                android:data="https://play.google.com/store/apps/details?id=in.ceeq" />
         </Preference>
         <Preference android:title="Terms &amp; Privacy" >
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="http://ceeq.in/termsprivacy"
+                android:data="http://ceeq.in/terms"
                 android:title="Terms amp; Privacy" />
         </Preference>
     </PreferenceCategory>

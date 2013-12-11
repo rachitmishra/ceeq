@@ -91,7 +91,7 @@
             android:theme="@style/Theme.Actionbar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="in.ceeq.activity.Home" />
+                android:value="in.ceeq.activities.Home" />
         </activity>
         <activity
             android:name="in.ceeq.activities.Settings"
@@ -99,7 +99,7 @@
             android:theme="@style/Theme.Actionbar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="in.ceeq.activity.Home" />
+                android:value="in.ceeq.activities.Home" />
         </activity>
         <activity
             android:name="in.ceeq.activities.Firstrun"
@@ -116,13 +116,15 @@
             android:label="@string/title_activity_playservice"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
+        <activity android:name="com.facebook.LoginActivity" >
+        </activity>
         <activity
             android:name="in.ceeq.activities.ViewBackups"
             android:label="@string/title_activity_display_backups"
             android:theme="@style/Theme.Actionbar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="in.ceeq.activity.Home" />
+                android:value="in.ceeq.activities.Home" />
         </activity>
 
         <receiver android:name="in.ceeq.receivers.MobileMessages" >
@@ -138,13 +140,17 @@
         <receiver
             android:name="in.ceeq.receivers.DeviceAdmin"
             android:permission="android.permission.BIND_DEVICE_ADMIN" >
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
+                <action android:name="android.app.action.ACTION_PASSWORD_FAILED" />
+                <action android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
+            </intent-filter>
+
             <meta-data
                 android:name="android.app.device_admin"
                 android:resource="@xml/device_admin" />
-
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-            </intent-filter>
         </receiver>
         <receiver
             android:name="in.ceeq.receivers.CloudMessages"
@@ -156,16 +162,31 @@
             </intent-filter>
         </receiver>
         <receiver android:name="in.ceeq.receivers.OutgoingCalls" >
-        </receiver>
-        <receiver android:name="in.ceeq.receivers.PowerButton" >
+            <intent-filter>
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
+            </intent-filter>
         </receiver>
         <receiver android:name="in.ceeq.receivers.ScheduledBackups" >
         </receiver>
         <receiver android:name="in.ceeq.receivers.Locations" >
         </receiver>
+        <receiver android:name="in.ceeq.receivers.PowerButton" >
+            <intent-filter>
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+            </intent-filter>
+        </receiver>
         <receiver android:name="in.ceeq.receivers.LowBattery" >
         </receiver>
-
+        <receiver
+            android:name="in.ceeq.receivers.SimState" >
+            <intent-filter>
+                <action android:name="android.intent.action.SIM_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
         <service android:name="in.ceeq.services.Commander" >
         </service>
         <service android:name="in.ceeq.services.Backups" >
@@ -182,7 +203,8 @@
         </service>
         <service android:name="in.ceeq.services.Tracker" >
         </service>
-
+        <service android:name="in.ceeq.services.Protector" >
+        </service>
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCmPkcRCi-1hIcPG0KIvWrsZ7WTRlKedv4" />
@@ -192,6 +214,7 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
     </application>
 
 </manifest>

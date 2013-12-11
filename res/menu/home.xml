@@ -12,15 +12,10 @@
         android:showAsAction="always"
         android:title="@string/settings"/>
 
-    <item
+    <!--<item
         android:id="@+id/menuFeedback"
         android:showAsAction="never"
         android:title="@string/support"/>
-     
-    <item
-        android:id="@+id/menuShare"
-        android:showAsAction="never"
-        android:title="@string/share"/>
     
     <item
         android:id="@+id/menuPrivacy"
@@ -30,8 +25,11 @@
     <item
         android:id="@+id/menuAbout"
         android:showAsAction="never"
-        android:title="@string/about"/>
-
+        android:title="@string/about"/> -->
+	<item
+        android:id="@+id/menuShare"
+        android:showAsAction="never"
+        android:title="@string/share"/>
     <item
         android:id="@+id/menuExit"
         android:showAsAction="never"

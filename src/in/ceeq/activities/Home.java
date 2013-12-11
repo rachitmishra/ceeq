@@ -38,6 +38,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -60,7 +61,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListAdapter;
@@ -87,6 +88,7 @@ import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.plus.PlusOneButton;
 
 public class Home extends FragmentActivity {
 
@@ -124,6 +126,7 @@ public class Home extends FragmentActivity {
 	private Helpers helpers;
 	private boolean exit = false;
 	private static final String SENDER_ID = "909602096750";
+	private static final int PLUS_ONE_REQUEST_CODE = 0;
 	private Session.StatusCallback statusCallback = new FBSessionStatus();
 
 	@Override
@@ -171,12 +174,13 @@ public class Home extends FragmentActivity {
 
 	private DrawerLayout drawerLayout;
 	private ActionBarDrawerToggle drawerToggle;
-	private ListView activityList, userList;
+	private ListView actionList;
 	private CharSequence drawerTitle;
 	private CharSequence title;
 	private TextView userId, userName;
 	private ImageView userImage;
 	private RelativeLayout userLoading, userDetails;
+	private PlusOneButton plusOneButton;
 
 	public void setupDrawer() {
 		userId = (TextView) findViewById(R.id.user_id_drawer);
@@ -223,16 +227,9 @@ public class Home extends FragmentActivity {
 
 		}.execute(preferencesHelper
 				.getString(PreferencesHelper.ACCOUNT_USER_IMAGE_URL));
-		userList = (ListView) findViewById(R.id.drawer_top);
-		userList.setAdapter(new ArrayAdapter<String>(this,
-				R.layout.drawer_inner, getResources().getStringArray(
-						R.array.user_account)));
-		userList.setOnItemClickListener(new DrawerUserClickListener());
-		activityList = (ListView) findViewById(R.id.drawer_bottom);
-		activityList.setAdapter(new ArrayAdapter<String>(this,
-				R.layout.drawer_inner, getResources().getStringArray(
-						R.array.activity_titles)));
-		activityList.setOnItemClickListener(new DrawerMenuClickListener());
+		actionList = (ListView) findViewById(R.id.drawer_action_list);
+		actionList.setAdapter(new DrawerAdapter());
+		actionList.setOnItemClickListener(new DrawerMenuClickListener());
 		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
 				R.drawable.ic_drawer, R.string.open_drawer,
@@ -247,6 +244,93 @@ public class Home extends FragmentActivity {
 			}
 		};
 		drawerLayout.setDrawerListener(drawerToggle);
+
+	}
+
+	public class DrawerAdapter extends BaseAdapter {
+
+		public DrawerAdapter() {
+
+		}
+
+		@Override
+		public int getCount() {
+			return 11;
+		}
+
+		@Override
+		public Object getItem(int arg0) {
+			return null;
+		}
+
+		@Override
+		public long getItemId(int arg0) {
+			return 0;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup arg2) {
+			TextView header, inner;
+			switch (position) {
+			case 1:
+				convertView = getLayoutInflater().inflate(
+						R.layout.drawer_action_plus, null);
+				plusOneButton = (PlusOneButton) convertView
+						.findViewById(R.id.plus_one_button);
+				plusOneButton.initialize("www.ceeq.in", PLUS_ONE_REQUEST_CODE);
+				return convertView;
+			case 2:
+			case 6:
+				convertView = getLayoutInflater().inflate(
+						R.layout.drawer_action_header, null);
+				header = (TextView) convertView
+						.findViewById(R.id.drawer_list_header);
+				header.setText(getHeaderText(position));
+				return convertView;
+			default:
+				convertView = getLayoutInflater().inflate(
+						R.layout.drawer_action_inner, null);
+				inner = (TextView) convertView
+						.findViewById(R.id.drawer_list_inner);
+				inner.setText(getInnerText(position));
+				return convertView;
+			}
+
+		}
+
+		public int getInnerText(int position) {
+			switch (position) {
+			case 0:
+				return R.string.disconnect;
+			case 3:
+				return R.string.tab_home;
+			case 4:
+				return R.string.tab_backup;
+			case 5:
+				return R.string.tab_security;
+			case 7:
+				return R.string.privacy;
+			case 8:
+				return R.string.menu_feedback;
+			case 9:
+				return R.string.about;
+			case 10:
+				return R.string.rate;
+			default:
+				return R.string.rate;
+			}
+		}
+
+		public int getHeaderText(int position) {
+			switch (position) {
+			case 2:
+				return R.string.navigate;
+			case 6:
+				return R.string.more;
+			default:
+				return R.string.more;
+			}
+		}
 
 	}
 
@@ -313,15 +397,6 @@ public class Home extends FragmentActivity {
 		drawerToggle.onConfigurationChanged(newConfig);
 	}
 
-	private class DrawerUserClickListener implements
-			ListView.OnItemClickListener {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-
-		}
-	}
-
 	private class DrawerMenuClickListener implements
 			ListView.OnItemClickListener {
 		@Override
@@ -331,30 +406,48 @@ public class Home extends FragmentActivity {
 		}
 
 		private void selectItem(int position) {
-			pager.setCurrentItem(position);
-
-			activityList.setItemChecked(position, true);
-			setTitle(getPageTitle(position));
-			drawerLayout.closeDrawer(Gravity.START);
-		}
-
-		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
 			switch (position) {
 			case 0:
-				return getString(R.string.tab_home).toUpperCase(l);
-			case 1:
-				return getString(R.string.tab_backup).toUpperCase(l);
-			case 2:
-				return getString(R.string.tab_security).toUpperCase(l);
+				break;
 			case 3:
-				return getString(R.string.tab_spam).toUpperCase(l);
 			case 4:
-				return getString(R.string.about).toUpperCase(l);
+			case 5:
+				pager.setCurrentItem(position - 3);
+				break;
+			case 7:
+				builder.setView(inflater.inflate(R.layout.dialog_privacy, null))
+						.create().show();
+				break;
+			case 8:
+				Intent emailIntent = new Intent(Intent.ACTION_SEND)
+						.setType(HTTP.PLAIN_TEXT_TYPE);
+				emailIntent
+						.putExtra(
+								Intent.EXTRA_EMAIL,
+								new String[] { getString(R.string.ceeq_support_email) });
+				emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Suggestion/Bugs");
+				emailIntent.putExtra(
+						Intent.EXTRA_TEXT,
+						"[Ceeq Support \n User: "
+								+ preferencesHelper.getString("accountName")
+								+ "]");
+				startActivity(emailIntent);
+				break;
+			case 9:
+				builder.setView(inflater.inflate(R.layout.dialog_about, null))
+						.create().show();
+				break;
+			case 10:
+				Intent rateIntent = new Intent(Intent.ACTION_VIEW)
+						.setData(Uri
+								.parse("https://play.google.com/store/apps/details?id=in.ceeq"));
+				startActivity(rateIntent);
+				break;
 			}
-			return null;
-		}
 
+			actionList.setItemChecked(position, true);
+			drawerLayout.closeDrawer(Gravity.START);
+		}
 	}
 
 	@Override
@@ -631,8 +724,8 @@ public class Home extends FragmentActivity {
 
 	@Override
 	protected void onResume() {
-		// checkPlayServices();
 		super.onResume();
+		checkPlayServices();
 	}
 
 	@Override
@@ -683,27 +776,6 @@ public class Home extends FragmentActivity {
 		case R.id.actionHelp:
 			startActivity(new Intent(this, Help.class));
 			break;
-		case R.id.menuFeedback:
-			Intent emailIntent = new Intent(Intent.ACTION_SEND);
-			emailIntent.setType(HTTP.PLAIN_TEXT_TYPE);
-			emailIntent.putExtra(Intent.EXTRA_EMAIL,
-					new String[] { getString(R.string.ceeq_support_email) });
-			emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Suggestion/Bugs");
-			emailIntent.putExtra(Intent.EXTRA_TEXT, "[Ceeq Support \n User: "
-					+ preferencesHelper.getString("accountName") + "]");
-			startActivity(emailIntent);
-			break;
-
-		case R.id.menuAbout:
-			builder.setView(inflater.inflate(R.layout.dialog_about, null))
-					.create().show();
-			break;
-
-		case R.id.menuPrivacy:
-			builder.setView(inflater.inflate(R.layout.dialog_privacy, null))
-					.create().show();
-			break;
-
 		case R.id.menuShare:
 			Intent shareIntent = new Intent(Intent.ACTION_SEND);
 			shareIntent.setType(HTTP.PLAIN_TEXT_TYPE);
@@ -718,6 +790,7 @@ public class Home extends FragmentActivity {
 
 		case R.id.menuExit:
 			this.finish();
+
 		}
 		return false;
 	}
