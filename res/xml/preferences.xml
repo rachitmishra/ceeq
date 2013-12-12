@@ -98,7 +98,7 @@
         <Preference android:title="Rate Us" >
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://play.google.com/store/apps/details?id=in.ceeq" />
+                android:data="@string/ceeq_play_link" />
         </Preference>
         <Preference android:title="Terms &amp; Privacy" >
             <intent

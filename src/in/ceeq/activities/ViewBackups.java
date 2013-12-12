@@ -9,6 +9,7 @@ package in.ceeq.activities;
 
 import in.ceeq.R;
 import in.ceeq.helpers.FilesHelper;
+import in.ceeq.helpers.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,12 +60,14 @@ public class ViewBackups extends Activity {
 	}
 
 	private FilesHelper filesHelper;
+
 	private void setupHelpers() {
 		filesHelper = new FilesHelper(this);
 	}
 
 	private GridView gridView;
 	private GridAdapter gridViewAdapter;
+
 	private void setupFileGrid() {
 		if (filesHelper.haveBackupFiles()) {
 			findViewById(R.id.help01).setVisibility(TextView.GONE);
@@ -84,9 +87,9 @@ public class ViewBackups extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case android.R.id.home :
-				NavUtils.navigateUpFromSameTask(this);
-				return true;
+		case android.R.id.home:
+			NavUtils.navigateUpFromSameTask(this);
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -201,108 +204,141 @@ public class ViewBackups extends Activity {
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			switch (item.getItemId()) {
 
-				case R.id.restore :
-					String fileName;
-					int fileType;
-					try {
-						for (int i = 0; i < selectedFiles.size(); i++) {
-							fileType = (Integer) gridView.getChildAt(
-									selectedFiles.get(i)).getTag(
-									R.string.file_type);
-							fileName = gridView
-									.getChildAt(selectedFiles.get(i))
-									.getTag(R.string.file_name).toString();
-							switch (fileType) {
-								case 1 :
-
-									break;
-								case 2 :
-									break;
-								case 3 :
-									break;
-								case 4 :
-									break;
-							}
+			case R.id.restore:
+				String fileName;
+				int fileType;
+				try {
+					for (int i = 0; i < selectedFiles.size(); i++) {
+						fileType = (Integer) gridView.getChildAt(
+								selectedFiles.get(i))
+								.getTag(R.string.file_type);
+						fileName = gridView.getChildAt(selectedFiles.get(i))
+								.getTag(R.string.file_name).toString();
+						switch (fileType) {
+						case 1:
+							Logger.d(fileName);
+							break;
+						case 2:
+							break;
+						case 3:
+							break;
+						case 4:
+							break;
 						}
-
-						if (selectedFiles.size() == 1)
-							Toast.makeText(ViewBackups.this,
-									selectedFiles.size() + " file restored.",
-									Toast.LENGTH_SHORT).show();
-						else
-							Toast.makeText(ViewBackups.this,
-									selectedFiles.size() + " files restored.",
-									Toast.LENGTH_SHORT).show();
-					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						selectedFiles.clear();
-						if (filesHelper.haveBackupFiles()) {
-							fileNames = new ArrayList<String>(
-									filesHelper
-											.getFileNames(
-													filesHelper
-															.getFiles(FilesHelper.BACKUP_PATH))
-											.keySet());
-						}
-						gridViewAdapter.notifyDataSetChanged();
-						gridView.setAdapter(gridViewAdapter);
 					}
-					return true;
 
-				case R.id.delete :
-					String[] deleteFiles = new String[selectedFiles.size()];
-					try {
-						for (int i = 0; i < selectedFiles.size(); i++) {
-							deleteFiles[i] = gridView
-									.getChildAt(selectedFiles.get(i))
-									.findViewById(R.id.gDisplayName)
-									.getTag(R.string.file_name).toString();
-						}
-						filesHelper.deleteFile(FilesHelper.BACKUP_PATH,
-								deleteFiles);
-						if (selectedFiles.size() == 1)
-							Toast.makeText(ViewBackups.this,
-									selectedFiles.size() + " file deleted.",
-									Toast.LENGTH_SHORT).show();
-						else
-							Toast.makeText(ViewBackups.this,
-									selectedFiles.size() + " files deleted.",
-									Toast.LENGTH_SHORT).show();
-					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						selectedFiles.clear();
-						if (filesHelper.haveBackupFiles()) {
-							fileNames = new ArrayList<String>(
-									filesHelper
-											.getFileNames(
-													filesHelper
-															.getFiles(FilesHelper.BACKUP_PATH))
-											.keySet());
-						} else {
-							findViewById(R.id.help02).setVisibility(
-									TextView.GONE);
-							gridView.setVisibility(TextView.GONE);
-							findViewById(R.id.help01).setVisibility(
-									TextView.VISIBLE);
-						}
-						gridViewAdapter.notifyDataSetChanged();
-						gridView.setAdapter(gridViewAdapter);
+					if (selectedFiles.size() == 1)
+						Toast.makeText(ViewBackups.this,
+								selectedFiles.size() + " file restored.",
+								Toast.LENGTH_SHORT).show();
+					else
+						Toast.makeText(ViewBackups.this,
+								selectedFiles.size() + " files restored.",
+								Toast.LENGTH_SHORT).show();
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					selectedFiles.clear();
+					if (filesHelper.haveBackupFiles()) {
+						fileNames = new ArrayList<String>(
+								filesHelper
+										.getFileNames(
+												filesHelper
+														.getFiles(FilesHelper.BACKUP_PATH))
+										.keySet());
 					}
-					return true;
-				case R.id.props :
-					AlertDialog.Builder builder = new AlertDialog.Builder(
-							ViewBackups.this);
-					LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					View v;
-					TextView text;
-					builder.setTitle("Properties");
-					if (selectedFiles.size() > 1) {
-						v = inflater.inflate(R.layout.dialog_selection_details,
-								null);
-						text = (TextView) v.findViewById(R.id.vfileTotalSize);
-						text.setText(getTotalSize(selectedFiles) + "KB");
+					gridViewAdapter.notifyDataSetChanged();
+					gridView.setAdapter(gridViewAdapter);
+				}
+				return true;
+
+			case R.id.delete:
+				String[] deleteFiles = new String[selectedFiles.size()];
+				try {
+					for (int i = 0; i < selectedFiles.size(); i++) {
+						deleteFiles[i] = gridView
+								.getChildAt(selectedFiles.get(i))
+								.findViewById(R.id.gDisplayName)
+								.getTag(R.string.file_name).toString();
+					}
+					filesHelper
+							.deleteFile(FilesHelper.BACKUP_PATH, deleteFiles);
+					if (selectedFiles.size() == 1)
+						Toast.makeText(ViewBackups.this,
+								selectedFiles.size() + " file deleted.",
+								Toast.LENGTH_SHORT).show();
+					else
+						Toast.makeText(ViewBackups.this,
+								selectedFiles.size() + " files deleted.",
+								Toast.LENGTH_SHORT).show();
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					selectedFiles.clear();
+					if (filesHelper.haveBackupFiles()) {
+						fileNames = new ArrayList<String>(
+								filesHelper
+										.getFileNames(
+												filesHelper
+														.getFiles(FilesHelper.BACKUP_PATH))
+										.keySet());
+					} else {
+						findViewById(R.id.help02).setVisibility(TextView.GONE);
+						gridView.setVisibility(TextView.GONE);
+						findViewById(R.id.help01).setVisibility(
+								TextView.VISIBLE);
+					}
+					gridViewAdapter.notifyDataSetChanged();
+					gridView.setAdapter(gridViewAdapter);
+				}
+				return true;
+			case R.id.props:
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						ViewBackups.this);
+				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				View v;
+				TextView text;
+				builder.setTitle("Properties");
+				if (selectedFiles.size() > 1) {
+					v = inflater.inflate(R.layout.dialog_selection_details,
+							null);
+					text = (TextView) v.findViewById(R.id.vfileTotalSize);
+					text.setText(getTotalSize(selectedFiles) + "KB");
+					builder.setView(v)
+							.setNegativeButton(R.string.close,
+									new DialogInterface.OnClickListener() {
+										public void onClick(
+												DialogInterface dialog, int id) {
+											dialog.cancel();
+										}
+									}).create().show();
+				} else {
+					v = inflater.inflate(R.layout.dialog_file_details, null);
+					text = (TextView) v.findViewById(R.id.vfileName);
+					if (!selectedFiles.isEmpty()) {
+						text.setText(gridView.getChildAt(selectedFiles.get(0))
+								.findViewById(R.id.gDisplayName)
+								.getTag(R.string.file_name).toString());
+						text = (TextView) v.findViewById(R.id.vfileType);
+						text.setText(fileProps.get(
+								gridView.getChildAt(selectedFiles.get(0))
+										.findViewById(R.id.gDisplayName)
+										.getTag(R.string.file_name).toString())
+								.get(0));
+						text = (TextView) v.findViewById(R.id.vfileDate);
+						text.setText(fileProps.get(
+								gridView.getChildAt(selectedFiles.get(0))
+										.findViewById(R.id.gDisplayName)
+										.getTag(R.string.file_name).toString())
+								.get(2));
+						text = (TextView) v.findViewById(R.id.vfileSize);
+						text.setText(fileProps.get(
+								gridView.getChildAt(selectedFiles.get(0))
+										.findViewById(R.id.gDisplayName)
+										.getTag(R.string.file_name).toString())
+								.get(1)
+								+ "KB");
+
 						builder.setView(v)
 								.setNegativeButton(R.string.close,
 										new DialogInterface.OnClickListener() {
@@ -312,50 +348,11 @@ public class ViewBackups extends Activity {
 												dialog.cancel();
 											}
 										}).create().show();
-					} else {
-						v = inflater
-								.inflate(R.layout.dialog_file_details, null);
-						text = (TextView) v.findViewById(R.id.vfileName);
-						if (!selectedFiles.isEmpty()) {
-							text.setText(gridView
-									.getChildAt(selectedFiles.get(0))
-									.findViewById(R.id.gDisplayName)
-									.getTag(R.string.file_name).toString());
-							text = (TextView) v.findViewById(R.id.vfileType);
-							text.setText(fileProps.get(
-									gridView.getChildAt(selectedFiles.get(0))
-											.findViewById(R.id.gDisplayName)
-											.getTag(R.string.file_name)
-											.toString()).get(0));
-							text = (TextView) v.findViewById(R.id.vfileDate);
-							text.setText(fileProps.get(
-									gridView.getChildAt(selectedFiles.get(0))
-											.findViewById(R.id.gDisplayName)
-											.getTag(R.string.file_name)
-											.toString()).get(2));
-							text = (TextView) v.findViewById(R.id.vfileSize);
-							text.setText(fileProps.get(
-									gridView.getChildAt(selectedFiles.get(0))
-											.findViewById(R.id.gDisplayName)
-											.getTag(R.string.file_name)
-											.toString()).get(1)
-									+ "KB");
-
-							builder.setView(v)
-									.setNegativeButton(
-											R.string.close,
-											new DialogInterface.OnClickListener() {
-												public void onClick(
-														DialogInterface dialog,
-														int id) {
-													dialog.cancel();
-												}
-											}).create().show();
-						}
-						return true;
 					}
-				default :
-					return false;
+					return true;
+				}
+			default:
+				return false;
 			}
 		}
 

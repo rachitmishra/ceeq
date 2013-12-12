@@ -97,6 +97,12 @@ public class Home extends FragmentActivity {
 	public final static int SHOW = 1;
 	public final static int HIDE = 0;
 
+	/**
+	 * 
+	 * Switch button states constant enum, used in switch cases to change or
+	 * save button states.
+	 * 
+	 */
 	public enum SwitchState {
 		ON, OFF
 	}
@@ -127,7 +133,7 @@ public class Home extends FragmentActivity {
 	private Helpers helpers;
 	private boolean exit = false;
 	private static final String SENDER_ID = "909602096750";
-	private static final int PLUS_ONE_REQUEST_CODE = 0;
+	private static final int PLUS_ONE_REQUEST_CODE = 9025;
 	private Session.StatusCallback statusCallback = new FBSessionStatus();
 
 	@Override
@@ -150,11 +156,17 @@ public class Home extends FragmentActivity {
 		}
 	}
 
+	/**
+	 * instantiate the helpers required in this activity.
+	 */
 	public void setupHelpers() {
 		preferencesHelper = new PreferencesHelper(this);
 		helpers = Helpers.getInstance(this);
 	}
 
+	/**
+	 * set up the view pager
+	 */
 	public void setupPager() {
 		pagerAdapter = new Pager(getSupportFragmentManager(), this);
 		pager = (ViewPager) findViewById(R.id.pager);
@@ -162,13 +174,23 @@ public class Home extends FragmentActivity {
 		pager.requestTransparentRegion(pager);
 	}
 
+	/**
+	 * set up the action bar
+	 */
+
 	public void setupActionbar() {
+		// get the action bar, and hide the title
 		getActionBar().setDisplayShowTitleEnabled(false);
+		// get the action bar, set different logo/icon
 		getActionBar().setIcon(R.drawable.ic_app_action_logo);
+		// get the action bar, set home as clickable and button
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 	}
 
+	/**
+	 * setup bugsense bug tracking in the app
+	 */
 	public void setupBugsense() {
 		BugSenseHandler.initAndStartSession(Home.this, "5996b3d9");
 	}
@@ -183,6 +205,9 @@ public class Home extends FragmentActivity {
 	private RelativeLayout userLoading, userDetails;
 	private PlusOneButton plusOneButton;
 
+	/**
+	 * setup the navigation drawer
+	 */
 	public void setupDrawer() {
 		userId = (TextView) findViewById(R.id.user_id_drawer);
 		userName = (TextView) findViewById(R.id.user_name_drawer);
@@ -248,6 +273,13 @@ public class Home extends FragmentActivity {
 
 	}
 
+	/**
+	 * The drawer adapter class for creating the Dialog view, mainly for
+	 * inflating the listview in dialog.
+	 * 
+	 * @author Lucky
+	 * 
+	 */
 	public class DrawerAdapter extends BaseAdapter {
 
 		public DrawerAdapter() {
@@ -278,7 +310,9 @@ public class Home extends FragmentActivity {
 						R.layout.drawer_action_plus, null);
 				plusOneButton = (PlusOneButton) convertView
 						.findViewById(R.id.plus_one_button);
-				plusOneButton.initialize("www.ceeq.in", PLUS_ONE_REQUEST_CODE);
+				plusOneButton.initialize(
+						"http://plus.google.com/116561373543243917689",
+						PLUS_ONE_REQUEST_CODE);
 				return convertView;
 			case 2:
 			case 6:
@@ -335,6 +369,9 @@ public class Home extends FragmentActivity {
 
 	}
 
+	/**
+	 * if this is first run show the drawer once
+	 */
 	public void setupFirstrun() {
 		drawerLayout.openDrawer(Gravity.START);
 		preferencesHelper.setBoolean(PreferencesHelper.FIRST_LOGIN, false);
@@ -441,9 +478,8 @@ public class Home extends FragmentActivity {
 						.show();
 				break;
 			case 10:
-				Intent rateIntent = new Intent(Intent.ACTION_VIEW)
-						.setData(Uri
-								.parse("https://play.google.com/store/apps/details?id=in.ceeq"));
+				Intent rateIntent = new Intent(Intent.ACTION_VIEW).setData(Uri
+						.parse(getString(R.string.ceeq_play_link)));
 				startActivity(rateIntent);
 				break;
 			}
@@ -575,6 +611,12 @@ public class Home extends FragmentActivity {
 	private DialogHelper dialogHelper;
 
 	private PackageManager packageManager;
+
+	/**
+	 * set up stealth mode
+	 * 
+	 * @param toggle
+	 */
 
 	private void setupStealthMode(ToggleButton toggle) {
 		packageManager = this.getPackageManager();
@@ -783,11 +825,13 @@ public class Home extends FragmentActivity {
 			Intent shareIntent = new Intent(Intent.ACTION_SEND);
 			shareIntent.setType(HTTP.PLAIN_TEXT_TYPE);
 			shareIntent.putExtra(Intent.EXTRA_SUBJECT,
-					"Ceeq - Device Security & Backup");
+					"Ceeq Mobile Application - Device Security and Backup");
 			shareIntent
 					.putExtra(
 							Intent.EXTRA_TEXT,
-							"Be a initial tester & report bugs. https://play.google.com/store/apps/details?id=in.ceeq \n\n");
+							"Hello, install Ceeq for free, enjoy your new security partner for Android.  \n\n");
+			shareIntent.putExtra(Intent.EXTRA_TEXT,
+					getString(R.string.ceeq_play_link));
 			startActivity(Intent.createChooser(shareIntent, "Share to"));
 			break;
 
