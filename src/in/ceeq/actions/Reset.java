@@ -1,15 +1,36 @@
 package in.ceeq.actions;
 
-import android.content.Context;
-
+import in.ceeq.R;
+import in.ceeq.activities.Splash;
+import in.ceeq.helpers.NotificationsHelper;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Uploader;
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
+
+import com.google.android.gms.plus.PlusClient;
 
 public class Reset {
 	private PreferencesHelper preferencesHelper;
+	private Context context;
+	private PlusClient googlePlusClient;
+
+	public Reset(Context context, PlusClient googlePlusClient) {
+		this.context = context;
+		this.googlePlusClient = googlePlusClient;
+		preferencesHelper = PreferencesHelper.getInstance(context);
+	}
 
 	public Reset(Context context) {
+		this.context = context;
 		preferencesHelper = PreferencesHelper.getInstance(context);
+	}
+
+	public static Reset getInstance(Context context, PlusClient googlePlusClient) {
+		return new Reset(context, googlePlusClient);
 	}
 
 	public static Reset getInstance(Context context) {
@@ -61,6 +82,47 @@ public class Reset {
 		catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void reset() {
+		new AsyncTask<Void, Void, Void>() {
+			private ProgressDialog progressDialog;
+
+			@Override
+			protected void onPreExecute() {
+				progressDialog = new ProgressDialog(context);
+				progressDialog.setMessage("Resetting Ceeq...");
+				progressDialog.show();
+			}
+
+			@Override
+			protected Void doInBackground(Void... arg0) {
+				try {
+					googlePlusClient.clearDefaultAccount();
+					googlePlusClient.revokeAccessAndDisconnect(null);
+					preferencesHelper.clear();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void arg0) {
+				progressDialog.dismiss();
+				NotificationsHelper.getInstance(context)
+						.removeAllNotifications();
+				Intent launchSplash = new Intent(context, Splash.class);
+				launchSplash.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				launchSplash.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+				launchSplash.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+				context.startActivity(launchSplash);
+				((Activity) context).overridePendingTransition(
+						R.drawable.fadeout, R.drawable.fadein);
+			}
+
+		}.execute();
 	}
 
 }

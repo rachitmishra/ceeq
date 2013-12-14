@@ -59,6 +59,6 @@ public class Stealth {
 				DISABLE);
 		preferencesHelper.setBoolean(PreferencesHelper.NOTIFICATIONS_STATUS,
 				ENABLE);
-		notificationsHelper.defaultNotification();
+		notificationsHelper.showPersistentNotification();
 	}
 }

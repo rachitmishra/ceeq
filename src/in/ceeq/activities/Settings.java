@@ -9,6 +9,7 @@ package in.ceeq.activities;
 
 import in.ceeq.R;
 import in.ceeq.actions.Choose;
+import in.ceeq.actions.Reset;
 import in.ceeq.helpers.PreferencesHelper;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -78,7 +79,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	private static final int CONNECTION_FAILURE_REQUEST = 9020;
 	private PreferencesHelper preferencesHelper;
 	private Preference changePrimaryContact, facebookConnect, googleConnect;
-	private PlusClient plus;
+	private PlusClient googlePlusClient;
 	private Session.StatusCallback statusCallback = new FBSessionStatus();
 
 	@Override
@@ -87,9 +88,8 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 
 		addPreferencesFromResource(R.xml.preferences);
 		preferencesHelper = new PreferencesHelper(this.getActivity());
-		googleInitialize();
-
-		facebookInitialize(savedInstanceState);
+		setupGoogle();
+		setupFacebook(savedInstanceState);
 
 		changePrimaryContact = (Preference) findPreference("changePrimaryContact");
 		changePrimaryContact
@@ -103,7 +103,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 
 		googleConnect = (Preference) findPreference("googleConnected");
 		googleConnect.setOnPreferenceChangeListener(new GoogleConnectListener(
-				getActivity(), plus));
+				getActivity(), googlePlusClient));
 
 		googleConnect = (Preference) findPreference("uninstallProtection");
 		googleConnect
@@ -111,12 +111,12 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 						getActivity(), getActivity()));
 	}
 
-	public void googleInitialize() {
-		plus = new PlusClient.Builder(getActivity(), this, this).setActions(
+	public void setupGoogle() {
+		googlePlusClient = new PlusClient.Builder(getActivity(), this, this).setActions(
 				"http://schemas.google.com/AddActivity").build();
 	}
 
-	public void facebookInitialize(Bundle savedInstanceState) {
+	public void setupFacebook(Bundle savedInstanceState) {
 		com.facebook.Settings
 				.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 
@@ -137,22 +137,11 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 		}
 	}
 
-	public void disConnectFacebook() {
-		Session session = Session.getActiveSession();
-		if (!session.isClosed()) {
-			session.closeAndClearTokenInformation();
-		}
-	}
-
-	public void disConnectGoogle() {
-		Session session = Session.getActiveSession();
-		if (!session.isClosed()) {
-			session.closeAndClearTokenInformation();
-		}
-	}
-
 	@Override
 	public void onConnected(Bundle connectionHint) {
+		/**
+		 * we have nothing to do on google + connected
+		 */
 	}
 
 	@Override
@@ -162,7 +151,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 				result.startResolutionForResult(getActivity(),
 						CONNECTION_FAILURE_REQUEST);
 			} catch (SendIntentException e) {
-				plus.connect();
+				googlePlusClient.connect();
 			}
 		}
 	}
@@ -171,18 +160,19 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	public void onStart() {
 		super.onStart();
 		Session.getActiveSession().addCallback(statusCallback);
-		plus.connect();
+		googlePlusClient.connect();
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 		Session.getActiveSession().removeCallback(statusCallback);
-		plus.disconnect();
+		googlePlusClient.disconnect();
 	}
 
 	@Override
 	public void onDisconnected() {
+
 	}
 
 	private class FBSessionStatus implements Session.StatusCallback {
@@ -246,7 +236,6 @@ class ChangeContactListener implements OnPreferenceClickListener {
 
 class FacebookConnectListener implements OnPreferenceChangeListener {
 
-	private boolean reset = true;
 	private Context context;
 	private PreferencesHelper preferencesHelper;
 
@@ -260,24 +249,16 @@ class FacebookConnectListener implements OnPreferenceChangeListener {
 		new AlertDialog.Builder(context)
 				.setTitle("Warning")
 				.setMessage(
-						"Please note, this will reset the protect me feature, You will have to reconnect Facebook to use this feature.")
+						"Please note, your friends won't be able to help you in trouble times.")
 				.setPositiveButton(R.string.continue_,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								if (preferencesHelper
-										.getBoolean(PreferencesHelper.PROTECT_ME_STATUS)) {
-									preferencesHelper
-											.setBoolean(
-													PreferencesHelper.GOOGLE_CONNECT_STATUS,
-													false);
-
-								}
+								disConnectFacebook();
 							}
 						})
 				.setNegativeButton(R.string.cancel,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								reset = true;
 								dialog.cancel();
 							}
 						}).setOnKeyListener(new OnKeyListener() {
@@ -287,28 +268,33 @@ class FacebookConnectListener implements OnPreferenceChangeListener {
 							KeyEvent event) {
 						if (keyCode == KeyEvent.KEYCODE_BACK
 								&& event.getAction() == KeyEvent.ACTION_UP) {
-							reset = true;
 							dialog.cancel();
 						}
 						return false;
 					}
 				}).create().show();
 
-		return reset;
+		return true;
+	}
+
+	public void disConnectFacebook() {
+		preferencesHelper.setBoolean(PreferencesHelper.FACEBOOK_CONNECT_STATUS,
+				false);
+		Session session = Session.getActiveSession();
+		if (!session.isClosed()) {
+			session.closeAndClearTokenInformation();
+		}
 	}
 }
 
 class GoogleConnectListener implements OnPreferenceChangeListener {
 
-	private boolean reset = true;
 	private Context context;
-	private PlusClient plus;
-	private PreferencesHelper preferencesHelper;
+	private PlusClient googlePlusClient;
 
-	public GoogleConnectListener(Context context, PlusClient plus) {
+	public GoogleConnectListener(Context context, PlusClient googlePlusClient) {
 		this.context = context;
-		this.plus = plus;
-		preferencesHelper = new PreferencesHelper(context);
+		this.googlePlusClient = googlePlusClient;
 	}
 
 	@Override
@@ -320,21 +306,15 @@ class GoogleConnectListener implements OnPreferenceChangeListener {
 				.setPositiveButton(R.string.continue_,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								if (plus.isConnected()) {
-									plus.clearDefaultAccount();
-									plus.disconnect();
-									plus.connect();
-									preferencesHelper
-											.setBoolean(
-													PreferencesHelper.GOOGLE_CONNECT_STATUS,
-													false);
+								if (googlePlusClient.isConnected()) {
+									Reset.getInstance(context, googlePlusClient)
+											.reset();
 								}
 							}
 						})
 				.setNegativeButton(R.string.cancel,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								reset = true;
 								dialog.cancel();
 							}
 						}).setOnKeyListener(new OnKeyListener() {
@@ -344,15 +324,14 @@ class GoogleConnectListener implements OnPreferenceChangeListener {
 							KeyEvent event) {
 						if (keyCode == KeyEvent.KEYCODE_BACK
 								&& event.getAction() == KeyEvent.ACTION_UP) {
-							reset = true;
 							dialog.cancel();
 						}
 						return false;
 					}
 				}).create().show();
-
-		return reset;
+		return true;
 	}
+
 }
 
 class ChangePinNumber extends DialogPreference {

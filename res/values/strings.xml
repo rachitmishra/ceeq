@@ -30,7 +30,7 @@
         <item>Device &amp; External Storage</item>
     </string-array>
     
-    <string name="disconnect">Disconnect</string>
+    <string name="disconnect"></string>
 
     <!-- Tab Titles -->
     <string name="tab_home">Home</string>

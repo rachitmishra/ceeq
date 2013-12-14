@@ -277,8 +277,6 @@ public class Home extends FragmentActivity {
 	 * The drawer adapter class for creating the Dialog view, mainly for
 	 * inflating the listview in dialog.
 	 * 
-	 * @author Lucky
-	 * 
 	 */
 	public class DrawerAdapter extends BaseAdapter {
 
@@ -445,8 +443,6 @@ public class Home extends FragmentActivity {
 
 		private void selectItem(int position) {
 			switch (position) {
-			case 0:
-				break;
 			case 3:
 			case 4:
 			case 5:
@@ -677,7 +673,8 @@ public class Home extends FragmentActivity {
 					new ComponentName(Home.this, Launcher.class),
 					PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
 					PackageManager.DONT_KILL_APP);
-			NotificationsHelper.getInstance(Home.this).defaultNotification();
+			NotificationsHelper.getInstance(Home.this)
+					.showPersistentNotification();
 			Receiver.getInstance(this).unregister(ReceiverType.OUTGOING_CALLS);
 			preferencesHelper.setBoolean(PreferencesHelper.STEALTH_MODE_STATUS,
 					false);
@@ -993,6 +990,7 @@ public class Home extends FragmentActivity {
 					Restore.getInstance(Home.this).restore(data);
 					break;
 				case WIPE:
+					Wipe.getInstance(Home.this);
 					break;
 				default:
 					break;
@@ -1124,7 +1122,7 @@ public class Home extends FragmentActivity {
 		public void showNotification() {
 			if (preferencesHelper
 					.getBoolean(PreferencesHelper.NOTIFICATIONS_STATUS))
-				notificationsHelper.defaultNotification();
+				notificationsHelper.showPersistentNotification();
 		}
 
 		public void restoreToggleStates(View v) {

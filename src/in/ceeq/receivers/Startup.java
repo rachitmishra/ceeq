@@ -45,7 +45,7 @@ public class Startup extends BroadcastReceiver {
 	public void showNotification() {
 		if (preferencesHelper
 				.getBoolean(PreferencesHelper.NOTIFICATIONS_STATUS))
-			notificationsHelper.defaultNotification();
+			notificationsHelper.showPersistentNotification();
 	}
 
 	public void checkSimChange(Context context) {

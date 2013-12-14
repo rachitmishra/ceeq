@@ -18,7 +18,12 @@ public class Launcher extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_transparent);
-		startActivity(new Intent(this, Splash.class));
-		this.finish();
+		Intent launchSplash;
+		launchSplash = new Intent(this, Splash.class);
+		launchSplash.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		launchSplash.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		launchSplash.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+		startActivity(launchSplash);
+		overridePendingTransition(R.drawable.fadeout, R.drawable.fadein);
 	}
 }

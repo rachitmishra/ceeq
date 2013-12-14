@@ -5,8 +5,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 public class PreferencesHelper {
-	private SharedPreferences prefs;
-	private SharedPreferences.Editor editor;
+	private final SharedPreferences prefs;
+	private final SharedPreferences.Editor editor;
 
 	public static final String SIM_NUMBER = "simNumber";
 	public static final String IEMI_NUMBER = "iemiNumber";
@@ -64,8 +64,7 @@ public class PreferencesHelper {
 	}
 
 	public void setBoolean(String key, Boolean value) {
-		editor.putBoolean(key, value);
-		editor.commit();
+		editor.putBoolean(key, value).commit();
 	}
 
 	public String getString(String key) {
@@ -73,8 +72,7 @@ public class PreferencesHelper {
 	}
 
 	public void setString(String key, String value) {
-		editor.putString(key, value);
-		editor.commit();
+		editor.putString(key, value).commit();
 	}
 
 	public int getInt(String key) {
@@ -82,8 +80,11 @@ public class PreferencesHelper {
 	}
 
 	public void setInt(String key, int value) {
-		editor.putInt(key, value);
-		editor.commit();
+		editor.putInt(key, value).commit();
+	}
+
+	public void clear() {
+		editor.clear().commit();
 	}
 
 }

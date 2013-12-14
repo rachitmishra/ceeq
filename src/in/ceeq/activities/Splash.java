@@ -34,6 +34,10 @@ import com.google.android.gms.plus.model.people.Person;
 public class Splash extends Activity implements ConnectionCallbacks,
 		OnConnectionFailedListener {
 
+	private enum Next {
+		FIRSTRUN, HOME
+	}
+
 	private boolean appHasInitialised, googleConnect;
 
 	@Override
@@ -119,18 +123,33 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	private static final int ONE_SECOND = 1;
 	private static final int ZERO_SECONDS = 0;
 
-	private void delayedStart(final Class<?> activity, int secondsDelayed) {
+	private void delayedStart(final Next nextActivity, int secondsDelayed) {
 
 		if (PreferencesHelper.getInstance(this).getBoolean(
 				PreferencesHelper.SPLASH_STATUS))
 			secondsDelayed = ONE_SECOND;
 		else
 			secondsDelayed = ZERO_SECONDS;
+
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				startActivity(new Intent(Splash.this, activity));
-				Splash.this.finish();
+				Intent launchNextActivity;
+				switch (nextActivity) {
+				case FIRSTRUN:
+					launchNextActivity = new Intent(Splash.this, Firstrun.class);
+					break;
+				default:
+					launchNextActivity = new Intent(Splash.this, Home.class);
+					break;
+
+				}
+
+				launchNextActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				launchNextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+				launchNextActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+				startActivity(launchNextActivity);
+				overridePendingTransition(R.drawable.fadeout, R.drawable.fadein);
 			}
 		}, secondsDelayed * 1000);
 	}
@@ -162,11 +181,11 @@ public class Splash extends Activity implements ConnectionCallbacks,
 			plus.connect();
 		} else if (!appHasInitialised) {
 			button.setVisibility(View.INVISIBLE);
-			delayedStart(Firstrun.class, ONE_SECOND);
+			delayedStart(Next.FIRSTRUN, ONE_SECOND);
 
 		} else {
 			button.setVisibility(View.INVISIBLE);
-			delayedStart(Home.class, ONE_SECOND);
+			delayedStart(Next.HOME, ONE_SECOND);
 
 		}
 	}
@@ -204,7 +223,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 
 		if (!appHasInitialised) {
 			button.setVisibility(View.INVISIBLE);
-			delayedStart(Firstrun.class, ZERO_SECONDS);
+			delayedStart(Next.FIRSTRUN, ZERO_SECONDS);
 		}
 	}
 
