@@ -10,6 +10,7 @@ package in.ceeq.activities;
 import in.ceeq.R;
 import in.ceeq.actions.Choose;
 import in.ceeq.actions.Reset;
+import in.ceeq.helpers.NotificationsHelper;
 import in.ceeq.helpers.PreferencesHelper;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -78,7 +79,8 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 
 	private static final int CONNECTION_FAILURE_REQUEST = 9020;
 	private PreferencesHelper preferencesHelper;
-	private Preference changePrimaryContact, facebookConnect, googleConnect;
+	private Preference changePrimaryContact, facebookConnect, googleConnect,
+			notifications;
 	private PlusClient googlePlusClient;
 	private Session.StatusCallback statusCallback = new FBSessionStatus();
 
@@ -107,13 +109,27 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 
 		googleConnect = (Preference) findPreference("uninstallProtection");
 		googleConnect
-				.setOnPreferenceChangeListener(new ActivateUninstallProtection(
-						getActivity(), getActivity()));
+				.setOnPreferenceChangeListener(new UninstallProtectionToggle(
+						getActivity()));
+
+		notifications = (Preference) findPreference("notifications");
+		notifications
+				.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+
+					@Override
+					public boolean onPreferenceChange(Preference preference,
+							Object newValue) {
+						NotificationsHelper.getInstance(getActivity())
+								.removeAllNotifications();
+						return false;
+					}
+				});
+
 	}
 
 	public void setupGoogle() {
-		googlePlusClient = new PlusClient.Builder(getActivity(), this, this).setActions(
-				"http://schemas.google.com/AddActivity").build();
+		googlePlusClient = new PlusClient.Builder(getActivity(), this, this)
+				.setActions("http://schemas.google.com/AddActivity").build();
 	}
 
 	public void setupFacebook(Bundle savedInstanceState) {
@@ -457,15 +473,15 @@ class ChangePinNumber extends DialogPreference {
 
 }
 
-class ActivateUninstallProtection implements OnPreferenceChangeListener {
+class UninstallProtectionToggle implements OnPreferenceChangeListener {
 
 	private PreferencesHelper preferencesHelper;
 	private Context context;
 	private Activity activity;
 
-	public ActivateUninstallProtection(Context context, Activity activity) {
+	public UninstallProtectionToggle(Context context) {
 		this.context = context;
-		this.activity = activity;
+		this.activity = (Activity) context;
 		preferencesHelper = new PreferencesHelper(context);
 	}
 
@@ -492,6 +508,29 @@ class ActivateUninstallProtection implements OnPreferenceChangeListener {
 					Toast.LENGTH_SHORT).show();
 			preferencesHelper.setBoolean(
 					PreferencesHelper.APP_UNINSTALL_PROTECTION, false);
+		}
+		return true;
+	}
+
+}
+
+class NotificationsToggle implements OnPreferenceChangeListener {
+
+	private Context context;
+
+	public NotificationsToggle(Context context) {
+		this.context = context;
+	}
+
+	@Override
+	public boolean onPreferenceChange(Preference preference, Object obj) {
+		if (Boolean.parseBoolean(obj.toString())) {
+			NotificationsHelper.getInstance(context)
+					.showPersistentNotification();
+		} else {
+			NotificationsHelper.getInstance(context).removeAllNotifications();
+			Toast.makeText(context, R.string.toast_string_13,
+					Toast.LENGTH_SHORT).show();
 		}
 		return true;
 	}

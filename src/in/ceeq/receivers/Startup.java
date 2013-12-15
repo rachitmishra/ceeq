@@ -38,8 +38,8 @@ public class Startup extends BroadcastReceiver {
 		notificationsHelper = new NotificationsHelper(context);
 		showNotification();
 		checkSimChange(context);
-		if (preferencesHelper.getBoolean("autoBackup"))
-			scheduleAlarms(context);
+		if (preferencesHelper.getBoolean(PreferencesHelper.AUTO_BACKUP_STATUS))
+			setupAlarms(context);
 	}
 
 	public void showNotification() {
@@ -70,7 +70,7 @@ public class Startup extends BroadcastReceiver {
 		}
 	}
 
-	public void scheduleAlarms(Context context) {
+	public void setupAlarms(Context context) {
 		PendingIntent pi;
 		AlarmManager alarms = (AlarmManager) context
 				.getSystemService(Context.ALARM_SERVICE);

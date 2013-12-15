@@ -539,7 +539,7 @@ public class Home extends FragmentActivity {
 					PreferencesHelper.FACEBOOK_CONNECT_STATUS, true);
 		} else {
 			preferencesHelper.setBoolean(
-					PreferencesHelper.FACEBOOK_CONNECT_STATUS, true);
+					PreferencesHelper.FACEBOOK_CONNECT_STATUS, false);
 		}
 	}
 

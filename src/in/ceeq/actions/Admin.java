@@ -7,12 +7,12 @@
 
 package in.ceeq.actions;
 
+import in.ceeq.R;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-
-import in.ceeq.R;
 
 public class Admin {
 
@@ -20,12 +20,12 @@ public class Admin {
 	private Activity activity;
 	private ComponentName deviceAdminComponentName;
 
-	public Admin(Activity activity) {
-		this.activity = activity;
+	public Admin(Context context) {
+		this.activity = (Activity) context;
 	}
 
-	public static Admin getInstance(Activity activity) {
-		return new Admin(activity);
+	public static Admin getInstance(Context context) {
+		return new Admin(context);
 	}
 
 	public void register() {
