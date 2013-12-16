@@ -578,6 +578,10 @@ class ChangeEmergencyMessage extends DialogPreference {
 	@Override
 	protected void onBindDialogView(View v) {
 		newMessage = (EditText) v.findViewById(R.id.newMessage);
+		String storedMessage = preferencesHelper
+				.getString(PreferencesHelper.DISTRESS_MESSAGE);
+		if (!storedMessage.isEmpty())
+			newMessage.setText(storedMessage);
 	}
 }
 
@@ -624,6 +628,10 @@ class ChangeDistressMessage extends DialogPreference {
 	@Override
 	protected void onBindDialogView(View v) {
 		newMessage = (EditText) v.findViewById(R.id.newMessage);
+		String storedMessage = preferencesHelper
+				.getString(PreferencesHelper.DISTRESS_MESSAGE);
+		if (!storedMessage.isEmpty())
+			newMessage.setText(storedMessage);
 	}
 }
 

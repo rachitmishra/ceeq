@@ -128,7 +128,7 @@ public class Backups extends IntentService {
 			sendMessage(ProgressBarState.SHOW);
 		}
 
-		notify();
+		notify(State.ON);
 
 		try {
 			switch (action) {
@@ -181,7 +181,7 @@ public class Backups extends IntentService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			notify();
+			notify(State.OFF);
 			if (actionParent == ActionParent.ACTIVITY) {
 				sendMessage(ProgressBarState.HIDE);
 			}

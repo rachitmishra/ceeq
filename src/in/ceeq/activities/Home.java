@@ -10,14 +10,16 @@ import in.ceeq.actions.Notifications;
 import in.ceeq.actions.Protect;
 import in.ceeq.actions.Receiver;
 import in.ceeq.actions.Receiver.ReceiverType;
+import in.ceeq.actions.Restore;
+import in.ceeq.actions.Upload;
 import in.ceeq.actions.Wipe;
-import in.ceeq.helpers.DialogsHelper;
-import in.ceeq.helpers.DialogsHelper.DialogType;
 import in.ceeq.helpers.Helpers;
+import in.ceeq.helpers.Logger;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.receivers.DeviceAdmin;
 import in.ceeq.services.Backups;
 import in.ceeq.services.Tracker;
+import in.ceeq.services.Uploader.UploadType;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -30,7 +32,9 @@ import java.util.TimeZone;
 
 import org.apache.http.protocol.HTTP;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -56,6 +60,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.InflateException;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,6 +71,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -97,6 +103,10 @@ public class Home extends FragmentActivity {
 	public static final String MESSENGER = "in.ceeq.Home";
 	public final static int SHOW = 1;
 	public final static int HIDE = 0;
+
+	public enum DialogType {
+		PROTECT, STEALTH, FEEDBACK, BACKUP, RESTORE, BLIP, WIPE, WIPE_EXTERNAL_STORAGE, WIPE_DEVICE, WIPE_EXTERNAL_STORAGE_AND_DEVICE, DEVICE_ADMIN
+	}
 
 	/**
 	 * 
@@ -139,7 +149,7 @@ public class Home extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 
 		setupActionbar();
-		setupBugsense();
+		// setupBugsense();
 		setContentView(R.layout.activity_home);
 		this.title = drawerTitle = getTitle();
 
@@ -180,7 +190,7 @@ public class Home extends FragmentActivity {
 		// get the action bar, and hide the title
 		getActionBar().setDisplayShowTitleEnabled(false);
 		// get the action bar, set different logo/icon
-		getActionBar().setIcon(R.drawable.ic_app_action_logo);
+		// getActionBar().setIcon(R.drawable.ic_app_action_logo);
 		// get the action bar, set home as clickable and button
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
@@ -545,7 +555,7 @@ public class Home extends FragmentActivity {
 		ToggleButton toggleButton;
 
 		builder = new AlertDialog.Builder(this);
-		dialogsHelper = DialogsHelper.getInstance(this);
+		dialogsHelper = new DialogsHelper(this);
 
 		switch (v.getId()) {
 
@@ -610,50 +620,7 @@ public class Home extends FragmentActivity {
 	private void setupStealthMode(ToggleButton toggleButton) {
 		packageManager = this.getPackageManager();
 		if (toggleButton.isChecked()) {
-			builder.setView(dialogsHelper.getView(DialogType.STEALTH))
-					.setPositiveButton(R.string.enable,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which) {
-									Notifications.getInstance(Home.this)
-											.remove();
-									preferencesHelper
-											.setBoolean(
-													PreferencesHelper.NOTIFICATIONS_STATUS,
-													false);
-
-									try {
-										packageManager
-												.setComponentEnabledSetting(
-														new ComponentName(
-																Home.this,
-																Launcher.class),
-														PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-														PackageManager.DONT_KILL_APP);
-										try {
-											startActivity(new Intent(Home.this,
-													Launcher.class));
-										} catch (Exception e) {
-										}
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-
-									Receiver.getInstance(Home.this).register(
-											ReceiverType.OUTGOING_CALLS);
-									preferencesHelper
-											.setBoolean(
-													PreferencesHelper.STEALTH_MODE_STATUS,
-													true);
-									Toast.makeText(Home.this,
-											"Stealth Mode enabled.",
-											Toast.LENGTH_SHORT).show();
-
-								}
-							})
-					.setNegativeButton(R.string.cancel, dialogsHelper)
-					.setOnKeyListener(dialogsHelper).create().show();
+			dialogsHelper.showDialog(DialogType.STEALTH, toggleButton);
 		} else {
 			getPackageManager().setComponentEnabledSetting(
 					new ComponentName(Home.this, Launcher.class),
@@ -668,25 +635,22 @@ public class Home extends FragmentActivity {
 		}
 	}
 
-	private void setupProtectMe(ToggleButton toggle) {
-		if (toggle.isChecked()) {
-			builder.setView(dialogsHelper.getView(DialogType.PROTECT))
-					.setPositiveButton(R.string.enable, dialogsHelper)
-					.setNegativeButton(R.string.cancel, dialogsHelper)
-					.setOnKeyListener(dialogsHelper).create().show();
+	private void setupProtectMe(ToggleButton toggleButton) {
+		if (toggleButton.isChecked()) {
+			dialogsHelper.showDialog(DialogType.PROTECT, toggleButton);
 		} else {
 			Protect.getInstance(this).disable();
 			preferencesHelper.setBoolean(PreferencesHelper.PROTECT_ME_STATUS,
-					toggle.isChecked());
+					toggleButton.isChecked());
 			Toast.makeText(Home.this, "Protect me disabled.",
 					Toast.LENGTH_SHORT).show();
 		}
 	}
 
-	private void setupScheduledBackup(ToggleButton toggle) {
+	private void setupScheduledBackup(ToggleButton toggleButton) {
 		preferencesHelper.setBoolean(PreferencesHelper.AUTO_BACKUP_STATUS,
-				toggle.isChecked());
-		if (toggle.isChecked()) {
+				toggleButton.isChecked());
+		if (toggleButton.isChecked()) {
 			timer.setVisibility(View.VISIBLE);
 			Toast.makeText(this,
 					"Automatic backups started, everyday at 2:00 AM",
@@ -700,13 +664,13 @@ public class Home extends FragmentActivity {
 		}
 	}
 
-	private void setupAutoBlips(ToggleButton toggle) {
-		if (toggle.isChecked()) {
-			dialogsHelper.showDialog(DialogType.BLIP);
+	private void setupAutoBlips(ToggleButton toggleButton) {
+		if (toggleButton.isChecked()) {
+			dialogsHelper.showDialog(DialogType.BLIP, toggleButton);
 		} else {
 			Receiver.getInstance(this).unregister(ReceiverType.LOW_BATTERY);
 			preferencesHelper.setBoolean(PreferencesHelper.AUTO_BLIP_STATUS,
-					toggle.isChecked());
+					toggleButton.isChecked());
 			Toast.makeText(this, "Auto blips disabled.", Toast.LENGTH_SHORT)
 					.show();
 		}
@@ -817,6 +781,338 @@ public class Home extends FragmentActivity {
 
 		}
 		return false;
+	}
+
+	public class DialogsHelper implements DialogInterface.OnClickListener,
+			DialogInterface.OnKeyListener {
+		private ToggleButton toggleButton;
+		private LayoutInflater inflater;
+		private static final int NONE = -1;
+		private Context context;
+		private Activity activity;
+		private AlertDialog.Builder alertDialogBuilder;
+		private PreferencesHelper preferencesHelper;
+		private View feedbackView, protectMeView;
+
+		private DialogType dialogType;
+
+		public DialogsHelper(Context context) {
+			this.context = context;
+			this.activity = (Activity) context;
+			preferencesHelper = PreferencesHelper.getInstance(context);
+		}
+
+		public void showDialog(DialogType dialogType) {
+			this.dialogType = dialogType;
+			alertDialogBuilder = new AlertDialog.Builder(context)
+					.setTitle(getTitle());
+			switch (dialogType) {
+			case FEEDBACK:
+				alertDialogBuilder.setView(getView(DialogType.FEEDBACK))
+						.setPositiveButton(getPositiveButtonString(), this);
+				break;
+			case DEVICE_ADMIN:
+				alertDialogBuilder.setView(getView(DialogType.DEVICE_ADMIN))
+						.setPositiveButton(getPositiveButtonString(), this);
+				break;
+			case WIPE_DEVICE:
+				alertDialogBuilder.setView(getView(DialogType.WIPE_DEVICE))
+						.setPositiveButton(getPositiveButtonString(), this);
+				break;
+			case WIPE_EXTERNAL_STORAGE:
+				alertDialogBuilder.setView(
+						getView(DialogType.WIPE_EXTERNAL_STORAGE))
+						.setPositiveButton(getPositiveButtonString(), this);
+				break;
+			case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
+				alertDialogBuilder.setView(
+						getView(DialogType.WIPE_EXTERNAL_STORAGE_AND_DEVICE))
+						.setPositiveButton(getPositiveButtonString(), this);
+				break;
+			default:
+				alertDialogBuilder.setSingleChoiceItems(getChoices(), NONE,
+						this);
+				break;
+			}
+			alertDialogBuilder
+					.setNegativeButton(getNegativeButtonString(), this)
+					.create().show();
+		}
+
+		public void showDialog(DialogType dialogType, ToggleButton toggleButton) {
+			this.dialogType = dialogType;
+			this.toggleButton = toggleButton;
+
+			alertDialogBuilder = new AlertDialog.Builder(context)
+					.setTitle(getTitle());
+
+			switch (dialogType) {
+			case BLIP:
+				alertDialogBuilder.setView(getView(DialogType.BLIP));
+				break;
+			case DEVICE_ADMIN:
+				alertDialogBuilder.setView(getView(DialogType.DEVICE_ADMIN));
+				break;
+			case PROTECT:
+				alertDialogBuilder.setView(getView(DialogType.PROTECT));
+				break;
+			case STEALTH:
+				alertDialogBuilder.setView(getView(DialogType.STEALTH));
+				break;
+			default:
+				break;
+
+			}
+
+			alertDialogBuilder
+					.setPositiveButton(getPositiveButtonString(), this)
+					.setNegativeButton(getNegativeButtonString(), this)
+					.setOnKeyListener(this).create().show();
+		}
+
+		public int getTitle() {
+			switch (dialogType) {
+			case BACKUP:
+				return R.string.dialog_title_backup;
+			case RESTORE:
+				return R.string.dialog_title_restore;
+			case WIPE:
+				return R.string.dialog_title_wipe;
+			case BLIP:
+				return R.string.dialog_title_blip;
+			case FEEDBACK:
+				return R.string.dialog_title_feedback;
+			case PROTECT:
+				return R.string.dialog_title_protect;
+			case STEALTH:
+				return R.string.dialog_title_stealth;
+			case DEVICE_ADMIN:
+				return R.string.dialog_title_device_admin;
+			default:
+				return R.string.dialog_title_wipe_device;
+			}
+		}
+
+		public int getChoices() {
+			switch (dialogType) {
+			case BACKUP:
+			case RESTORE:
+				return R.array.backup_options;
+			case WIPE:
+				return R.array.wipe_options;
+			default:
+				return 0;
+			}
+		}
+
+		public View getView(DialogType dialogType) {
+			this.dialogType = dialogType;
+			inflater = activity.getLayoutInflater();
+			switch (dialogType) {
+
+			case BLIP:
+				return inflater.inflate(R.layout.dialog_blips_info, null);
+
+			case DEVICE_ADMIN:
+				return inflater.inflate(R.layout.dialog_device_admin, null);
+
+			case STEALTH:
+				return inflater.inflate(R.layout.dialog_stealth_mode, null);
+
+			case PROTECT:
+				protectMeView = inflater.inflate(R.layout.dialog_protect_me,
+						null);
+				Button facebookConnect = (Button) protectMeView
+						.findViewById(R.id.facebook_login);
+				LinearLayout socialBox = (LinearLayout) protectMeView
+						.findViewById(R.id.social_box);
+				if (preferencesHelper
+						.getBoolean(PreferencesHelper.FACEBOOK_CONNECT_STATUS)) {
+					socialBox.setVisibility(View.GONE);
+				} else {
+					socialBox.setVisibility(View.VISIBLE);
+				}
+				facebookConnect.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						Home.this.connectFacebook();
+					}
+				});
+				EditText distressMessage = (EditText) protectMeView
+						.findViewById(R.id.distressMessage);
+				String storedMessage = preferencesHelper
+						.getString(PreferencesHelper.DISTRESS_MESSAGE);
+				if (!storedMessage.isEmpty())
+					distressMessage.setText(storedMessage);
+				return protectMeView;
+			case WIPE_DEVICE:
+				return inflater.inflate(R.layout.dialog_wipe, null);
+			case WIPE_EXTERNAL_STORAGE:
+				return inflater.inflate(R.layout.dialog_wipe_external_storage,
+						null);
+			case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
+				return inflater.inflate(R.layout.dialog_wipe, null);
+			default:
+				return inflater.inflate(R.layout.dialog_feedback, null);
+
+			}
+		}
+
+		public int getPositiveButtonString() {
+			switch (dialogType) {
+			case PROTECT:
+				return R.string.save;
+			case STEALTH:
+				return R.string.enable;
+			case BLIP:
+				return R.string.okay;
+			case FEEDBACK:
+				return R.string.send;
+			default:
+				return R.string.continue_;
+			}
+		}
+
+		public int getNegativeButtonString() {
+			switch (dialogType) {
+			default:
+				return R.string.cancel;
+			}
+		}
+
+		@Override
+		public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+			if (keyCode == KeyEvent.KEYCODE_BACK
+					&& event.getAction() == KeyEvent.ACTION_UP) {
+				resetToggle(toggleButton);
+				dialog.dismiss();
+			}
+			return false;
+		}
+
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+
+			switch (which) {
+
+			case Dialog.BUTTON_NEGATIVE:
+				resetToggle(toggleButton);
+				dialog.dismiss();
+				break;
+
+			case Dialog.BUTTON_POSITIVE:
+			default:
+				switch (dialogType) {
+				case BACKUP:
+					Backup.getInstance(context).backup(which);
+					dialog.dismiss();
+					break;
+				case RESTORE:
+					Restore.getInstance(context).restore(which);
+					dialog.dismiss();
+					break;
+				case WIPE:
+					switch (which) {
+					case 0:
+						showDialog(DialogType.WIPE_EXTERNAL_STORAGE);
+						break;
+					case 1:
+						showDialog(DialogType.WIPE_DEVICE);
+						break;
+					case 2:
+						showDialog(DialogType.WIPE_EXTERNAL_STORAGE_AND_DEVICE);
+						break;
+					}
+					dialog.dismiss();
+					break;
+				case BLIP:
+					Receiver.getInstance(context).register(
+							ReceiverType.LOW_BATTERY);
+					preferencesHelper.setBoolean(
+							PreferencesHelper.AUTO_BLIP_STATUS, true);
+					showToast("Auto blips enabled.");
+					break;
+				case DEVICE_ADMIN:
+					Logger.d("Activating device admin");
+					Admin.getInstance(context).register();
+					break;
+				case FEEDBACK:
+					EditText feedbackMessage = (EditText) feedbackView
+							.findViewById(R.id.feedbackMessage);
+					preferencesHelper.setString(
+							PreferencesHelper.FEEDBACK_MESSAGE, feedbackMessage
+									.getText().toString());
+					Upload.getInstance(context).start(UploadType.FEEDBACK);
+					break;
+				case PROTECT:
+					Protect.getInstance(context).enable();
+					EditText distressMessage = (EditText) protectMeView
+							.findViewById(R.id.distressMessage);
+					preferencesHelper.setString(
+							PreferencesHelper.DISTRESS_MESSAGE, distressMessage
+									.getText().toString());
+					preferencesHelper.setBoolean(
+							PreferencesHelper.PROTECT_ME_STATUS, true);
+					showToast("Protect me enabled. Just press power button 10 times for help.");
+					break;
+				case STEALTH:
+					Notifications.getInstance(context).remove();
+					preferencesHelper.setBoolean(
+							PreferencesHelper.NOTIFICATIONS_STATUS, false);
+					try {
+						packageManager
+								.setComponentEnabledSetting(
+										new ComponentName(Home.this,
+												Launcher.class),
+										PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+										PackageManager.DONT_KILL_APP);
+						try {
+							startActivity(new Intent(Home.this, Launcher.class));
+						} catch (Exception e) {
+							// Let it be 3:)
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					Receiver.getInstance(context).register(
+							ReceiverType.OUTGOING_CALLS);
+					preferencesHelper.setBoolean(
+							PreferencesHelper.STEALTH_MODE_STATUS, true);
+					showToast("Stealth Mode enabled.");
+					break;
+				case WIPE_DEVICE:
+					if (Admin.getInstance(context).isRegistered())
+						Wipe.getInstance(context).device();
+					else
+						showDialog(DialogType.DEVICE_ADMIN);
+					break;
+				case WIPE_EXTERNAL_STORAGE:
+					Wipe.getInstance(context).externalStorage();
+					break;
+				case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
+					if (Admin.getInstance(context).isRegistered())
+						Wipe.getInstance(context).deviceAndExternalStorage();
+					else
+						showDialog(DialogType.DEVICE_ADMIN);
+					break;
+				default:
+					break;
+				}
+				break;
+			}
+
+		}
+
+		public void resetToggle(ToggleButton toggleButton) {
+			if (toggleButton != null)
+				toggleButton.setChecked(false);
+		}
+
+		public void showToast(String message) {
+			Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+		}
+
 	}
 
 	public static class HomeFragment extends Fragment {

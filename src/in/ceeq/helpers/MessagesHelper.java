@@ -199,7 +199,7 @@ public class MessagesHelper {
 				+ "Battery Status : "
 				+ (helpers.getBatteryLevel() * 100)
 				+ "%"
-				+ "\nCeeq will send you regular location updates every 5 minutes.\n";
+				+ "\nCeeq will send you regular location updates every 10 minutes.\n";
 	}
 
 	/**

@@ -57,7 +57,6 @@
         android:resizeable="true"
         android:smallScreens="true"
         android:xlargeScreens="false" />
-
     <application
         android:allowBackup="true"
         android:allowClearUserData="false"
@@ -65,7 +64,7 @@
         android:label="@string/app_name" >
         <activity
             android:name="in.ceeq.Launcher"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"
             android:noHistory="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -88,9 +87,10 @@
         <activity
             android:name="in.ceeq.activities.Home"
             android:excludeFromRecents="true"
-            android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Actionbar" >
+            android:theme="@style/Theme.Actionbar"
+            android:logo="@drawable/ic_app_action_logo"
+			>
         </activity>
         <activity
             android:name="in.ceeq.activities.Help"

@@ -17,7 +17,7 @@
         android:textSize="12sp" />
 
     <EditText
-        android:id="@+id/newMessage"
+        android:id="@+id/feedbackMessage"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_margin="0dp"

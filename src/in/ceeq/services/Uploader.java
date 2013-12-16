@@ -41,7 +41,7 @@ public class Uploader extends IntentService {
 	private static final String IEMI_NUMBER = "ieminum";
 	private static final String GCM_ID = "gcmid";
 	private static final String DEVICE_ADMIN = "deviceadmin";
-	private static final String ACTION = "action";
+	public static final String ACTION = "action";
 	private static final String LATITUDE = "latitude";
 	private static final String LONGITUDE = "longitude";
 	private static final String MESSAGE = "message";

@@ -63,6 +63,8 @@
     <string name="dialog_title_blip">Enable Auto blip</string>
     <string name="dialog_title_feedback">Send feedback</string>
     <string name="dialog_title_protect">Enable Protect Me</string>
+    <string name="dialog_title_device_admin">Activate Device Administration</string>
+    <string name="dialog_title_wipe_device">Note</string>
 
     <!-- Button Strings -->
     <string name="quick_backup">One Click Backup</string>
