@@ -7,7 +7,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="17" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -165,10 +165,8 @@
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
-        <receiver android:name="in.ceeq.receivers.ScheduledBackups" >
-        </receiver>
-        <receiver android:name="in.ceeq.receivers.Locations" >
-        </receiver>
+        <receiver android:name="in.ceeq.receivers.ScheduledBackups" />
+        <receiver android:name="in.ceeq.receivers.Locations" />
         <receiver android:name="in.ceeq.receivers.PowerButton" >
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_OFF" />
@@ -178,32 +176,21 @@
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
             </intent-filter>
         </receiver>
-        <receiver android:name="in.ceeq.receivers.LowBattery" >
-        </receiver>
+        <receiver android:name="in.ceeq.receivers.LowBattery" />
         <receiver
             android:name="in.ceeq.receivers.SimState" >
             <intent-filter>
                 <action android:name="android.intent.action.SIM_STATE_CHANGED" />
             </intent-filter>
         </receiver>
-        <service android:name="in.ceeq.services.Commander" >
-        </service>
-        <service android:name="in.ceeq.services.Backups" >
-        </service>
-        <service android:name="in.ceeq.services.Ringer" >
-        </service>
-        <service android:name="in.ceeq.services.Locater" >
-        </service>
-        <service android:name="in.ceeq.services.Runner" >
-        </service>
-        <service android:name="in.ceeq.services.Uploader" >
-        </service>
-        <service android:name="in.ceeq.services.Startup" >
-        </service>
-        <service android:name="in.ceeq.services.Tracker" >
-        </service>
-        <service android:name="in.ceeq.services.Protector" >
-        </service>
+        <service android:name="in.ceeq.services.Commander" />
+        <service android:name="in.ceeq.services.Backups" />
+        <service android:name="in.ceeq.services.Ringer" />
+        <service android:name="in.ceeq.services.Locater" />
+        <service android:name="in.ceeq.services.Runner" />
+        <service android:name="in.ceeq.services.Uploader" />
+        <service android:name="in.ceeq.services.Tracker" />
+        <service android:name="in.ceeq.services.Protector" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCmPkcRCi-1hIcPG0KIvWrsZ7WTRlKedv4" />

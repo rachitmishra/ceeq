@@ -1,7 +1,6 @@
 package in.ceeq.actions;
 
 import in.ceeq.Launcher;
-import in.ceeq.helpers.NotificationsHelper;
 import in.ceeq.helpers.PreferencesHelper;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,14 +10,14 @@ import android.content.pm.PackageManager;
 public class Stealth {
 	private Context context;
 	private PreferencesHelper preferencesHelper;
-	private NotificationsHelper notificationsHelper;
+	private Notifications notifications;
 	private static final boolean ENABLE = true;
 	private static final boolean DISABLE = false;
 
 	public Stealth(Context context) {
 		this.context = context;
 		preferencesHelper = PreferencesHelper.getInstance(context);
-		notificationsHelper = NotificationsHelper.getInstance(context);
+		notifications = Notifications.getInstance(context);
 	}
 
 	public static Stealth getInstance(Context context) {
@@ -41,8 +40,7 @@ public class Stealth {
 				PackageManager.DONT_KILL_APP);
 		preferencesHelper.setBoolean(PreferencesHelper.NOTIFICATIONS_STATUS,
 				DISABLE);
-		notificationsHelper
-				.hideNotification(NotificationsHelper.DEFAULT_NOTIFICATION_ID);
+		notifications.remove();
 		try {
 			context.startActivity(new Intent(context, Launcher.class));
 		} catch (Exception e) {
@@ -59,6 +57,6 @@ public class Stealth {
 				DISABLE);
 		preferencesHelper.setBoolean(PreferencesHelper.NOTIFICATIONS_STATUS,
 				ENABLE);
-		notificationsHelper.showPersistentNotification();
+		notifications.show();
 	}
 }

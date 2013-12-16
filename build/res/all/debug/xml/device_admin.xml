@@ -1,8 +1,0 @@
-<device-admin>
-  <uses-policies>
-    <watch-login />
-    <force-lock />
-    <wipe-data />
-    <encrypted-storage />
-  </uses-policies>
-</device-admin><!-- From: file:/D:/git/ceeq/ceeq/res/xml/device_admin.xml -->

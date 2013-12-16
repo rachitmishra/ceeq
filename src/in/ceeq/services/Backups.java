@@ -7,6 +7,24 @@
 
 package in.ceeq.services;
 
+import hirondelle.date4j.DateTime;
+import in.ceeq.actions.Backup.State;
+import in.ceeq.actions.Notifications;
+import in.ceeq.activities.Home;
+import in.ceeq.activities.Home.ProgressBarState;
+import in.ceeq.helpers.FilesHelper;
+import in.ceeq.helpers.PreferencesHelper;
+import in.ceeq.helpers.XmlDataParseHelper;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.TimeZone;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import android.app.IntentService;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -27,23 +45,6 @@ import android.provider.UserDictionary;
 import android.util.Log;
 import android.util.Xml;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.TimeZone;
-
-import hirondelle.date4j.DateTime;
-import in.ceeq.activities.Home;
-import in.ceeq.activities.Home.ProgressBarState;
-import in.ceeq.helpers.FilesHelper;
-import in.ceeq.helpers.NotificationsHelper;
-import in.ceeq.helpers.PreferencesHelper;
-import in.ceeq.helpers.XmlDataParseHelper;
-
 public class Backups extends IntentService {
 
 	private Calls_ callsManager;
@@ -51,8 +52,7 @@ public class Backups extends IntentService {
 	private Messages_ messagesManager;
 	private Dictionary_ dictionaryManager;
 	private FilesHelper filesHelper;
-	private PreferencesHelper preferencesManager;
-	private NotificationsHelper notificationsHelper;
+	private PreferencesHelper preferencesHelper;
 
 	private static final String FILE_NAME_PREFIX_CONTACTS = "contact";
 	private static final String FILE_NAME_PREFIX_MESSAGES = "message";
@@ -111,28 +111,10 @@ public class Backups extends IntentService {
 		messagesManager = new Messages_();
 		dictionaryManager = new Dictionary_();
 		filesHelper = new FilesHelper(this);
-		preferencesManager = new PreferencesHelper(this);
-		notificationsHelper = new NotificationsHelper(this);
+		preferencesHelper = new PreferencesHelper(this);
 		resolver = getContentResolver();
 		serializer = Xml.newSerializer();
 		writer = new StringWriter();
-	}
-
-	public void sendMessage(ProgressBarState state) {
-		Message message = Message.obtain();
-		switch (state) {
-			case SHOW :
-				message.arg1 = Home.SHOW;
-				break;
-			case HIDE :
-				message.arg1 = Home.HIDE;
-				break;
-		}
-		try {
-			messageHandler.send(message);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
 	}
 
 	@Override
@@ -146,83 +128,113 @@ public class Backups extends IntentService {
 			sendMessage(ProgressBarState.SHOW);
 		}
 
-		notificationsHelper.startBackupNotification(action);
+		notify();
+
 		try {
 			switch (action) {
-				case BACKUP :
-					switch (actionType) {
-						case ACTION_TYPE_ALL :
-							backup();
-							break;
-						case ACTION_TYPE_CONTACTS :
-							backupContacts();
-							break;
-						case ACTION_TYPE_MESSAGES :
-							backupMessages();
-							break;
-						case ACTION_TYPE_CALLS :
-							backupCallLogs();
-							break;
-						case ACTION_TYPE_WORDS :
-							backupDictionary();
-							break;
-					}
+			case BACKUP:
+				switch (actionType) {
+				case ACTION_TYPE_ALL:
+					backup();
 					break;
-				case RESTORE :
-					switch (actionType) {
+				case ACTION_TYPE_CONTACTS:
+					backupContacts();
+					break;
+				case ACTION_TYPE_MESSAGES:
+					backupMessages();
+					break;
+				case ACTION_TYPE_CALLS:
+					backupCallLogs();
+					break;
+				case ACTION_TYPE_WORDS:
+					backupDictionary();
+					break;
+				}
+				break;
+			case RESTORE:
+				switch (actionType) {
 
-						case ACTION_TYPE_ALL :
-							restoreContacts(preferencesManager
-									.getString(PREFS_L_CONTACTS));
-							restoreMessages(preferencesManager
-									.getString(PREFS_L_MESSAGES));
-							restoreCallLogs(preferencesManager
-									.getString(PREFS_L_CALLS));
-							restoreDictionary(preferencesManager
-									.getString(PREFS_L_WORDS));
-							break;
-						case ACTION_TYPE_CONTACTS :
-							restoreContacts(preferencesManager
-									.getString(PREFS_L_CONTACTS));
-						case ACTION_TYPE_MESSAGES :
-							restoreMessages(preferencesManager
-									.getString(PREFS_L_MESSAGES));
+				case ACTION_TYPE_ALL:
+					restoreContacts(preferencesHelper
+							.getString(PREFS_L_CONTACTS));
+					restoreMessages(preferencesHelper
+							.getString(PREFS_L_MESSAGES));
+					restoreCallLogs(preferencesHelper.getString(PREFS_L_CALLS));
+					restoreDictionary(preferencesHelper
+							.getString(PREFS_L_WORDS));
+					break;
+				case ACTION_TYPE_CONTACTS:
+					restoreContacts(preferencesHelper
+							.getString(PREFS_L_CONTACTS));
+				case ACTION_TYPE_MESSAGES:
+					restoreMessages(preferencesHelper
+							.getString(PREFS_L_MESSAGES));
 
-						case ACTION_TYPE_CALLS :
-							restoreCallLogs(preferencesManager
-									.getString(PREFS_L_CALLS));
+				case ACTION_TYPE_CALLS:
+					restoreCallLogs(preferencesHelper.getString(PREFS_L_CALLS));
 
-						case ACTION_TYPE_WORDS :
-							restoreDictionary(preferencesManager
-									.getString(PREFS_L_WORDS));
-					}
+				case ACTION_TYPE_WORDS:
+					restoreDictionary(preferencesHelper
+							.getString(PREFS_L_WORDS));
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			notificationsHelper.stopBackupNotification(action);
+			notify();
 			if (actionParent == ActionParent.ACTIVITY) {
 				sendMessage(ProgressBarState.HIDE);
 			}
 		}
 	}
 
+	public void notify(State state) {
+		if (preferencesHelper
+				.getBoolean(PreferencesHelper.NOTIFICATIONS_STATUS)) {
+			switch (state) {
+			case OFF:
+				Notifications.getInstance(this).remove(action);
+				break;
+			case ON:
+				Notifications.getInstance(this).show(action);
+				break;
+			}
+		}
+	}
+
+	public void sendMessage(ProgressBarState state) {
+		Message message = Message.obtain();
+		switch (state) {
+		case SHOW:
+			message.arg1 = Home.SHOW;
+			break;
+		case HIDE:
+			message.arg1 = Home.HIDE;
+			break;
+		}
+		try {
+			messageHandler.send(message);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void backup() {
 		try {
-			preferencesManager.setString(PREFS_L_CONTACTS, filesHelper
+			preferencesHelper.setString(PREFS_L_CONTACTS, filesHelper
 					.writeFile(contactsManager.readContacts(),
 							FILE_NAME_PREFIX_CONTACTS));
-			preferencesManager.setString(PREFS_L_MESSAGES, filesHelper
+			preferencesHelper.setString(PREFS_L_MESSAGES, filesHelper
 					.writeFile(messagesManager.readMessages(),
 							FILE_NAME_PREFIX_MESSAGES));
-			preferencesManager.setString(PREFS_L_CALLS, filesHelper.writeFile(
+			preferencesHelper.setString(PREFS_L_CALLS, filesHelper.writeFile(
 					callsManager.readCalls(), FILE_NAME_PREFIX_CALLS));
 
-			preferencesManager
+			preferencesHelper
 					.setString(PREFS_L_WORDS, filesHelper.writeFile(
 							dictionaryManager.readDictionary(),
 							FILE_NAME_PREFIX_WORDS));
-			preferencesManager.setString(LAST_BACKUP_DATE,
+			preferencesHelper.setString(LAST_BACKUP_DATE,
 					DateTime.today(TimeZone.getDefault()).toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -231,10 +243,10 @@ public class Backups extends IntentService {
 
 	public void backupContacts() {
 		try {
-			preferencesManager.setString(PREFS_L_CONTACTS, filesHelper
+			preferencesHelper.setString(PREFS_L_CONTACTS, filesHelper
 					.writeFile(contactsManager.readContacts(),
 							FILE_NAME_PREFIX_CONTACTS));
-			preferencesManager.setString(LAST_BACKUP_DATE,
+			preferencesHelper.setString(LAST_BACKUP_DATE,
 					DateTime.today(TimeZone.getDefault()).toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -243,10 +255,10 @@ public class Backups extends IntentService {
 
 	public void backupMessages() {
 		try {
-			preferencesManager.setString(PREFS_L_MESSAGES, filesHelper
+			preferencesHelper.setString(PREFS_L_MESSAGES, filesHelper
 					.writeFile(messagesManager.readMessages(),
 							FILE_NAME_PREFIX_MESSAGES));
-			preferencesManager.setString(LAST_BACKUP_DATE,
+			preferencesHelper.setString(LAST_BACKUP_DATE,
 					DateTime.today(TimeZone.getDefault()).toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -255,9 +267,9 @@ public class Backups extends IntentService {
 
 	public void backupCallLogs() {
 		try {
-			preferencesManager.setString(PREFS_L_CALLS, filesHelper.writeFile(
+			preferencesHelper.setString(PREFS_L_CALLS, filesHelper.writeFile(
 					callsManager.readCalls(), FILE_NAME_PREFIX_CALLS));
-			preferencesManager.setString(LAST_BACKUP_DATE,
+			preferencesHelper.setString(LAST_BACKUP_DATE,
 					DateTime.today(TimeZone.getDefault()).toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -266,11 +278,11 @@ public class Backups extends IntentService {
 
 	public void backupDictionary() {
 		try {
-			preferencesManager
+			preferencesHelper
 					.setString(PREFS_L_WORDS, filesHelper.writeFile(
 							dictionaryManager.readDictionary(),
 							FILE_NAME_PREFIX_WORDS));
-			preferencesManager.setString(LAST_BACKUP_DATE,
+			preferencesHelper.setString(LAST_BACKUP_DATE,
 					DateTime.today(TimeZone.getDefault()).toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -278,10 +290,10 @@ public class Backups extends IntentService {
 	}
 
 	public void restore() {
-		restoreContacts(preferencesManager.getString(PREFS_L_CONTACTS));
-		restoreMessages(preferencesManager.getString(PREFS_L_MESSAGES));
-		restoreCallLogs(preferencesManager.getString(PREFS_L_CALLS));
-		restoreDictionary(preferencesManager.getString(PREFS_L_WORDS));
+		restoreContacts(preferencesHelper.getString(PREFS_L_CONTACTS));
+		restoreMessages(preferencesHelper.getString(PREFS_L_MESSAGES));
+		restoreCallLogs(preferencesHelper.getString(PREFS_L_CALLS));
+		restoreDictionary(preferencesHelper.getString(PREFS_L_WORDS));
 	}
 
 	public boolean restoreContacts(String fileName) {
@@ -414,40 +426,40 @@ public class Backups extends IntentService {
 			Log.w("Developer", "Restoring call logs ...");
 			while (eventType != XmlPullParser.END_DOCUMENT) {
 				switch (eventType) {
-					case XmlPullParser.START_DOCUMENT :
-						Log.w("Developer", "Reading backup file...");
-						break;
-					case XmlPullParser.START_TAG :
-						tagName = parser.getName();
-						if (tagName.equals(CALL_TAG)) {
-							call = new ContentValues();
-						} else if (tagName.equals(TOTAL_CALLS_TAG)) {
-							totalCalls = Integer.parseInt(XmlDataParseHelper
-									.readTag(parser, TOTAL_CALLS_TAG));
-						} else if (tagName.equals(NUMBER_TAG)) {
-							call.put(NUMBER, XmlDataParseHelper.readTag(parser,
-									NUMBER_TAG));
-						} else if (tagName.equals(TYPE_TAG)) {
-							call.put(TYPE, XmlDataParseHelper.readTag(parser,
-									TYPE_TAG));
-						} else if (tagName.equals(DATE_TAG)) {
-							call.put(DATE, XmlDataParseHelper.readTag(parser,
-									DATE_TAG));
-						} else if (tagName.equals(DURATION_TAG)) {
-							call.put(DURATION, XmlDataParseHelper.readTag(
-									parser, DURATION_TAG));
+				case XmlPullParser.START_DOCUMENT:
+					Log.w("Developer", "Reading backup file...");
+					break;
+				case XmlPullParser.START_TAG:
+					tagName = parser.getName();
+					if (tagName.equals(CALL_TAG)) {
+						call = new ContentValues();
+					} else if (tagName.equals(TOTAL_CALLS_TAG)) {
+						totalCalls = Integer.parseInt(XmlDataParseHelper
+								.readTag(parser, TOTAL_CALLS_TAG));
+					} else if (tagName.equals(NUMBER_TAG)) {
+						call.put(NUMBER,
+								XmlDataParseHelper.readTag(parser, NUMBER_TAG));
+					} else if (tagName.equals(TYPE_TAG)) {
+						call.put(TYPE,
+								XmlDataParseHelper.readTag(parser, TYPE_TAG));
+					} else if (tagName.equals(DATE_TAG)) {
+						call.put(DATE,
+								XmlDataParseHelper.readTag(parser, DATE_TAG));
+					} else if (tagName.equals(DURATION_TAG)) {
+						call.put(DURATION, XmlDataParseHelper.readTag(parser,
+								DURATION_TAG));
+					}
+					break;
+				case XmlPullParser.END_TAG:
+					tagName = parser.getName();
+					if (tagName.equals(CALL_TAG)) {
+						try {
+							resolver.insert(URI, call);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						break;
-					case XmlPullParser.END_TAG :
-						tagName = parser.getName();
-						if (tagName.equals(CALL_TAG)) {
-							try {
-								resolver.insert(URI, call);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						break;
+					}
+					break;
 				}
 				eventType = parser.next();
 			}
@@ -524,7 +536,7 @@ public class Backups extends IntentService {
 								.getColumnIndex(HPN))) > 0) {
 							try {
 								pcs = resolver.query(PURI, null, CID + " = ?",
-										new String[]{id}, null);
+										new String[] { id }, null);
 								serializer.startTag("", NUMBERS_TAG);
 								while (pcs.moveToNext()) {
 									serializer.startTag("", NUMBER_TAG);
@@ -543,7 +555,7 @@ public class Backups extends IntentService {
 
 						try {
 							ecs = resolver.query(EURI, null, EID + " = ?",
-									new String[]{id}, null);
+									new String[] { id }, null);
 							if (ecs.moveToFirst()) {
 								serializer.startTag("", EMAILS_TAG);
 								do {
@@ -563,7 +575,7 @@ public class Backups extends IntentService {
 
 						try {
 							acs = resolver.query(AURI, null, AID + " = ?",
-									new String[]{id}, null);
+									new String[] { id }, null);
 							if (acs.moveToFirst()) {
 								serializer.startTag("", ADDRESS_TAG);
 								do {
@@ -614,79 +626,71 @@ public class Backups extends IntentService {
 			Log.w("Developer", "Restoring contacts...");
 			while (eventType != XmlPullParser.END_DOCUMENT) {
 				switch (eventType) {
-					case XmlPullParser.START_DOCUMENT :
-						Log.w("Developer", "Reading backup file...");
-						break;
-					case XmlPullParser.START_TAG :
-						tagName = parser.getName();
-						if (tagName.equals(TOTAL_CONTACTS_TAG)) {
-							totalContacts = Integer.parseInt(XmlDataParseHelper
-									.readTag(parser, TOTAL_CONTACTS_TAG));
-							Log.w("Developer", "File contains " + totalContacts
-									+ " contacts...");
-						}
-						if (tagName.equals(CONTACT_TAG)) {
-							contact = new ArrayList<ContentProviderOperation>();
-							contact.add(ContentProviderOperation
-									.newInsert(RawContacts.CONTENT_URI)
-									.withValue(RawContacts.ACCOUNT_TYPE, NULL)
-									.withValue(RawContacts.ACCOUNT_NAME, NULL)
-									.build());
-						} else if (tagName.equals(NAME_TAG)) {
-							String name = XmlDataParseHelper.readTag(parser,
-									NAME_TAG);
-							contact.add(ContentProviderOperation
-									.newInsert(
-											ContactsContract.Data.CONTENT_URI)
-									.withValueBackReference(
-											Data.RAW_CONTACT_ID, 0)
-									.withValue(Data.MIMETYPE, NCT)
-									.withValue(DNM, name).build());
-						} else if (tagName.equals(NUMBER_TAG)) {
-							String type = parser.getAttributeValue(NULL,
-									TYPE_TAG);
-							String number = XmlDataParseHelper.readTag(parser,
-									NUMBER_TAG);
-							contact.add(ContentProviderOperation
-									.newInsert(
-											ContactsContract.Data.CONTENT_URI)
-									.withValueBackReference(
-											ContactsContract.Data.RAW_CONTACT_ID,
-											0)
-									.withValue(ContactsContract.Data.MIMETYPE,
-											PCT).withValue(PNUM, number)
-									.withValue(PTYPE, type).build());
-						} else if (tagName.equals(EMAIL_TAG)) {
-							String type = parser.getAttributeValue(NULL,
-									TYPE_TAG);
-							String email = XmlDataParseHelper.readTag(parser,
-									EMAIL_TAG);
-							contact.add(ContentProviderOperation
-									.newInsert(
-											ContactsContract.Data.CONTENT_URI)
-									.withValueBackReference(
-											ContactsContract.Data.RAW_CONTACT_ID,
-											0)
-									.withValue(ContactsContract.Data.MIMETYPE,
-											ECT).withValue(EMAIL, email)
-									.withValue(ETYPE, type).build());
-						} else if (tagName.equals(ADDRESS_TAG)) {
+				case XmlPullParser.START_DOCUMENT:
+					Log.w("Developer", "Reading backup file...");
+					break;
+				case XmlPullParser.START_TAG:
+					tagName = parser.getName();
+					if (tagName.equals(TOTAL_CONTACTS_TAG)) {
+						totalContacts = Integer.parseInt(XmlDataParseHelper
+								.readTag(parser, TOTAL_CONTACTS_TAG));
+						Log.w("Developer", "File contains " + totalContacts
+								+ " contacts...");
+					}
+					if (tagName.equals(CONTACT_TAG)) {
+						contact = new ArrayList<ContentProviderOperation>();
+						contact.add(ContentProviderOperation
+								.newInsert(RawContacts.CONTENT_URI)
+								.withValue(RawContacts.ACCOUNT_TYPE, NULL)
+								.withValue(RawContacts.ACCOUNT_NAME, NULL)
+								.build());
+					} else if (tagName.equals(NAME_TAG)) {
+						String name = XmlDataParseHelper.readTag(parser,
+								NAME_TAG);
+						contact.add(ContentProviderOperation
+								.newInsert(ContactsContract.Data.CONTENT_URI)
+								.withValueBackReference(Data.RAW_CONTACT_ID, 0)
+								.withValue(Data.MIMETYPE, NCT)
+								.withValue(DNM, name).build());
+					} else if (tagName.equals(NUMBER_TAG)) {
+						String type = parser.getAttributeValue(NULL, TYPE_TAG);
+						String number = XmlDataParseHelper.readTag(parser,
+								NUMBER_TAG);
+						contact.add(ContentProviderOperation
+								.newInsert(ContactsContract.Data.CONTENT_URI)
+								.withValueBackReference(
+										ContactsContract.Data.RAW_CONTACT_ID, 0)
+								.withValue(ContactsContract.Data.MIMETYPE, PCT)
+								.withValue(PNUM, number).withValue(PTYPE, type)
+								.build());
+					} else if (tagName.equals(EMAIL_TAG)) {
+						String type = parser.getAttributeValue(NULL, TYPE_TAG);
+						String email = XmlDataParseHelper.readTag(parser,
+								EMAIL_TAG);
+						contact.add(ContentProviderOperation
+								.newInsert(ContactsContract.Data.CONTENT_URI)
+								.withValueBackReference(
+										ContactsContract.Data.RAW_CONTACT_ID, 0)
+								.withValue(ContactsContract.Data.MIMETYPE, ECT)
+								.withValue(EMAIL, email).withValue(ETYPE, type)
+								.build());
+					} else if (tagName.equals(ADDRESS_TAG)) {
 
+					}
+					break;
+				case XmlPullParser.END_TAG:
+					tagName = parser.getName();
+					if (tagName.equals(CONTACT_TAG)) {
+						try {
+							getContentResolver().applyBatch(
+									ContactsContract.AUTHORITY, contact);
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						} catch (OperationApplicationException e) {
+							e.printStackTrace();
 						}
-						break;
-					case XmlPullParser.END_TAG :
-						tagName = parser.getName();
-						if (tagName.equals(CONTACT_TAG)) {
-							try {
-								getContentResolver().applyBatch(
-										ContactsContract.AUTHORITY, contact);
-							} catch (RemoteException e) {
-								e.printStackTrace();
-							} catch (OperationApplicationException e) {
-								e.printStackTrace();
-							}
-						}
-						break;
+					}
+					break;
 				}
 				eventType = parser.next();
 			}
@@ -709,7 +713,7 @@ public class Backups extends IntentService {
 				MURI = Uri.parse("content://sms");
 
 		public String readMessages() {
-			Cursor cs = resolver.query(MURI, new String[]{"*"}, null, null,
+			Cursor cs = resolver.query(MURI, new String[] { "*" }, null, null,
 					null);
 			try {
 				if (cs.moveToFirst()) {
@@ -762,43 +766,43 @@ public class Backups extends IntentService {
 			Log.w("Developer", "Restoring message ...");
 			while (eventType != XmlPullParser.END_DOCUMENT) {
 				switch (eventType) {
-					case XmlPullParser.START_DOCUMENT :
-						Log.w("Developer", "Reading backup file...");
-						break;
-					case XmlPullParser.START_TAG :
-						tagName = parser.getName();
-						if (tagName.equals(MESSAGE_TAG)) {
-							message = new ContentValues();
-						} else if (tagName.equals(TOTAL_MESSAGES_TAG)) {
-							totalMessages = Integer.parseInt(XmlDataParseHelper
-									.readTag(parser, TOTAL_MESSAGES_TAG));
-						} else if (tagName.equals(NUMBER_TAG)) {
-							message.put(NUMBER_TAG, XmlDataParseHelper.readTag(
-									parser, NUMBER_TAG));
-						} else if (tagName.equals(BODY_TAG)) {
-							message.put(BODY_TAG, XmlDataParseHelper.readTag(
-									parser, BODY_TAG));
-						} else if (tagName.equals(DATE_TAG)) {
-							message.put(DATE_TAG, XmlDataParseHelper.readTag(
-									parser, DATE_TAG));
-						} else if (tagName.equals(TYPE_TAG)) {
-							message.put(TYPE_TAG, XmlDataParseHelper.readTag(
-									parser, TYPE_TAG));
-						} else if (tagName.equals(READ_TAG)) {
-							message.put(READ_TAG, XmlDataParseHelper.readTag(
-									parser, READ_TAG));
+				case XmlPullParser.START_DOCUMENT:
+					Log.w("Developer", "Reading backup file...");
+					break;
+				case XmlPullParser.START_TAG:
+					tagName = parser.getName();
+					if (tagName.equals(MESSAGE_TAG)) {
+						message = new ContentValues();
+					} else if (tagName.equals(TOTAL_MESSAGES_TAG)) {
+						totalMessages = Integer.parseInt(XmlDataParseHelper
+								.readTag(parser, TOTAL_MESSAGES_TAG));
+					} else if (tagName.equals(NUMBER_TAG)) {
+						message.put(NUMBER_TAG,
+								XmlDataParseHelper.readTag(parser, NUMBER_TAG));
+					} else if (tagName.equals(BODY_TAG)) {
+						message.put(BODY_TAG,
+								XmlDataParseHelper.readTag(parser, BODY_TAG));
+					} else if (tagName.equals(DATE_TAG)) {
+						message.put(DATE_TAG,
+								XmlDataParseHelper.readTag(parser, DATE_TAG));
+					} else if (tagName.equals(TYPE_TAG)) {
+						message.put(TYPE_TAG,
+								XmlDataParseHelper.readTag(parser, TYPE_TAG));
+					} else if (tagName.equals(READ_TAG)) {
+						message.put(READ_TAG,
+								XmlDataParseHelper.readTag(parser, READ_TAG));
+					}
+					break;
+				case XmlPullParser.END_TAG:
+					tagName = parser.getName();
+					if (tagName.equals(MESSAGE_TAG)) {
+						try {
+							resolver.insert(URI, message);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						break;
-					case XmlPullParser.END_TAG :
-						tagName = parser.getName();
-						if (tagName.equals(MESSAGE_TAG)) {
-							try {
-								resolver.insert(URI, message);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						break;
+					}
+					break;
 				}
 				eventType = parser.next();
 			}
@@ -819,9 +823,9 @@ public class Backups extends IntentService {
 				DICTIONARY_TAG = "dictionary", TOTAL_WORDS_TAG = "total";
 		private final Uri URI = UserDictionary.Words.CONTENT_URI;
 
-		private String[] mProjection = {UserDictionary.Words.WORD,
+		private String[] mProjection = { UserDictionary.Words.WORD,
 				UserDictionary.Words.LOCALE, UserDictionary.Words.FREQUENCY,
-				UserDictionary.Words.APP_ID};
+				UserDictionary.Words.APP_ID };
 
 		public String readDictionary() {
 			Cursor cs = resolver.query(URI, mProjection, null, null, null);
@@ -876,40 +880,40 @@ public class Backups extends IntentService {
 			Log.w("Developer", "Restoring dictionary ...");
 			while (eventType != XmlPullParser.END_DOCUMENT) {
 				switch (eventType) {
-					case XmlPullParser.START_DOCUMENT :
-						Log.w("Developer", "Reading backup file...");
-						break;
-					case XmlPullParser.START_TAG :
-						tagName = parser.getName();
-						if (tagName.equals(WORD_TAG)) {
-							word = new ContentValues();
-						} else if (tagName.equals(TOTAL_WORDS_TAG)) {
-							totalWords = Integer.parseInt(XmlDataParseHelper
-									.readTag(parser, TOTAL_WORDS_TAG));
-						} else if (tagName.equals(APPID_TAG)) {
-							word.put(APP_ID, XmlDataParseHelper.readTag(parser,
-									APPID_TAG));
-						} else if (tagName.equals(WORD_TEXT_TAG)) {
-							word.put(WORD, XmlDataParseHelper.readTag(parser,
-									WORD_TEXT_TAG));
-						} else if (tagName.equals(FREQUENCY_TAG)) {
-							word.put(FREQUENCY, XmlDataParseHelper.readTag(
-									parser, FREQUENCY_TAG));
-						} else if (tagName.equals(LOCALE_TAG)) {
-							word.put(LOCALE, XmlDataParseHelper.readTag(parser,
-									LOCALE_TAG));
+				case XmlPullParser.START_DOCUMENT:
+					Log.w("Developer", "Reading backup file...");
+					break;
+				case XmlPullParser.START_TAG:
+					tagName = parser.getName();
+					if (tagName.equals(WORD_TAG)) {
+						word = new ContentValues();
+					} else if (tagName.equals(TOTAL_WORDS_TAG)) {
+						totalWords = Integer.parseInt(XmlDataParseHelper
+								.readTag(parser, TOTAL_WORDS_TAG));
+					} else if (tagName.equals(APPID_TAG)) {
+						word.put(APP_ID,
+								XmlDataParseHelper.readTag(parser, APPID_TAG));
+					} else if (tagName.equals(WORD_TEXT_TAG)) {
+						word.put(WORD, XmlDataParseHelper.readTag(parser,
+								WORD_TEXT_TAG));
+					} else if (tagName.equals(FREQUENCY_TAG)) {
+						word.put(FREQUENCY, XmlDataParseHelper.readTag(parser,
+								FREQUENCY_TAG));
+					} else if (tagName.equals(LOCALE_TAG)) {
+						word.put(LOCALE,
+								XmlDataParseHelper.readTag(parser, LOCALE_TAG));
+					}
+					break;
+				case XmlPullParser.END_TAG:
+					tagName = parser.getName();
+					if (tagName.equals(WORD_TAG)) {
+						try {
+							resolver.insert(URI, word);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						break;
-					case XmlPullParser.END_TAG :
-						tagName = parser.getName();
-						if (tagName.equals(WORD_TAG)) {
-							try {
-								resolver.insert(URI, word);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						break;
+					}
+					break;
 				}
 				eventType = parser.next();
 			}

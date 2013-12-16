@@ -2,7 +2,6 @@ package in.ceeq.actions;
 
 import in.ceeq.R;
 import in.ceeq.activities.Splash;
-import in.ceeq.helpers.NotificationsHelper;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Uploader;
 import android.app.Activity;
@@ -110,8 +109,7 @@ public class Reset {
 			@Override
 			protected void onPostExecute(Void arg0) {
 				progressDialog.dismiss();
-				NotificationsHelper.getInstance(context)
-						.removeAllNotifications();
+				Notifications.getInstance(context).remove();
 				Intent launchSplash = new Intent(context, Splash.class);
 				launchSplash.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				launchSplash.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

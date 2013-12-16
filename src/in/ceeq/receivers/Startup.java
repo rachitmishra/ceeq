@@ -8,7 +8,7 @@
 package in.ceeq.receivers;
 
 import hirondelle.date4j.DateTime;
-import in.ceeq.helpers.NotificationsHelper;
+import in.ceeq.actions.Notifications;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Commander;
 import in.ceeq.services.Commander.Command;
@@ -25,7 +25,6 @@ import android.telephony.TelephonyManager;
 public class Startup extends BroadcastReceiver {
 
 	private PreferencesHelper preferencesHelper;
-	private NotificationsHelper notificationsHelper;
 
 	public static final int ALARM_ACTIVATION_REQUEST = 9012;
 
@@ -35,17 +34,16 @@ public class Startup extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		preferencesHelper = new PreferencesHelper(context);
-		notificationsHelper = new NotificationsHelper(context);
-		showNotification();
+		showNotification(context);
 		checkSimChange(context);
 		if (preferencesHelper.getBoolean(PreferencesHelper.AUTO_BACKUP_STATUS))
 			setupAlarms(context);
 	}
 
-	public void showNotification() {
+	public void showNotification(Context context) {
 		if (preferencesHelper
 				.getBoolean(PreferencesHelper.NOTIFICATIONS_STATUS))
-			notificationsHelper.showPersistentNotification();
+			Notifications.getInstance(context).show();
 	}
 
 	public void checkSimChange(Context context) {

@@ -3,14 +3,17 @@ package in.ceeq.activities;
 import hirondelle.date4j.DateTime;
 import in.ceeq.Launcher;
 import in.ceeq.R;
+import in.ceeq.actions.Admin;
 import in.ceeq.actions.Backup;
+import in.ceeq.actions.Backup.State;
+import in.ceeq.actions.Notifications;
 import in.ceeq.actions.Protect;
 import in.ceeq.actions.Receiver;
 import in.ceeq.actions.Receiver.ReceiverType;
-import in.ceeq.actions.Restore;
 import in.ceeq.actions.Wipe;
+import in.ceeq.helpers.DialogsHelper;
+import in.ceeq.helpers.DialogsHelper.DialogType;
 import in.ceeq.helpers.Helpers;
-import in.ceeq.helpers.NotificationsHelper;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.receivers.DeviceAdmin;
 import in.ceeq.services.Backups;
@@ -32,7 +35,6 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnKeyListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -54,7 +56,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.InflateException;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -115,10 +116,6 @@ public class Home extends FragmentActivity {
 		DISABLE, ENABLE
 	}
 
-	public enum Dialog {
-		PROTECT, STEALTH, FEEDBACK, BACKUP, RESTORE, BLIP, WIPE, WIPE_EXTERNAL_STORAGE, WIPE_DEVICE, WIPE_EXTERNAL_STORAGE_AND_DEVICE, DEVICE_ADMIN
-	}
-
 	public enum ToggleState {
 		OFF, ON
 	}
@@ -131,6 +128,7 @@ public class Home extends FragmentActivity {
 	private static ProgressBar progressBar;
 	private PreferencesHelper preferencesHelper;
 	private Helpers helpers;
+	private DialogsHelper dialogsHelper;
 	private boolean exit = false;
 	private static final String SENDER_ID = "909602096750";
 	private static final int PLUS_ONE_REQUEST_CODE = 9025;
@@ -544,23 +542,26 @@ public class Home extends FragmentActivity {
 	}
 
 	public void onButtonPressed(View v) {
-		ToggleButton toggle;
+		ToggleButton toggleButton;
+
 		builder = new AlertDialog.Builder(this);
+		dialogsHelper = DialogsHelper.getInstance(this);
+
 		switch (v.getId()) {
 
 		case R.id.toggle_protect:
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_protect);
-			setupProtectMe(toggle);
+			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_protect);
+			setupProtectMe(toggleButton);
 			break;
 
 		case R.id.toggle_stealth:
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_stealth);
-			setupStealthMode(toggle);
+			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_stealth);
+			setupStealthMode(toggleButton);
 			break;
 
 		case R.id.toggle_backup:
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_backup);
-			setupScheduledBackup(toggle);
+			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_backup);
+			setupScheduledBackup(toggleButton);
 			break;
 
 		case R.id.b_backup:
@@ -568,11 +569,11 @@ public class Home extends FragmentActivity {
 			break;
 
 		case R.id.backup:
-			new DialogHelper().showDialog(Dialog.BACKUP);
+			dialogsHelper.showDialog(DialogType.BACKUP);
 			break;
 
 		case R.id.restore:
-			new DialogHelper().showDialog(Dialog.RESTORE);
+			dialogsHelper.showDialog(DialogType.RESTORE);
 			break;
 
 		case R.id.b_view:
@@ -580,17 +581,17 @@ public class Home extends FragmentActivity {
 			break;
 
 		case R.id.toggle_track:
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_track);
-			setupLocationTracker(toggle);
+			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_track);
+			setupLocationTracker(toggleButton);
 			break;
 
 		case R.id.toggle_blip:
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_blip);
-			setupAutoBlips(toggle);
+			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_blip);
+			setupAutoBlips(toggleButton);
 			break;
 
 		case R.id.wipe:
-			new DialogHelper().showDialog(Dialog.WIPE);
+			dialogsHelper.showDialog(DialogType.WIPE);
 			break;
 
 		case R.id.wipe_cache:
@@ -598,37 +599,25 @@ public class Home extends FragmentActivity {
 			break;
 
 		case R.id.b_feedback:
-			new DialogHelper().showDialog(Dialog.FEEDBACK);
+			dialogsHelper.showDialog(DialogType.FEEDBACK);
 			break;
 		}
 
 	}
 
-	private DialogHelper dialogHelper;
-
 	private PackageManager packageManager;
 
-	/**
-	 * set up stealth mode
-	 * 
-	 * @param toggle
-	 */
-
-	private void setupStealthMode(ToggleButton toggle) {
+	private void setupStealthMode(ToggleButton toggleButton) {
 		packageManager = this.getPackageManager();
-		if (toggle.isChecked()) {
-			dialogHelper = new DialogHelper(toggle);
-			builder.setView(dialogHelper.getView(Dialog.STEALTH))
+		if (toggleButton.isChecked()) {
+			builder.setView(dialogsHelper.getView(DialogType.STEALTH))
 					.setPositiveButton(R.string.enable,
 							new DialogInterface.OnClickListener() {
-
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									NotificationsHelper
-											.getInstance(Home.this)
-											.hideNotification(
-													NotificationsHelper.DEFAULT_NOTIFICATION_ID);
+									Notifications.getInstance(Home.this)
+											.remove();
 									preferencesHelper
 											.setBoolean(
 													PreferencesHelper.NOTIFICATIONS_STATUS,
@@ -663,18 +652,14 @@ public class Home extends FragmentActivity {
 
 								}
 							})
-					.setNegativeButton(R.string.cancel,
-							dialogHelper.new DialogNegativeButtonPressed())
-					.setOnKeyListener(
-							dialogHelper.new DialogBackButtonPressed())
-					.create().show();
+					.setNegativeButton(R.string.cancel, dialogsHelper)
+					.setOnKeyListener(dialogsHelper).create().show();
 		} else {
 			getPackageManager().setComponentEnabledSetting(
 					new ComponentName(Home.this, Launcher.class),
 					PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
 					PackageManager.DONT_KILL_APP);
-			NotificationsHelper.getInstance(Home.this)
-					.showPersistentNotification();
+			Notifications.getInstance(Home.this).show();
 			Receiver.getInstance(this).unregister(ReceiverType.OUTGOING_CALLS);
 			preferencesHelper.setBoolean(PreferencesHelper.STEALTH_MODE_STATUS,
 					false);
@@ -685,15 +670,10 @@ public class Home extends FragmentActivity {
 
 	private void setupProtectMe(ToggleButton toggle) {
 		if (toggle.isChecked()) {
-			dialogHelper = new DialogHelper(toggle);
-			builder.setView(dialogHelper.getView(Dialog.PROTECT))
-					.setPositiveButton(R.string.enable,
-							dialogHelper.new DialogPositiveButtonPressed())
-					.setNegativeButton(R.string.cancel,
-							dialogHelper.new DialogNegativeButtonPressed())
-					.setOnKeyListener(
-							dialogHelper.new DialogBackButtonPressed())
-					.create().show();
+			builder.setView(dialogsHelper.getView(DialogType.PROTECT))
+					.setPositiveButton(R.string.enable, dialogsHelper)
+					.setNegativeButton(R.string.cancel, dialogsHelper)
+					.setOnKeyListener(dialogsHelper).create().show();
 		} else {
 			Protect.getInstance(this).disable();
 			preferencesHelper.setBoolean(PreferencesHelper.PROTECT_ME_STATUS,
@@ -711,18 +691,18 @@ public class Home extends FragmentActivity {
 			Toast.makeText(this,
 					"Automatic backups started, everyday at 2:00 AM",
 					Toast.LENGTH_SHORT).show();
-			helpers.setupAlarms(SwitchState.ON);
+			Backup.getInstance(this).autoBackups(State.ON);
 		} else {
 			timer.setVisibility(View.GONE);
 			Toast.makeText(this, "Automatic backups cancelled.",
 					Toast.LENGTH_SHORT).show();
-			helpers.setupAlarms(SwitchState.OFF);
+			Backup.getInstance(this).autoBackups(State.OFF);
 		}
 	}
 
 	private void setupAutoBlips(ToggleButton toggle) {
 		if (toggle.isChecked()) {
-			new DialogHelper().showDialog(Dialog.BLIP);
+			dialogsHelper.showDialog(DialogType.BLIP);
 		} else {
 			Receiver.getInstance(this).unregister(ReceiverType.LOW_BATTERY);
 			preferencesHelper.setBoolean(PreferencesHelper.AUTO_BLIP_STATUS,
@@ -839,237 +819,8 @@ public class Home extends FragmentActivity {
 		return false;
 	}
 
-	public class DialogHelper {
-		private ToggleButton toggle;
-		private LayoutInflater inflater;
-		private static final int NONE = -1;
-		private Dialog dialogType;
-
-		public DialogHelper() {
-		}
-
-		public DialogHelper(ToggleButton toggle) {
-			this.toggle = toggle;
-		}
-
-		public void showDialog(Dialog dialogType) {
-			this.dialogType = dialogType;
-			builder = new AlertDialog.Builder(Home.this).setTitle(getTitle());
-
-			switch (dialogType) {
-			case BACKUP:
-			case RESTORE:
-			case WIPE:
-				builder.setSingleChoiceItems(getChoices(), NONE,
-						new DialogOptionSelect());
-				break;
-
-			case FEEDBACK:
-				builder.setView(getView(Dialog.FEEDBACK));
-				builder.setPositiveButton(getPositiveButtonString(),
-						new DialogPositiveButtonPressed());
-			default:
-				break;
-			}
-
-			builder.setNegativeButton(getNegativeButtonString(),
-					new DialogNegativeButtonPressed()).setOnKeyListener(
-					new DialogBackButtonPressed());
-			builder.create().show();
-		}
-
-		public int getTitle() {
-			switch (dialogType) {
-			case BACKUP:
-				return R.string.dialog_title_backup;
-			case RESTORE:
-				return R.string.dialog_title_restore;
-			case WIPE:
-				return R.string.dialog_title_wipe;
-			case BLIP:
-				return R.string.dialog_title_blip;
-			case FEEDBACK:
-				return R.string.dialog_title_feedback;
-			case PROTECT:
-			case STEALTH:
-				return R.string.dialog_title_stealth;
-			default:
-				return 0;
-			}
-		}
-
-		public int getChoices() {
-			switch (dialogType) {
-			case BACKUP:
-			case RESTORE:
-				return R.array.backup_options;
-			case WIPE:
-				return R.array.wipe_options;
-			default:
-				return 0;
-			}
-		}
-
-		public View getView(Dialog dialogType) {
-			this.dialogType = dialogType;
-			inflater = Home.this.getLayoutInflater();
-			switch (dialogType) {
-			case BLIP:
-				return inflater.inflate(R.layout.dialog_blips_info, null);
-			case FEEDBACK:
-				return inflater.inflate(R.layout.dialog_feedback, null);
-			case STEALTH:
-				return inflater.inflate(R.layout.dialog_stealth_mode, null);
-			case PROTECT:
-				View view = inflater.inflate(R.layout.dialog_protect_me, null);
-				Button facebookConnect = (Button) view
-						.findViewById(R.id.facebook_login);
-				LinearLayout socialBox = (LinearLayout) view
-						.findViewById(R.id.social_box);
-				if (preferencesHelper
-						.getBoolean(PreferencesHelper.FACEBOOK_CONNECT_STATUS)) {
-					socialBox.setVisibility(View.GONE);
-				} else {
-					socialBox.setVisibility(View.VISIBLE);
-				}
-				facebookConnect.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						Home.this.connectFacebook();
-
-					}
-				});
-				return view;
-			default:
-				break;
-			}
-			return null;
-		}
-
-		public int getPositiveButtonString() {
-			switch (dialogType) {
-			case PROTECT:
-				return R.string.save;
-			case STEALTH:
-				return R.string.enable;
-			case BLIP:
-				return R.string.okay;
-			case FEEDBACK:
-				return R.string.send;
-			default:
-				return 0;
-			}
-		}
-
-		public int getNegativeButtonString() {
-			switch (dialogType) {
-			case BACKUP:
-			case RESTORE:
-			case STEALTH:
-			case BLIP:
-			case FEEDBACK:
-			case WIPE:
-				return R.string.cancel;
-			default:
-				return 0;
-			}
-		}
-
-		class DialogOptionSelect implements DialogInterface.OnClickListener {
-			public void onClick(DialogInterface dialog, int action) {
-				onOptionSelect(action);
-				dialog.dismiss();
-			}
-
-			public void onOptionSelect(int data) {
-				switch (dialogType) {
-				case BACKUP:
-					Backup.getInstance(Home.this).backup(data);
-					break;
-				case RESTORE:
-					Restore.getInstance(Home.this).restore(data);
-					break;
-				case WIPE:
-					Wipe.getInstance(Home.this);
-					break;
-				default:
-					break;
-
-				}
-			}
-		}
-
-		public class DialogPositiveButtonPressed implements
-				DialogInterface.OnClickListener {
-			public void onClick(DialogInterface dialog, int id) {
-				onPositiveButtonPressed();
-				dialog.dismiss();
-			}
-
-			public void onPositiveButtonPressed() {
-				switch (dialogType) {
-				case BLIP:
-					break;
-				case DEVICE_ADMIN:
-					break;
-				case FEEDBACK:
-
-					break;
-				case PROTECT:
-					Protect.getInstance(Home.this).enable();
-					preferencesHelper.setBoolean(
-							PreferencesHelper.PROTECT_ME_STATUS, true);
-					showToast("Protect me enabled. Just press power button 10 times for help.");
-					break;
-				case STEALTH:
-
-					break;
-				case WIPE:
-					break;
-				case WIPE_DEVICE:
-					break;
-				case WIPE_EXTERNAL_STORAGE:
-					break;
-				case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
-					break;
-				default:
-					break;
-
-				}
-			}
-		}
-
-		public void showToast(String message) {
-			Toast.makeText(Home.this, message, Toast.LENGTH_SHORT).show();
-		}
-
-		public class DialogNegativeButtonPressed implements
-				DialogInterface.OnClickListener {
-			public void onClick(DialogInterface dialog, int id) {
-				if (toggle != null)
-					toggle.setChecked(false);
-				dialog.dismiss();
-			}
-		}
-
-		public class DialogBackButtonPressed implements OnKeyListener {
-
-			@Override
-			public boolean onKey(DialogInterface dialog, int keyCode,
-					KeyEvent event) {
-				if (keyCode == KeyEvent.KEYCODE_BACK
-						&& event.getAction() == KeyEvent.ACTION_UP) {
-					if (toggle != null)
-						toggle.setChecked(false);
-					dialog.dismiss();
-				}
-				return false;
-			}
-		}
-
-	}
-
 	public static class HomeFragment extends Fragment {
+
 		public enum Status {
 			ALL, AUTO_BACKUP, AUTO_TRACK, GPS, DEVICE_ADMIN, BACKUP, SYNC
 		}
@@ -1084,7 +835,6 @@ public class Home extends FragmentActivity {
 		private LinearLayout statusBox;
 		private ArrayList<Status> notification_list;
 		private ToggleButton toggle;
-		private NotificationsHelper notificationsHelper;
 
 		public HomeFragment() {
 		}
@@ -1095,7 +845,6 @@ public class Home extends FragmentActivity {
 			view = inflater.inflate(R.layout.fragment_main, container, false);
 			preferencesHelper = new PreferencesHelper(this.getActivity());
 			helpers = Helpers.getInstance(getActivity());
-			notificationsHelper = new NotificationsHelper(this.getActivity());
 			notificationList = (ExpandableListView) view
 					.findViewById(R.id.notifications);
 			notification_list = new ArrayList<Status>();
@@ -1122,7 +871,7 @@ public class Home extends FragmentActivity {
 		public void showNotification() {
 			if (preferencesHelper
 					.getBoolean(PreferencesHelper.NOTIFICATIONS_STATUS))
-				notificationsHelper.showPersistentNotification();
+				Notifications.getInstance(getActivity()).show();
 		}
 
 		public void restoreToggleStates(View v) {
@@ -1188,21 +937,19 @@ public class Home extends FragmentActivity {
 		}
 
 		public boolean setSecurityStatus() {
-
-			if (helpers.hasGpsEnabled() & helpers.hasDeviceAdminEnabled()) {
+			boolean deviceAdminActive = Admin.getInstance(getActivity())
+					.isRegistered();
+			if (helpers.hasGpsEnabled() & deviceAdminActive) {
 				return true;
-			} else if (helpers.hasGpsEnabled()
-					& !helpers.hasDeviceAdminEnabled()) {
+			} else if (helpers.hasGpsEnabled() & !deviceAdminActive) {
 				notification_list.add(Status.DEVICE_ADMIN);
 				counter++;
 				return false;
-			} else if (!helpers.hasGpsEnabled()
-					& helpers.hasDeviceAdminEnabled()) {
+			} else if (!helpers.hasGpsEnabled() & deviceAdminActive) {
 				notification_list.add(Status.GPS);
 				counter++;
 				return false;
-			} else if (!helpers.hasGpsEnabled()
-					& !helpers.hasDeviceAdminEnabled()) {
+			} else if (!helpers.hasGpsEnabled() & !deviceAdminActive) {
 				notification_list.add(Status.GPS);
 				notification_list.add(Status.DEVICE_ADMIN);
 				counter += 2;

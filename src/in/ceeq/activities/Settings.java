@@ -9,8 +9,8 @@ package in.ceeq.activities;
 
 import in.ceeq.R;
 import in.ceeq.actions.Choose;
+import in.ceeq.actions.Notifications;
 import in.ceeq.actions.Reset;
-import in.ceeq.helpers.NotificationsHelper;
 import in.ceeq.helpers.PreferencesHelper;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -88,7 +88,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		addPreferencesFromResource(R.xml.preferences);
+		addPreferencesFromResource(R.xml.app_preferences);
 		preferencesHelper = new PreferencesHelper(this.getActivity());
 		setupGoogle();
 		setupFacebook(savedInstanceState);
@@ -119,8 +119,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 					@Override
 					public boolean onPreferenceChange(Preference preference,
 							Object newValue) {
-						NotificationsHelper.getInstance(getActivity())
-								.removeAllNotifications();
+						Notifications.getInstance(getActivity()).remove();
 						return false;
 					}
 				});
@@ -525,10 +524,9 @@ class NotificationsToggle implements OnPreferenceChangeListener {
 	@Override
 	public boolean onPreferenceChange(Preference preference, Object obj) {
 		if (Boolean.parseBoolean(obj.toString())) {
-			NotificationsHelper.getInstance(context)
-					.showPersistentNotification();
+			Notifications.getInstance(context).show();
 		} else {
-			NotificationsHelper.getInstance(context).removeAllNotifications();
+			Notifications.getInstance(context).remove();
 			Toast.makeText(context, R.string.toast_string_13,
 					Toast.LENGTH_SHORT).show();
 		}

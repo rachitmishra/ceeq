@@ -8,26 +8,14 @@
 package in.ceeq.helpers;
 
 import hirondelle.date4j.DateTime;
-import in.ceeq.activities.Home.ComponentState;
-import in.ceeq.activities.Home.SwitchState;
-import in.ceeq.receivers.DeviceAdmin;
-import in.ceeq.receivers.LowBattery;
-import in.ceeq.receivers.OutgoingCalls;
-import in.ceeq.receivers.PowerButton;
-import in.ceeq.receivers.ScheduledBackups;
 
 import java.util.Locale;
 import java.util.TimeZone;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -40,19 +28,11 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 
 public class Helpers {
 
-	public static final int ALARM_ACTIVATION_REQUEST = 9012;
-
 	private Context context;
 	private LocationManager locationManager;
 	private PreferencesHelper preferencesHelper;
-	private DevicePolicyManager devicePolicyManager;
-	private ComponentName deviceAdminComponentName;
-	private ConnectivityManager connectivityManager;
-	private PackageManager packageManager;
 
-	public enum Receivers {
-		OUTGOING_CALLS_RECEIVER, POWER_BUTTON_RECEIVER, SCHEDULED_BACKUPS_RECEIVER, LOW_BATTERY_RECEIVER
-	}
+	private ConnectivityManager connectivityManager;
 
 	public Helpers(Context context) {
 		this.context = context;
@@ -67,16 +47,6 @@ public class Helpers {
 		locationManager = (LocationManager) context
 				.getSystemService(Context.LOCATION_SERVICE);
 		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-			return true;
-		return false;
-	}
-
-	public boolean hasDeviceAdminEnabled() {
-		devicePolicyManager = (DevicePolicyManager) context
-				.getSystemService(Context.DEVICE_POLICY_SERVICE);
-		deviceAdminComponentName = new ComponentName(context, DeviceAdmin.class);
-
-		if (devicePolicyManager.isAdminActive(deviceAdminComponentName))
 			return true;
 		return false;
 	}
@@ -168,66 +138,5 @@ public class Helpers {
 				regId);
 		preferencesHelper.setInt(PreferencesHelper.APP_VERSION,
 				getAppVersion(context));
-	}
-
-	public void setupAlarms(SwitchState state) {
-		PendingIntent pi;
-		AlarmManager alarms = (AlarmManager) context
-				.getSystemService(Context.ALARM_SERVICE);
-		switch (state) {
-		case OFF:
-			pi = PendingIntent.getBroadcast(context, ALARM_ACTIVATION_REQUEST,
-					new Intent("in.ceeq.ACTION_BACKUP"),
-					PendingIntent.FLAG_CANCEL_CURRENT);
-			alarms.cancel(pi);
-
-			break;
-		case ON:
-			pi = PendingIntent.getBroadcast(context, ALARM_ACTIVATION_REQUEST,
-					new Intent("in.ceeq.ACTION_BACKUP"),
-					PendingIntent.FLAG_CANCEL_CURRENT);
-			alarms.setInexactRepeating(AlarmManager.RTC_WAKEUP, new DateTime(
-					DateTime.today(TimeZone.getDefault()) + " 02:00:00")
-					.getMilliseconds(TimeZone.getDefault()),
-					AlarmManager.INTERVAL_DAY, pi);
-			break;
-		}
-
-	}
-
-	public void setupReceivers(Receivers receiverName, ComponentState state) {
-		packageManager = context.getPackageManager();
-		ComponentName componentName = null;
-		switch (receiverName) {
-		case LOW_BATTERY_RECEIVER:
-			componentName = new ComponentName(context, LowBattery.class);
-			break;
-		case OUTGOING_CALLS_RECEIVER:
-			componentName = new ComponentName(context, OutgoingCalls.class);
-			break;
-		case POWER_BUTTON_RECEIVER:
-			componentName = new ComponentName(context, PowerButton.class);
-			break;
-		case SCHEDULED_BACKUPS_RECEIVER:
-			componentName = new ComponentName(context, ScheduledBackups.class);
-			break;
-		}
-
-		switch (state) {
-		case DISABLE:
-			packageManager.setComponentEnabledSetting(componentName,
-					PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-					PackageManager.DONT_KILL_APP);
-			break;
-		case ENABLE:
-			packageManager.setComponentEnabledSetting(componentName,
-					PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-					PackageManager.DONT_KILL_APP);
-			break;
-		}
-	}
-
-	public static void Toast(String message) {
-		// Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 	}
 }
