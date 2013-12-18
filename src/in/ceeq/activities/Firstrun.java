@@ -149,7 +149,6 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 				launchHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				launchHome.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				startActivity(launchHome);
-				overridePendingTransition(R.drawable.fadeout, R.drawable.fadein);
 			} else if (!setPin)
 				Toast.makeText(Firstrun.this, R.string.toast_string_10,
 						Toast.LENGTH_SHORT).show();

@@ -5,31 +5,17 @@
     android:layout_height="match_parent" >
 
     <FrameLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-
-            <android.support.v4.view.PagerTitleStrip
-                android:id="@+id/pager_title_strip"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:background="#efefef"
-                android:padding="4dp"
-                android:textColor="#0099cc" />
-        </android.support.v4.view.ViewPager>
     </FrameLayout>
 	
 	<LinearLayout
         android:id="@+id/left_drawer"
-        android:layout_width="200dp"
+        android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#303030"
+        android:background="#dadada"
         android:orientation="vertical" >
         <RelativeLayout
                 android:id="@+id/user_loader"
@@ -66,7 +52,7 @@
                     android:paddingRight="4dp"
                     android:paddingTop="4dp"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="#959595" />
+                    android:textColor="#606060" />
                 <TextView
                     android:id="@+id/user_id_drawer"
                     android:layout_width="wrap_content"
@@ -76,15 +62,15 @@
                     android:paddingLeft="4dp"
                     android:paddingRight="4dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="#808080" />
+                    android:textColor="#999999" />
             </RelativeLayout>
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
-                android:background="#858585" />
+                android:background="#aaaaaa" />
          	<ListView
                 android:id="@+id/drawer_action_list"
-                android:layout_width="200dp"
+                android:layout_width="240dp"
                 android:layout_height="0dp"
                 android:layout_gravity="start"
                 android:layout_weight="1"

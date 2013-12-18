@@ -3,7 +3,6 @@ package in.ceeq.activities;
 import hirondelle.date4j.DateTime;
 import in.ceeq.Launcher;
 import in.ceeq.R;
-import in.ceeq.actions.Admin;
 import in.ceeq.actions.Backup;
 import in.ceeq.actions.Backup.State;
 import in.ceeq.actions.Notifications;
@@ -14,7 +13,6 @@ import in.ceeq.actions.Restore;
 import in.ceeq.actions.Upload;
 import in.ceeq.actions.Wipe;
 import in.ceeq.helpers.Helpers;
-import in.ceeq.helpers.Logger;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.receivers.DeviceAdmin;
 import in.ceeq.services.Backups;
@@ -27,7 +25,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.http.protocol.HTTP;
@@ -55,8 +52,6 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.InflateException;
@@ -103,6 +98,7 @@ public class Home extends FragmentActivity {
 	public static final String MESSENGER = "in.ceeq.Home";
 	public final static int SHOW = 1;
 	public final static int HIDE = 0;
+	private static final int DEVICE_ADMIN_ACTIVATION_REQUEST = 9014;
 
 	public enum DialogType {
 		PROTECT, STEALTH, FEEDBACK, BACKUP, RESTORE, BLIP, WIPE, WIPE_EXTERNAL_STORAGE, WIPE_DEVICE, WIPE_EXTERNAL_STORAGE_AND_DEVICE, DEVICE_ADMIN
@@ -130,11 +126,6 @@ public class Home extends FragmentActivity {
 		OFF, ON
 	}
 
-	private Pager pagerAdapter;
-	private ViewPager pager;
-	private AlertDialog.Builder builder;
-	private LayoutInflater inflater;
-	private static LinearLayout timer;
 	private static ProgressBar progressBar;
 	private PreferencesHelper preferencesHelper;
 	private Helpers helpers;
@@ -143,6 +134,7 @@ public class Home extends FragmentActivity {
 	private static final String SENDER_ID = "909602096750";
 	private static final int PLUS_ONE_REQUEST_CODE = 9025;
 	private Session.StatusCallback statusCallback = new FBSessionStatus();
+	FragmentManager fragmentManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +148,8 @@ public class Home extends FragmentActivity {
 		setupHelpers();
 		checkPlayServices();
 		setupFacebookConnect(savedInstanceState);
-		setupPager();
+		// setupPager();
+		setupHome();
 		setupDrawer();
 
 		if (preferencesHelper.getBoolean(PreferencesHelper.FIRST_LOGIN)) {
@@ -172,14 +165,12 @@ public class Home extends FragmentActivity {
 		helpers = Helpers.getInstance(this);
 	}
 
-	/**
-	 * set up the view pager
-	 */
-	public void setupPager() {
-		pagerAdapter = new Pager(getSupportFragmentManager(), this);
-		pager = (ViewPager) findViewById(R.id.pager);
-		pager.setAdapter(pagerAdapter);
-		pager.requestTransparentRegion(pager);
+	public void setupHome() {
+		fragmentManager = getSupportFragmentManager();
+		Fragment fragment = new HomeFragment();
+		fragmentManager.beginTransaction().replace(R.id.container, fragment)
+				.commit();
+
 	}
 
 	/**
@@ -450,16 +441,21 @@ public class Home extends FragmentActivity {
 		}
 
 		private void selectItem(int position) {
+
+			Fragment fragment = null;
 			switch (position) {
+
 			case 3:
+				fragment = new HomeFragment();
+				break;
 			case 4:
+				fragment = new BackupFragment();
+				break;
 			case 5:
-				pager.setCurrentItem(position - 3);
+				fragment = new SecurityFragment();
 				break;
 			case 7:
-				builder.setView(inflater.inflate(R.layout.dialog_privacy, null))
-						.setPositiveButton(R.string.close, null).create()
-						.show();
+				fragment = new PrivacyFragment();
 				break;
 			case 8:
 				Intent emailIntent = new Intent(Intent.ACTION_SEND)
@@ -477,9 +473,7 @@ public class Home extends FragmentActivity {
 				startActivity(emailIntent);
 				break;
 			case 9:
-				builder.setView(inflater.inflate(R.layout.dialog_about, null))
-						.setPositiveButton(R.string.close, null).create()
-						.show();
+				fragment = new AboutApplicationFragment();
 				break;
 			case 10:
 				Intent rateIntent = new Intent(Intent.ACTION_VIEW).setData(Uri
@@ -487,7 +481,9 @@ public class Home extends FragmentActivity {
 				startActivity(rateIntent);
 				break;
 			}
-
+			if (fragment != null)
+				fragmentManager.beginTransaction()
+						.replace(R.id.container, fragment).commit();
 			actionList.setItemChecked(position, true);
 			drawerLayout.closeDrawer(Gravity.START);
 		}
@@ -554,7 +550,6 @@ public class Home extends FragmentActivity {
 	public void onButtonPressed(View v) {
 		ToggleButton toggleButton;
 
-		builder = new AlertDialog.Builder(this);
 		dialogsHelper = new DialogsHelper(this);
 
 		switch (v.getId()) {
@@ -571,7 +566,8 @@ public class Home extends FragmentActivity {
 
 		case R.id.toggle_backup:
 			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_backup);
-			setupScheduledBackup(toggleButton);
+			setupScheduledBackup(toggleButton.isChecked());
+			resetBackup();
 			break;
 
 		case R.id.b_backup:
@@ -615,6 +611,18 @@ public class Home extends FragmentActivity {
 
 	}
 
+	public void resetHome() {
+		Fragment fragment = new HomeFragment();
+		fragmentManager.beginTransaction().replace(R.id.container, fragment)
+				.commit();
+	}
+
+	public void resetBackup() {
+		Fragment fragment = new BackupFragment();
+		fragmentManager.beginTransaction().replace(R.id.container, fragment)
+				.commit();
+	}
+
 	private PackageManager packageManager;
 
 	private void setupStealthMode(ToggleButton toggleButton) {
@@ -647,21 +655,23 @@ public class Home extends FragmentActivity {
 		}
 	}
 
-	private void setupScheduledBackup(ToggleButton toggleButton) {
-		preferencesHelper.setBoolean(PreferencesHelper.AUTO_BACKUP_STATUS,
-				toggleButton.isChecked());
-		if (toggleButton.isChecked()) {
-			timer.setVisibility(View.VISIBLE);
+	private void setupScheduledBackup(boolean value) {
+
+		if (value) {
 			Toast.makeText(this,
 					"Automatic backups started, everyday at 2:00 AM",
 					Toast.LENGTH_SHORT).show();
 			Backup.getInstance(this).autoBackups(State.ON);
+			preferencesHelper.setBoolean(PreferencesHelper.AUTO_BACKUP_STATUS,
+					true);
 		} else {
-			timer.setVisibility(View.GONE);
 			Toast.makeText(this, "Automatic backups cancelled.",
 					Toast.LENGTH_SHORT).show();
 			Backup.getInstance(this).autoBackups(State.OFF);
+			preferencesHelper.setBoolean(PreferencesHelper.AUTO_BACKUP_STATUS,
+					false);
 		}
+
 	}
 
 	private void setupAutoBlips(ToggleButton toggleButton) {
@@ -750,8 +760,6 @@ public class Home extends FragmentActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		builder = new AlertDialog.Builder(this);
-		inflater = this.getLayoutInflater();
 		if (drawerToggle.onOptionsItemSelected(item)) {
 			return true;
 		}
@@ -788,11 +796,12 @@ public class Home extends FragmentActivity {
 		private ToggleButton toggleButton;
 		private LayoutInflater inflater;
 		private static final int NONE = -1;
-		private Context context;
-		private Activity activity;
 		private AlertDialog.Builder alertDialogBuilder;
 		private PreferencesHelper preferencesHelper;
 		private View feedbackView, protectMeView;
+		private Activity activity;
+		private Context context;
+		private ComponentName deviceAdminComponentName;
 
 		private DialogType dialogType;
 
@@ -992,6 +1001,8 @@ public class Home extends FragmentActivity {
 
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
+			deviceAdminComponentName = new ComponentName(context,
+					DeviceAdmin.class);
 
 			switch (which) {
 
@@ -1013,13 +1024,13 @@ public class Home extends FragmentActivity {
 					break;
 				case WIPE:
 					switch (which) {
-					case 0:
+					case Wipe.EXTERNAL_STORAGE:
 						showDialog(DialogType.WIPE_EXTERNAL_STORAGE);
 						break;
-					case 1:
+					case Wipe.DEVICE:
 						showDialog(DialogType.WIPE_DEVICE);
 						break;
-					case 2:
+					case Wipe.EXTERNAL_STORAGE_AND_DEVICE:
 						showDialog(DialogType.WIPE_EXTERNAL_STORAGE_AND_DEVICE);
 						break;
 					}
@@ -1033,8 +1044,16 @@ public class Home extends FragmentActivity {
 					showToast("Auto blips enabled.");
 					break;
 				case DEVICE_ADMIN:
-					Logger.d("Activating device admin");
-					Admin.getInstance(context).register();
+					activity.startActivityForResult(
+							new Intent(
+									DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+									.putExtra(
+											DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+											deviceAdminComponentName)
+									.putExtra(
+											DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+											activity.getString(R.string.help_note_25)),
+							DEVICE_ADMIN_ACTIVATION_REQUEST);
 					break;
 				case FEEDBACK:
 					EditText feedbackMessage = (EditText) feedbackView
@@ -1082,7 +1101,8 @@ public class Home extends FragmentActivity {
 					showToast("Stealth Mode enabled.");
 					break;
 				case WIPE_DEVICE:
-					if (Admin.getInstance(context).isRegistered())
+					if (preferencesHelper
+							.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS))
 						Wipe.getInstance(context).device();
 					else
 						showDialog(DialogType.DEVICE_ADMIN);
@@ -1091,7 +1111,8 @@ public class Home extends FragmentActivity {
 					Wipe.getInstance(context).externalStorage();
 					break;
 				case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
-					if (Admin.getInstance(context).isRegistered())
+					if (preferencesHelper
+							.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS))
 						Wipe.getInstance(context).deviceAndExternalStorage();
 					else
 						showDialog(DialogType.DEVICE_ADMIN);
@@ -1183,12 +1204,13 @@ public class Home extends FragmentActivity {
 			counter = 0;
 			boolean backupStatus = setBackupStatus();
 			boolean securityStatus = setSecurityStatus();
-			if (backupStatus & securityStatus)
+			if (backupStatus & securityStatus) {
 				preferencesHelper
 						.setBoolean(PreferencesHelper.APP_STATUS, true);
-			else
+			} else {
 				preferencesHelper.setBoolean(PreferencesHelper.APP_STATUS,
 						false);
+			}
 			return counter;
 		}
 
@@ -1233,8 +1255,8 @@ public class Home extends FragmentActivity {
 		}
 
 		public boolean setSecurityStatus() {
-			boolean deviceAdminActive = Admin.getInstance(getActivity())
-					.isRegistered();
+			boolean deviceAdminActive = preferencesHelper
+					.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS);
 			if (helpers.hasGpsEnabled() & deviceAdminActive) {
 				return true;
 			} else if (helpers.hasGpsEnabled() & !deviceAdminActive) {
@@ -1311,9 +1333,7 @@ public class Home extends FragmentActivity {
 					button.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							AlertDialog.Builder alert = getDialog((notifications
-									.get(childPosition)));
-							alert.create().show();
+							onButtonPress((notifications.get(childPosition)));
 						}
 					});
 				}
@@ -1348,108 +1368,37 @@ public class Home extends FragmentActivity {
 				}
 			}
 
-			public AlertDialog.Builder getDialog(Status status) {
+			public void onButtonPress(Status status) {
 				switch (status) {
 				case AUTO_BACKUP:
-					return new AlertDialog.Builder(
-							HomeFragment.this.getActivity())
-							.setTitle("Enable AutoBackup")
-							.setMessage("Activate auto backups ?")
-							.setPositiveButton(R.string.yes,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											preferencesHelper
-													.setBoolean(
-															PreferencesHelper.AUTO_BACKUP_STATUS,
-															true);
-											setStatus();
-										}
-									})
-							.setNegativeButton(R.string.cancel,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											dialog.cancel();
-										}
-									});
+					((Home) getActivity()).setupScheduledBackup(true);
+					break;
 				case AUTO_TRACK:
-					return new AlertDialog.Builder(
-							HomeFragment.this.getActivity())
-							.setTitle("Activate AutoTrack")
-							.setMessage("Activate auto tracking ?")
-							.setPositiveButton(R.string.yes,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											preferencesHelper
-													.setBoolean(
-															PreferencesHelper.AUTO_TRACK_STATUS,
-															true);
-											setStatus();
-										}
-									})
-							.setNegativeButton(R.string.cancel,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											dialog.cancel();
-										}
-									});
+					preferencesHelper.setBoolean(
+							PreferencesHelper.AUTO_TRACK_STATUS, true);
+					break;
 				case GPS:
-					return new AlertDialog.Builder(
-							HomeFragment.this.getActivity())
-							.setTitle("Activate GPS")
-							.setMessage("Activate GPS ?")
-							.setPositiveButton(R.string.yes,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											startActivity(new Intent(
-													android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-											setStatus();
-										}
-									})
-							.setNegativeButton(R.string.cancel,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											dialog.cancel();
-										}
-									});
+
+					startActivity(new Intent(
+							android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+					break;
 				case DEVICE_ADMIN:
-					return new AlertDialog.Builder(
-							HomeFragment.this.getActivity())
-							.setTitle("Activate Device Admin")
-							.setMessage("Activate Device Admin ?")
-							.setPositiveButton(R.string.yes,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											startActivityForResult(
-													new Intent(
-															DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-															.putExtra(
-																	DevicePolicyManager.EXTRA_DEVICE_ADMIN,
-																	deviceAdminComponentName)
-															.putExtra(
-																	DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-																	"Activating Device Administrator enables all the security features of the application."),
-													DEVICE_ADMIN_ACTIVATION_REQUEST);
-											setStatus();
-										}
-									})
-							.setNegativeButton(R.string.cancel,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											dialog.cancel();
-										}
-									});
+					startActivityForResult(
+							new Intent(
+									DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+									.putExtra(
+											DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+											deviceAdminComponentName)
+									.putExtra(
+											DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+											"Activating Device Administrator enables all the security features of the application."),
+							DEVICE_ADMIN_ACTIVATION_REQUEST);
+					break;
 				case SYNC:
-				default:
-					return null;
+					break;
 				}
+
+				((Home) getActivity()).resetHome();
 			}
 
 			@Override
@@ -1525,13 +1474,10 @@ public class Home extends FragmentActivity {
 		private TextView hours, mins, unit, div, lastBackupDate;
 		private CountDownTimer timerClock;
 		private View view;
+		private LinearLayout timer;
 
 		public BackupFragment() {
 
-		}
-
-		public interface UpdateStatus {
-			public void updateStatus();
 		}
 
 		@Override
@@ -1563,10 +1509,6 @@ public class Home extends FragmentActivity {
 			lastBackupDate.setText(getLastBackupLabel());
 
 			return view;
-		}
-
-		public void checkBackupFiles() {
-
 		}
 
 		public void setTimerClock() {
@@ -1683,11 +1625,6 @@ public class Home extends FragmentActivity {
 
 			preferencesHelper = new PreferencesHelper(this.getActivity());
 
-			if (view != null) {
-				ViewGroup parent = (ViewGroup) view.getParent();
-				if (parent != null)
-					parent.removeView(view);
-			}
 			try {
 				view = inflater.inflate(R.layout.fragment_security, container,
 						false);
@@ -1739,6 +1676,28 @@ public class Home extends FragmentActivity {
 		}
 	}
 
+	public static class PrivacyFragment extends Fragment {
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.fragment_privacy,
+					container, false);
+			return rootView;
+		}
+	}
+
+	public static class AboutApplicationFragment extends Fragment {
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.fragment_about_app,
+					container, false);
+			return rootView;
+		}
+	}
+
 	public static class AntivirusFragment extends Fragment {
 
 		@Override
@@ -1784,66 +1743,4 @@ public class Home extends FragmentActivity {
 			}
 		}
 	}
-
-	public class Pager extends FragmentPagerAdapter {
-
-		public Pager(FragmentManager fm, Context context) {
-			super(fm);
-		}
-
-		@Override
-		public Fragment getItem(int position) {
-			Fragment fragment = null;
-			switch (position) {
-			case 0:
-				fragment = new HomeFragment();
-				break;
-			case 1:
-				fragment = new BackupFragment();
-				break;
-			case 2:
-				fragment = new SecurityFragment();
-				break;
-			case 3:
-				fragment = new AntivirusFragment();
-				break;
-			case 4:
-				fragment = new AboutDeviceFragment();
-				break;
-			case 5:
-				fragment = new AntiSpamFragment();
-				break;
-			}
-
-			return fragment;
-		}
-
-		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
-			switch (position) {
-			case 0:
-				return getString(R.string.tab_home).toUpperCase(l);
-			case 1:
-				return getString(R.string.tab_backup).toUpperCase(l);
-			case 2:
-				return getString(R.string.tab_security).toUpperCase(l);
-			case 3:
-				return getString(R.string.tab_spam).toUpperCase(l);
-			case 4:
-				return getString(R.string.about).toUpperCase(l);
-			}
-			return null;
-		}
-
-		@Override
-		public int getCount() {
-			return 3;
-		}
-
-		@Override
-		public int getItemPosition(Object object) {
-			return POSITION_NONE;
-		}
-	}
-
 }

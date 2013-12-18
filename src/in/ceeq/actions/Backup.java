@@ -9,6 +9,7 @@ package in.ceeq.actions;
 
 import hirondelle.date4j.DateTime;
 import in.ceeq.activities.Home;
+import in.ceeq.helpers.Logger;
 import in.ceeq.services.Backups;
 import in.ceeq.services.Backups.Action;
 import in.ceeq.services.Backups.ActionParent;
@@ -53,14 +54,15 @@ public class Backup {
 		switch (state) {
 		case OFF:
 			pi = PendingIntent.getBroadcast(context, ALARM_ACTIVATION_REQUEST,
-					new Intent("in.ceeq.ACTION_BACKUP"),
+					new Intent("in.ceeq.action.BACKUP"),
 					PendingIntent.FLAG_CANCEL_CURRENT);
 			alarms.cancel(pi);
 
 			break;
 		case ON:
+			Logger.d("Turning alarm ON");
 			pi = PendingIntent.getBroadcast(context, ALARM_ACTIVATION_REQUEST,
-					new Intent("in.ceeq.ACTION_BACKUP"),
+					new Intent("in.ceeq.action.BACKUP"),
 					PendingIntent.FLAG_CANCEL_CURRENT);
 			alarms.setInexactRepeating(AlarmManager.RTC_WAKEUP, new DateTime(
 					DateTime.today(TimeZone.getDefault()) + " 02:00:00")

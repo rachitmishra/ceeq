@@ -149,7 +149,6 @@ public class Splash extends Activity implements ConnectionCallbacks,
 				launchNextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				launchNextActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				startActivity(launchNextActivity);
-				overridePendingTransition(R.drawable.fadeout, R.drawable.fadein);
 			}
 		}, secondsDelayed * 1000);
 	}

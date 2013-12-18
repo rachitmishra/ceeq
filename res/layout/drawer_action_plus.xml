@@ -11,14 +11,4 @@
        plus:annotation="inline"
        plus:size="standard" />
 
-   <View
-       android:layout_width="match_parent"
-       android:layout_height="2dp"
-       android:layout_gravity="bottom"
-       android:layout_marginLeft="8dp"
-       android:layout_marginRight="8dp"
-       android:background="#555555"
-       android:paddingLeft="2dp"
-       android:paddingRight="2dp" />
-
 </FrameLayout>

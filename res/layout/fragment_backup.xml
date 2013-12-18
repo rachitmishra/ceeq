@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/ic_bg_main" >
-
-    <LinearLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/ic_bg_main"
         android:orientation="vertical" >
 
         <ProgressBar
@@ -17,6 +12,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
+            android:layout_marginTop="10dp"
             android:indeterminate="true"
             android:max="100"
             android:progress="0"
@@ -26,6 +22,7 @@
             android:id="@+id/timerLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:orientation="vertical" >
 
             <LinearLayout
@@ -127,12 +124,10 @@
 
                 <ToggleButton
                     android:id="@+id/toggle_backup"
-                    style="@style/button_toggle"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="right|center_vertical"
                     android:layout_weight="0"
-                    android:background="@drawable/ic_button_toggle_bg"
                     android:onClick="onButtonPressed" />
             </LinearLayout>
         </LinearLayout>
@@ -151,7 +146,6 @@
 
             <Button
                 android:id="@+id/b_backup"
-                style="@style/buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="2dp"
@@ -160,7 +154,6 @@
 
             <Button
                 android:id="@+id/backup"
-                style="@style/buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="2dp"
@@ -169,7 +162,6 @@
 
             <Button
                 android:id="@+id/restore"
-                style="@style/buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="2dp"
@@ -178,7 +170,6 @@
 
             <Button
                 android:id="@+id/b_view"
-                style="@style/buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="onButtonPressed"
@@ -231,5 +222,3 @@
             android:layout_marginBottom="8dp"
             android:background="@drawable/ic_bg_shadow" />
     </LinearLayout>
-
-</ScrollView>

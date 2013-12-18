@@ -165,7 +165,12 @@
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
-        <receiver android:name="in.ceeq.receivers.ScheduledBackups" />
+        <receiver android:name="in.ceeq.receivers.ScheduledBackups"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="in.ceeq.action.BACKUP" />
+            </intent-filter>
+        </receiver>
         <receiver android:name="in.ceeq.receivers.Locations" />
         <receiver android:name="in.ceeq.receivers.PowerButton" >
             <intent-filter>
