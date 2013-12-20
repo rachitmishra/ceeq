@@ -12,7 +12,6 @@ import in.ceeq.actions.Receiver.ReceiverType;
 import in.ceeq.actions.Restore;
 import in.ceeq.actions.Upload;
 import in.ceeq.actions.Wipe;
-import in.ceeq.helpers.Helpers;
 import in.ceeq.helpers.PhoneHelper;
 import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
@@ -129,7 +128,7 @@ public class Home extends FragmentActivity {
 
 	private static ProgressBar progressBar;
 	private PreferencesHelper preferencesHelper;
-	private Helpers helpers;
+	private PhoneHelper phoneHelper;
 	private DialogsHelper dialogsHelper;
 	private boolean exit = false;
 	private static final String SENDER_ID = "909602096750";
@@ -167,7 +166,7 @@ public class Home extends FragmentActivity {
 
 	public void setupHelpers() {
 		preferencesHelper = new PreferencesHelper(this);
-		helpers = Helpers.getInstance(this);
+		phoneHelper = PhoneHelper.getInstance(this);
 	}
 
 	public void setupHome() {
@@ -432,9 +431,8 @@ public class Home extends FragmentActivity {
 
 	private GoogleCloudMessaging gcm;
 
-	public void doRegisterGcm() {
+	public void setupGoogleCloudMessaging() {
 		gcm = GoogleCloudMessaging.getInstance(this);
-
 		new AsyncTask<Void, Void, Boolean>() {
 			private String registrationId;
 
@@ -445,7 +443,7 @@ public class Home extends FragmentActivity {
 						gcm = GoogleCloudMessaging.getInstance(Home.this);
 					}
 					registrationId = gcm.register(SENDER_ID);
-					helpers.storeRegistrationId(registrationId);
+					phoneHelper.set(Phone.REGISTRATION_ID, registrationId);
 					return true;
 				} catch (IOException ex) {
 					return false;
@@ -461,6 +459,7 @@ public class Home extends FragmentActivity {
 					preferencesHelper.setBoolean(
 							PreferencesHelper.GCM_REGISTRATION_STATUS, false);
 			}
+
 		};
 
 	}
@@ -521,7 +520,7 @@ public class Home extends FragmentActivity {
 	}
 
 	public void checkPlayServices() {
-		if (!helpers.isGooglePlayConnected()) {
+		if (phoneHelper.enabled(Phone.PLAY_SERVICES)) {
 			startActivity(new Intent(this, GoogleServices.class).putExtra(
 					"from", 1));
 			this.finish();
@@ -1137,7 +1136,7 @@ public class Home extends FragmentActivity {
 			ALL, AUTO_BACKUP, AUTO_TRACK, GPS, DEVICE_ADMIN, BACKUP, SYNC
 		}
 
-		private Helpers helpers;
+		private PhoneHelper phoneHelper;
 		private PreferencesHelper preferencesHelper;
 		private View view;
 		private int counter;
@@ -1156,8 +1155,8 @@ public class Home extends FragmentActivity {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			view = inflater.inflate(R.layout.fragment_main, container, false);
-			preferencesHelper = new PreferencesHelper(this.getActivity());
-			helpers = Helpers.getInstance(getActivity());
+			setupHelpers();
+
 			notificationList = (ExpandableListView) view
 					.findViewById(R.id.notifications);
 			notification_list = new ArrayList<Status>();
@@ -1185,6 +1184,12 @@ public class Home extends FragmentActivity {
 					"http://plus.google.com/116561373543243917689",
 					PLUS_ONE_REQUEST_CODE);
 			return view;
+		}
+
+		public void setupHelpers() {
+			phoneHelper = PhoneHelper.getInstance(getActivity());
+			preferencesHelper = PreferencesHelper.getInstance(this
+					.getActivity());
 		}
 
 		public void showNotification() {
@@ -1257,19 +1262,20 @@ public class Home extends FragmentActivity {
 		}
 
 		public boolean setSecurityStatus() {
-			boolean deviceAdminActive = preferencesHelper
+			boolean deviceAdminEnabled = preferencesHelper
 					.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS);
-			if (helpers.isGpsEnabled() & deviceAdminActive) {
+			boolean gpsEnabled = phoneHelper.enabled(Phone.GPS);
+			if (gpsEnabled & deviceAdminEnabled) {
 				return true;
-			} else if (helpers.isGpsEnabled() & !deviceAdminActive) {
+			} else if (gpsEnabled & !deviceAdminEnabled) {
 				notification_list.add(Status.DEVICE_ADMIN);
 				counter++;
 				return false;
-			} else if (!helpers.isGpsEnabled() & deviceAdminActive) {
+			} else if (!gpsEnabled & deviceAdminEnabled) {
 				notification_list.add(Status.GPS);
 				counter++;
 				return false;
-			} else if (!helpers.isGpsEnabled() & !deviceAdminActive) {
+			} else if (!gpsEnabled & !deviceAdminEnabled) {
 				notification_list.add(Status.GPS);
 				notification_list.add(Status.DEVICE_ADMIN);
 				counter += 2;
@@ -1638,8 +1644,8 @@ public class Home extends FragmentActivity {
 						false);
 
 				map = ((SupportMapFragment) getActivity()
-						.getSupportFragmentManager()
-						.findFragmentById(R.id.map)).getMap();
+						.getSupportFragmentManager().findFragmentById(R.id.map))
+						.getMap();
 				map.getUiSettings().setAllGesturesEnabled(false);
 				map.getUiSettings().setZoomControlsEnabled(false);
 				map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -1719,7 +1725,6 @@ public class Home extends FragmentActivity {
 	public static class MyDeviceFragment extends Fragment {
 		private PhoneHelper phoneHelper;
 		private PreferencesHelper preferencesHelper;
-		private Helpers helper;
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -1728,7 +1733,6 @@ public class Home extends FragmentActivity {
 					false);
 			preferencesHelper = PreferencesHelper.getInstance(getActivity());
 			phoneHelper = PhoneHelper.getInstance(getActivity());
-			helper = Helpers.getInstance(getActivity());
 			setupData(view);
 			return view;
 		}
@@ -1741,24 +1745,24 @@ public class Home extends FragmentActivity {
 			text.setText(preferencesHelper
 					.getString(PreferencesHelper.ACCOUNT_USER_NAME));
 			text = (TextView) view.findViewById(R.id.c_sim);
-			text.setText(phoneHelper.getData(Phone.SIM_ID));
+			text.setText(phoneHelper.get(Phone.SIM_ID));
 			text = (TextView) view.findViewById(R.id.c_imsi);
-			text.setText(phoneHelper.getData(Phone.IMSI));
+			text.setText(phoneHelper.get(Phone.IMSI));
 			text = (TextView) view.findViewById(R.id.c_iemi);
-			text.setText(phoneHelper.getData(Phone.IEMI));
+			text.setText(phoneHelper.get(Phone.IEMI));
 			text = (TextView) view.findViewById(R.id.c_gps);
-			text.setText(booleanToString(helper.isGpsEnabled()));
+			text.setText(booleanToString(phoneHelper.enabled(Phone.GPS)));
 			text = (TextView) view.findViewById(R.id.c_admin);
 			text.setText(booleanToString(preferencesHelper
 					.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS)));
 			text = (TextView) view.findViewById(R.id.c_operator);
-			text.setText(phoneHelper.getData(Phone.OPERATOR));
+			text.setText(phoneHelper.get(Phone.OPERATOR));
 			text = (TextView) view.findViewById(R.id.c_size);
-			text.setText(phoneHelper.getSize());
+			text.setText(phoneHelper.get(Phone.SIZE));
 			text = (TextView) view.findViewById(R.id.c_pixels);
-			text.setText(phoneHelper.getDensity());
+			text.setText(phoneHelper.get(Phone.DENSITY));
 			text = (TextView) view.findViewById(R.id.c_apps);
-			text.setText(phoneHelper.getTotalApplications() + "");
+			text.setText(phoneHelper.get(Phone.APP_COUNT) + "");
 
 		}
 

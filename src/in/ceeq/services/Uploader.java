@@ -7,7 +7,6 @@
 
 package in.ceeq.services;
 
-import in.ceeq.helpers.Helpers;
 import in.ceeq.helpers.PhoneHelper;
 import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
@@ -68,17 +67,17 @@ public class Uploader extends IntentService {
 	private UploadType uploadType;
 
 	@Override
-	public void onCreate() {
-		preferencesHelper = PreferencesHelper.getInstance(this);
-		phoneHelper = PhoneHelper.getInstance(this);
-	}
-
-	@Override
 	protected void onHandleIntent(Intent intent) {
+		setupHelpers();
 		clearPendingUploads();
 		uploadType = (UploadType) intent.getExtras().get(ACTION);
 		uploadData(uploadType);
 		setUploadStatus();
+	}
+
+	public void setupHelpers() {
+		preferencesHelper = PreferencesHelper.getInstance(this);
+		phoneHelper = PhoneHelper.getInstance(this);
 	}
 
 	private void clearPendingUploads() {
@@ -175,11 +174,11 @@ public class Uploader extends IntentService {
 		nameValuePairs.add(new BasicNameValuePair(SIM_NUMBER, preferencesHelper
 				.getString(PreferencesHelper.SIM_NUMBER)));
 		nameValuePairs.add(new BasicNameValuePair(MANUFACTURER, phoneHelper
-				.getData(Phone.MANUFACTURER)));
+				.get(Phone.MANUFACTURER)));
 		nameValuePairs.add(new BasicNameValuePair(MODEL, phoneHelper
-				.getData(Phone.MODEL)));
+				.get(Phone.MODEL)));
 		nameValuePairs.add(new BasicNameValuePair(IEMI_NUMBER, phoneHelper
-				.getData(Phone.IEMI)));
+				.get(Phone.IEMI)));
 		nameValuePairs.add(new BasicNameValuePair(GCM_ID, preferencesHelper
 				.getString(PreferencesHelper.GCM_REGISTRATION_ID)));
 		nameValuePairs
@@ -214,9 +213,8 @@ public class Uploader extends IntentService {
 				.getString(PreferencesHelper.LAST_LOCATION_LATITUDE)));
 		nameValuePairs.add(new BasicNameValuePair(LONGITUDE, preferencesHelper
 				.getString(PreferencesHelper.LAST_LOCATION_LONGITUDE)));
-		nameValuePairs.add(new BasicNameValuePair(BATTERY, Helpers.getInstance(
-				this).getBatteryLevel()
-				+ "%"));
+		nameValuePairs.add(new BasicNameValuePair(BATTERY, phoneHelper
+				.get(Phone.BATTERY_LEVEL)));
 		return nameValuePairs;
 	}
 

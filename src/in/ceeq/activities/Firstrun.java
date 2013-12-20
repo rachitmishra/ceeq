@@ -81,9 +81,9 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 
 	public void setupDevice() {
 		preferencesHelper.setString(PreferencesHelper.SIM_NUMBER,
-				phoneHelper.getData(Phone.SIM_ID));
+				phoneHelper.get(Phone.SIM_ID));
 		preferencesHelper.setString(PreferencesHelper.IEMI_NUMBER,
-				phoneHelper.getData(Phone.IEMI));
+				phoneHelper.get(Phone.IEMI));
 	}
 
 	private PreferencesHelper preferencesHelper;

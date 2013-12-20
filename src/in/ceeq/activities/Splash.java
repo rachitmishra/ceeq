@@ -9,7 +9,8 @@ package in.ceeq.activities;
 
 import hirondelle.date4j.DateTime;
 import in.ceeq.R;
-import in.ceeq.helpers.Helpers;
+import in.ceeq.helpers.PhoneHelper;
+import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 
 import java.util.TimeZone;
@@ -38,6 +39,10 @@ public class Splash extends Activity implements ConnectionCallbacks,
 		FIRSTRUN, HOME
 	}
 
+	private ProgressBar progreeBar;
+	private PlusClient plus;
+	private SignInButton button;
+	private PhoneHelper phoneHelper;
 	private boolean appHasInitialised, googleConnect;
 
 	@Override
@@ -55,12 +60,9 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	private PreferencesHelper preferencesHelper;
 
 	private void setupHelpers() {
-		preferencesHelper = new PreferencesHelper(this);
+		preferencesHelper = PreferencesHelper.getInstance(this);
+		phoneHelper = PhoneHelper.getInstance(this);
 	}
-
-	private ProgressBar progreeBar;
-	private PlusClient plus;
-	private SignInButton button;
 
 	private void setupGoogleConnect() {
 		progreeBar = (ProgressBar) findViewById(R.id.connectProgress);
@@ -69,7 +71,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	}
 
 	private void checkConnectivity() {
-		if (!Helpers.getInstance(this).hasInternet()) {
+		if (!phoneHelper.enabled(Phone.INTERNET)) {
 			Toast.makeText(this, R.string.toast_string_0, Toast.LENGTH_SHORT)
 					.show();
 		}
@@ -77,7 +79,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	}
 
 	private void checkPlayServices() {
-		if (!Helpers.getInstance(this).isGooglePlayConnected()) {
+		if (!phoneHelper.enabled(Phone.PLAY_SERVICES)) {
 			startActivity(new Intent(this, GoogleServices.class).putExtra(
 					"from", 1));
 			this.finish();
