@@ -3,11 +3,11 @@
     package="in.ceeq"
     android:installLocation="internalOnly"
     android:versionCode="1000"
-    android:versionName="1.0.0 Beta" >
+    android:versionName="1.0.5 Beta" >
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="19" />
 
     <uses-feature
         android:glEsVersion="0x00020000"

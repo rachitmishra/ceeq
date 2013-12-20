@@ -36,7 +36,7 @@ public class Locater extends IntentService implements
 	public static final String ACTION = "action";
 
 	public enum RequestType {
-		BLIP, MESSAGE, SERVER, PROTECT, NOW
+		BLIP, MESSAGE, SERVER, PROTECT, NOW, TRACKER
 	}
 
 	private static final String SENDER_ADDRESS = "senderAddress";
@@ -117,6 +117,8 @@ public class Locater extends IntentService implements
 			break;
 		case SERVER:
 			sendLocationUpdate.putExtra(ACTION, RequestType.SERVER);
+			break;
+		default:
 			break;
 		}
 		Logger.d("Broadcasting location update...");

@@ -10,6 +10,7 @@ package in.ceeq.activities;
 import in.ceeq.R;
 import in.ceeq.actions.Choose;
 import in.ceeq.actions.Reset;
+import in.ceeq.helpers.Logger;
 import in.ceeq.helpers.PhoneHelper;
 import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
@@ -71,7 +72,7 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 		setupHelpers();
 		setupGoogleConnect();
 		setupHelplist();
-
+		Logger.w("First run has been started");
 		Reset.getInstance(this).defaults();
 		setupDevice();
 		pinNumber = (EditText) findViewById(R.id.pinNumber);

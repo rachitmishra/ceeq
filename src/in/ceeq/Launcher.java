@@ -24,5 +24,7 @@ public class Launcher extends Activity {
 		launchSplash.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		launchSplash.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 		startActivity(launchSplash);
+
+		overridePendingTransition(0, 0);
 	}
 }

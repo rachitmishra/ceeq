@@ -43,7 +43,7 @@ public class Helpers {
 		return new Helpers(context);
 	}
 
-	public boolean hasGpsEnabled() {
+	public boolean isGpsEnabled() {
 		locationManager = (LocationManager) context
 				.getSystemService(Context.LOCATION_SERVICE);
 		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))

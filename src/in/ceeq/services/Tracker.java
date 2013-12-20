@@ -2,7 +2,7 @@ package in.ceeq.services;
 
 import in.ceeq.helpers.Logger;
 import in.ceeq.helpers.PreferencesHelper;
-import in.ceeq.receivers.Locations;
+import in.ceeq.services.Locater.RequestType;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
@@ -19,16 +19,14 @@ public class Tracker extends Service implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener, LocationListener {
 
-	private static final String CURRENT_LOCATION_ACTION = "in.ceeq.ACTION_CURRENT_LOCATION";
-	private static final String NEW_LOCATION_ACTION = "in.ceeq.ACTION_NEW_LOCATION";
+	// private static final String CURRENT_LOCATION_ACTION =
+	// "in.ceeq.ACTION_CURRENT_LOCATION";
+	// private static final String NEW_LOCATION_ACTION =
+	// "in.ceeq.ACTION_NEW_LOCATION";
 
 	public static final String ACTION = "action";
 
-	public enum RequestType {
-		BLIP, MESSAGE, SERVER, PROTECT, NOW, TRACKER
-	}
-
-	private static final String SENDER_ADDRESS = "senderAddress";
+	// private static final String SENDER_ADDRESS = "senderAddress";
 	private LocationRequest locationRequest;
 	private LocationClient locationClient;
 	private Location location;
@@ -39,7 +37,7 @@ public class Tracker extends Service implements
 	private static final int FASTEST_INTERVAL = 60000;
 
 	@Override
-	public void onStart(Intent intent, int startId) {
+	public int onStartCommand(Intent intent, int flags, int startId) {
 		locationRequest = LocationRequest.create();
 		locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		locationRequest.setInterval(INTERVAL);
@@ -47,10 +45,11 @@ public class Tracker extends Service implements
 		preferencesHelper = PreferencesHelper.getInstance(this);
 		locationClient = new LocationClient(this, this, this);
 		requestType = (RequestType) intent.getExtras().get(ACTION);
-		senderAddress = intent.getExtras().getString(SENDER_ADDRESS);
+		// senderAddress = intent.getExtras().getString(SENDER_ADDRESS);
 		Logger.d("Type : " + requestType + " has sender address : "
 				+ senderAddress);
 		locationClient.connect();
+		return START_REDELIVER_INTENT;
 	}
 
 	@Override
@@ -59,20 +58,14 @@ public class Tracker extends Service implements
 				location.getLatitude() + "");
 		preferencesHelper.setString(PreferencesHelper.LAST_LOCATION_LONGITUDE,
 				location.getLongitude() + "");
-		Intent newLocationUpdate = new Intent();
-		newLocationUpdate.setAction(NEW_LOCATION_ACTION);
-		switch (requestType) {
-		case MESSAGE:
-			newLocationUpdate.putExtra(ACTION, RequestType.MESSAGE);
-			newLocationUpdate.putExtra(SENDER_ADDRESS, senderAddress);
-			break;
-		case PROTECT:
-			newLocationUpdate.putExtra(ACTION, RequestType.PROTECT);
-			break;
-		default:
-			break;
-		}
-		sendBroadcast(newLocationUpdate);
+		/*
+		 * Intent newLocationUpdate = new Intent();
+		 * newLocationUpdate.setAction(NEW_LOCATION_ACTION); switch
+		 * (requestType) { case MESSAGE: newLocationUpdate.putExtra(ACTION,
+		 * RequestType.MESSAGE); break; case PROTECT:
+		 * newLocationUpdate.putExtra(ACTION, RequestType.PROTECT); break;
+		 * default: break; } sendBroadcast(newLocationUpdate);
+		 */
 	}
 
 	@Override
@@ -90,11 +83,12 @@ public class Tracker extends Service implements
 				location.getLatitude() + "");
 		preferencesHelper.setString(PreferencesHelper.LAST_LOCATION_LONGITUDE,
 				location.getLongitude() + "");
-		Intent sendLocationUpdate = new Intent(this, Locations.class);
-		sendLocationUpdate.setAction(CURRENT_LOCATION_ACTION);
-		sendLocationUpdate.putExtra(ACTION, RequestType.TRACKER);
-		Logger.d("Broadcasting location update...");
-		sendBroadcast(sendLocationUpdate);
+		/*
+		 * Intent sendLocationUpdate = new Intent(this, Locations.class);
+		 * sendLocationUpdate.setAction(CURRENT_LOCATION_ACTION);
+		 * sendLocationUpdate.putExtra(ACTION, RequestType.TRACKER);
+		 * sendBroadcast(sendLocationUpdate);
+		 */
 	}
 
 	@Override

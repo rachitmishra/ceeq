@@ -7,16 +7,12 @@
 
 package in.ceeq.receivers;
 
-import hirondelle.date4j.DateTime;
+import in.ceeq.actions.Backup;
+import in.ceeq.actions.Backup.State;
 import in.ceeq.actions.Notifications;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Commander;
 import in.ceeq.services.Commander.Command;
-
-import java.util.TimeZone;
-
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -69,16 +65,7 @@ public class Startup extends BroadcastReceiver {
 	}
 
 	public void setupAlarms(Context context) {
-		PendingIntent pi;
-		AlarmManager alarms = (AlarmManager) context
-				.getSystemService(Context.ALARM_SERVICE);
-		pi = PendingIntent.getBroadcast(context, ALARM_ACTIVATION_REQUEST,
-				new Intent("in.ceeq.ACTION_BACKUP"),
-				PendingIntent.FLAG_CANCEL_CURRENT);
-		alarms.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-				new DateTime(DateTime.today(TimeZone.getDefault())
-						+ " 02:00:00").getMilliseconds(TimeZone.getDefault()),
-				AlarmManager.INTERVAL_DAY, pi);
+		Backup.getInstance(context).autoBackups(State.ON);
 	}
 
 }

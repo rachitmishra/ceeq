@@ -12,26 +12,15 @@
         android:layout_marginTop="10dp"
         android:autoLink="web|email"
         android:background="@drawable/ic_bg_white"
+        android:gravity="left"
         android:text="@string/help_note_18"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#606060"
-        android:textSize="13sp" />
+        android:textColor="@color/text_medium"
+        android:textSize="14sp" />
 
     <View
         android:layout_width="wrap_content"
         android:layout_height="1dp"
         android:background="@drawable/ic_bg_shadow" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:autoLink="web"
-        android:gravity="center_horizontal"
-        android:text="http://www.ceeq.in"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#f4f4f4"
-        android:textSize="16sp"
-        tools:ignore="HardcodedText" />
 
 </LinearLayout>

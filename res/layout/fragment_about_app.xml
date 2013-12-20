@@ -22,7 +22,7 @@
         android:gravity="center_horizontal"
         android:text="@string/app_version"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#434343" />
+        android:textColor="@color/text_light" />
 
     <TextView
         android:layout_width="match_parent"
@@ -32,7 +32,7 @@
         android:gravity="center_horizontal"
         android:text="@string/ceeq_link"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#f4f4f4" />
+        android:textColor="@color/blue" />
 
     <TextView
         android:layout_width="match_parent"
@@ -44,7 +44,7 @@
         android:padding="8dp"
         android:text="@string/help_note_7"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#606060"
+        android:textColor="@color/text_medium"
         android:textSize="14sp" />
 
     <View

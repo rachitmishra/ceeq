@@ -4,15 +4,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/ic_bg_main"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:paddingTop="16dp" >
 
         <LinearLayout
             android:id="@+id/statusBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_bg_green"
-            android:padding="0dp"
-            android:layout_marginTop="10dp" >
+            android:padding="0dp" >
 
             <View
                 android:layout_width="40dp"
@@ -135,6 +135,30 @@
                 android:onClick="onButtonPressed"
                 android:text="@string/feedback"
                 android:textSize="16sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/ic_bg_shadow" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_bg_white"
+            android:orientation="vertical"
+            android:padding="4dp" >
+
+       <com.google.android.gms.plus.PlusOneButton
+           xmlns:plus="http://schemas.android.com/apk/lib/com.google.android.gms.plus"
+           android:id="@+id/plus_one_button"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_margin="8dp"
+           plus:annotation="inline"
+           plus:size="standard" />
+
         </LinearLayout>
 
         <View

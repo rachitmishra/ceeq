@@ -7,13 +7,26 @@ import android.content.Intent;
 import android.os.IBinder;
 
 public class Protector extends Service {
-	public Protector() {
 
+	public static final String ACTION = "action";
+
+	public enum ProtectorType {
+		START;
 	}
 
+	private ProtectorType type;
+
 	@Override
-	public void onCreate() {
-		Receiver.getInstance(this).register(ReceiverType.POWER_BUTTON);
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		type = (ProtectorType) intent.getExtras().get(ACTION);
+		switch (type) {
+
+		case START:
+			Receiver.getInstance(this).register(ReceiverType.POWER_BUTTON);
+			break;
+		}
+
+		return START_REDELIVER_INTENT;
 	}
 
 	@Override

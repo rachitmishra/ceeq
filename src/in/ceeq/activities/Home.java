@@ -13,9 +13,12 @@ import in.ceeq.actions.Restore;
 import in.ceeq.actions.Upload;
 import in.ceeq.actions.Wipe;
 import in.ceeq.helpers.Helpers;
+import in.ceeq.helpers.PhoneHelper;
+import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.receivers.DeviceAdmin;
 import in.ceeq.services.Backups;
+import in.ceeq.services.Locater.RequestType;
 import in.ceeq.services.Tracker;
 import in.ceeq.services.Uploader.UploadType;
 
@@ -54,7 +57,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
-import android.view.InflateException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -83,7 +85,6 @@ import com.facebook.LoggingBehavior;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.Settings;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -134,7 +135,15 @@ public class Home extends FragmentActivity {
 	private static final String SENDER_ID = "909602096750";
 	private static final int PLUS_ONE_REQUEST_CODE = 9025;
 	private Session.StatusCallback statusCallback = new FBSessionStatus();
-	FragmentManager fragmentManager;
+	private FragmentManager fragmentManager;
+	private DrawerLayout drawerLayout;
+	private ActionBarDrawerToggle drawerToggle;
+	private ListView actionList;
+	private CharSequence drawerTitle;
+	private CharSequence title;
+	private TextView userId, userName;
+	private ImageView userImage;
+	private RelativeLayout userLoading, userDetails;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -148,7 +157,6 @@ public class Home extends FragmentActivity {
 		setupHelpers();
 		checkPlayServices();
 		setupFacebookConnect(savedInstanceState);
-		// setupPager();
 		setupHome();
 		setupDrawer();
 
@@ -157,9 +165,6 @@ public class Home extends FragmentActivity {
 		}
 	}
 
-	/**
-	 * instantiate the helpers required in this activity.
-	 */
 	public void setupHelpers() {
 		preferencesHelper = new PreferencesHelper(this);
 		helpers = Helpers.getInstance(this);
@@ -173,36 +178,15 @@ public class Home extends FragmentActivity {
 
 	}
 
-	/**
-	 * set up the action bar
-	 */
-
 	public void setupActionbar() {
-		// get the action bar, and hide the title
 		getActionBar().setDisplayShowTitleEnabled(false);
-		// get the action bar, set different logo/icon
-		// getActionBar().setIcon(R.drawable.ic_app_action_logo);
-		// get the action bar, set home as clickable and button
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 	}
 
-	/**
-	 * setup bugsense bug tracking in the app
-	 */
 	public void setupBugsense() {
 		BugSenseHandler.initAndStartSession(Home.this, "5996b3d9");
 	}
-
-	private DrawerLayout drawerLayout;
-	private ActionBarDrawerToggle drawerToggle;
-	private ListView actionList;
-	private CharSequence drawerTitle;
-	private CharSequence title;
-	private TextView userId, userName;
-	private ImageView userImage;
-	private RelativeLayout userLoading, userDetails;
-	private PlusOneButton plusOneButton;
 
 	/**
 	 * setup the navigation drawer
@@ -253,8 +237,8 @@ public class Home extends FragmentActivity {
 		}.execute(preferencesHelper
 				.getString(PreferencesHelper.ACCOUNT_USER_IMAGE_URL));
 		actionList = (ListView) findViewById(R.id.drawer_action_list);
-		actionList.setAdapter(new DrawerAdapter());
-		actionList.setOnItemClickListener(new DrawerMenuClickListener());
+		actionList.setAdapter(new DrawerManager());
+		actionList.setOnItemClickListener(new DrawerManager());
 		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
 				R.drawable.ic_drawer, R.string.open_drawer,
@@ -272,20 +256,15 @@ public class Home extends FragmentActivity {
 
 	}
 
-	/**
-	 * The drawer adapter class for creating the Dialog view, mainly for
-	 * inflating the listview in dialog.
-	 * 
-	 */
-	public class DrawerAdapter extends BaseAdapter {
+	public class DrawerManager extends BaseAdapter implements
+			ListView.OnItemClickListener {
 
-		public DrawerAdapter() {
-
+		public DrawerManager() {
 		}
 
 		@Override
 		public int getCount() {
-			return 11;
+			return 12;
 		}
 
 		@Override
@@ -301,18 +280,15 @@ public class Home extends FragmentActivity {
 		@Override
 		public View getView(int position, View convertView, ViewGroup arg2) {
 			TextView header, inner;
+			ImageView innerImage;
 			switch (position) {
 			case 1:
+			case 6:
 				convertView = getLayoutInflater().inflate(
 						R.layout.drawer_action_plus, null);
-				plusOneButton = (PlusOneButton) convertView
-						.findViewById(R.id.plus_one_button);
-				plusOneButton.initialize(
-						"http://plus.google.com/116561373543243917689",
-						PLUS_ONE_REQUEST_CODE);
 				return convertView;
 			case 2:
-			case 6:
+			case 7:
 				convertView = getLayoutInflater().inflate(
 						R.layout.drawer_action_header, null);
 				header = (TextView) convertView
@@ -325,7 +301,11 @@ public class Home extends FragmentActivity {
 				inner = (TextView) convertView
 						.findViewById(R.id.drawer_list_inner);
 				inner.setText(getInnerText(position));
+				innerImage = (ImageView) convertView
+						.findViewById(R.id.drawer_list_icon);
+				innerImage.setBackgroundResource(getInnerImage(position));
 				return convertView;
+
 			}
 
 		}
@@ -333,20 +313,20 @@ public class Home extends FragmentActivity {
 		public int getInnerText(int position) {
 			switch (position) {
 			case 0:
-				return R.string.disconnect;
+				return R.string.my_device;
 			case 3:
 				return R.string.tab_home;
 			case 4:
 				return R.string.tab_backup;
 			case 5:
 				return R.string.tab_security;
-			case 7:
-				return R.string.privacy;
 			case 8:
-				return R.string.menu_feedback;
+				return R.string.privacy;
 			case 9:
-				return R.string.about;
+				return R.string.menu_feedback;
 			case 10:
+				return R.string.about;
+			case 11:
 				return R.string.rate;
 			default:
 				return R.string.rate;
@@ -357,18 +337,94 @@ public class Home extends FragmentActivity {
 			switch (position) {
 			case 2:
 				return R.string.navigate;
-			case 6:
+			case 7:
 				return R.string.more;
 			default:
 				return R.string.more;
 			}
 		}
 
+		public int getInnerImage(int position) {
+			switch (position) {
+			case 0:
+				return R.drawable.ic_stat_my_device;
+			case 3:
+				return R.drawable.ic_stat_home;
+			case 4:
+				return R.drawable.ic_stat_storage;
+			case 5:
+				return R.drawable.ic_stat_security;
+			case 8:
+				return R.drawable.ic_stat_privacy;
+			case 9:
+				return R.drawable.ic_stat_content_email;
+			case 10:
+				return R.drawable.ic_stat_action_about;
+			case 11:
+				return R.drawable.ic_stat_rating_important;
+			default:
+				return R.drawable.ic_stat_rating_important;
+			}
+		}
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			selectItem(position);
+		}
+
+		private void selectItem(int position) {
+
+			Fragment fragment = null;
+			switch (position) {
+			case 0:
+				fragment = new MyDeviceFragment();
+				break;
+			case 3:
+				fragment = new HomeFragment();
+				break;
+			case 4:
+				fragment = new BackupFragment();
+				break;
+			case 5:
+				fragment = new SecurityFragment();
+				break;
+			case 8:
+				fragment = new PrivacyFragment();
+				break;
+			case 9:
+				Intent emailIntent = new Intent(Intent.ACTION_SEND)
+						.setType(HTTP.PLAIN_TEXT_TYPE);
+				emailIntent
+						.putExtra(
+								Intent.EXTRA_EMAIL,
+								new String[] { getString(R.string.ceeq_support_email) });
+				emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Suggestion/Bugs");
+				emailIntent.putExtra(
+						Intent.EXTRA_TEXT,
+						"[Ceeq Support \n User: "
+								+ preferencesHelper.getString("accountName")
+								+ "]");
+				startActivity(emailIntent);
+				break;
+			case 10:
+				fragment = new AboutApplicationFragment();
+				break;
+			case 11:
+				Intent rateIntent = new Intent(Intent.ACTION_VIEW).setData(Uri
+						.parse(getString(R.string.ceeq_play_link)));
+				startActivity(rateIntent);
+				break;
+			}
+			if (fragment != null)
+				fragmentManager.beginTransaction()
+						.replace(R.id.container, fragment).commit();
+			actionList.setItemChecked(position, true);
+			drawerLayout.closeDrawer(Gravity.START);
+		}
+
 	}
 
-	/**
-	 * if this is first run show the drawer once
-	 */
 	public void setupFirstrun() {
 		drawerLayout.openDrawer(Gravity.START);
 		preferencesHelper.setBoolean(PreferencesHelper.FIRST_LOGIN, false);
@@ -430,69 +486,6 @@ public class Home extends FragmentActivity {
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		drawerToggle.onConfigurationChanged(newConfig);
-	}
-
-	private class DrawerMenuClickListener implements
-			ListView.OnItemClickListener {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-			selectItem(position);
-		}
-
-		private void selectItem(int position) {
-
-			Fragment fragment = null;
-			switch (position) {
-
-			case 3:
-				fragment = new HomeFragment();
-				break;
-			case 4:
-				fragment = new BackupFragment();
-				break;
-			case 5:
-				fragment = new SecurityFragment();
-				break;
-			case 7:
-				fragment = new PrivacyFragment();
-				break;
-			case 8:
-				Intent emailIntent = new Intent(Intent.ACTION_SEND)
-						.setType(HTTP.PLAIN_TEXT_TYPE);
-				emailIntent
-						.putExtra(
-								Intent.EXTRA_EMAIL,
-								new String[] { getString(R.string.ceeq_support_email) });
-				emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Suggestion/Bugs");
-				emailIntent.putExtra(
-						Intent.EXTRA_TEXT,
-						"[Ceeq Support \n User: "
-								+ preferencesHelper.getString("accountName")
-								+ "]");
-				startActivity(emailIntent);
-				break;
-			case 9:
-				fragment = new AboutApplicationFragment();
-				break;
-			case 10:
-				Intent rateIntent = new Intent(Intent.ACTION_VIEW).setData(Uri
-						.parse(getString(R.string.ceeq_play_link)));
-				startActivity(rateIntent);
-				break;
-			}
-			if (fragment != null)
-				fragmentManager.beginTransaction()
-						.replace(R.id.container, fragment).commit();
-			actionList.setItemChecked(position, true);
-			drawerLayout.closeDrawer(Gravity.START);
-		}
-	}
-
-	@Override
-	public void setTitle(CharSequence title) {
-		this.title = title;
-		getActionBar().setTitle(this.title);
 	}
 
 	public static Handler messageHandler = new MessageHandler();
@@ -692,7 +685,9 @@ public class Home extends FragmentActivity {
 		if (toggle.isChecked()) {
 			Toast.makeText(this, "Automatic tracking enabled.",
 					Toast.LENGTH_SHORT).show();
-			startService(new Intent(this, Tracker.class));
+			Intent startTracker = new Intent(this, Tracker.class);
+			startTracker.putExtra(Tracker.ACTION, RequestType.TRACKER);
+			startService(startTracker);
 		} else {
 			Toast.makeText(this, "Automatic tracking disabled.",
 					Toast.LENGTH_SHORT).show();
@@ -1151,7 +1146,8 @@ public class Home extends FragmentActivity {
 		private TextView statusText;
 		private LinearLayout statusBox;
 		private ArrayList<Status> notification_list;
-		private ToggleButton toggle;
+		private ToggleButton toggleButton;
+		private PlusOneButton plusOneButton;
 
 		public HomeFragment() {
 		}
@@ -1182,6 +1178,12 @@ public class Home extends FragmentActivity {
 					preferencesHelper.getBoolean(PreferencesHelper.APP_STATUS),
 					notification_list);
 			notificationList.setAdapter(notificationListAdapter);
+
+			plusOneButton = (PlusOneButton) view
+					.findViewById(R.id.plus_one_button);
+			plusOneButton.initialize(
+					"http://plus.google.com/116561373543243917689",
+					PLUS_ONE_REQUEST_CODE);
 			return view;
 		}
 
@@ -1192,11 +1194,11 @@ public class Home extends FragmentActivity {
 		}
 
 		public void restoreToggleStates(View v) {
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_protect);
-			toggle.setChecked(preferencesHelper
+			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_protect);
+			toggleButton.setChecked(preferencesHelper
 					.getBoolean(PreferencesHelper.PROTECT_ME_STATUS));
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_stealth);
-			toggle.setChecked(preferencesHelper
+			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_stealth);
+			toggleButton.setChecked(preferencesHelper
 					.getBoolean(PreferencesHelper.STEALTH_MODE_STATUS));
 		}
 
@@ -1257,17 +1259,17 @@ public class Home extends FragmentActivity {
 		public boolean setSecurityStatus() {
 			boolean deviceAdminActive = preferencesHelper
 					.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS);
-			if (helpers.hasGpsEnabled() & deviceAdminActive) {
+			if (helpers.isGpsEnabled() & deviceAdminActive) {
 				return true;
-			} else if (helpers.hasGpsEnabled() & !deviceAdminActive) {
+			} else if (helpers.isGpsEnabled() & !deviceAdminActive) {
 				notification_list.add(Status.DEVICE_ADMIN);
 				counter++;
 				return false;
-			} else if (!helpers.hasGpsEnabled() & deviceAdminActive) {
+			} else if (!helpers.isGpsEnabled() & deviceAdminActive) {
 				notification_list.add(Status.GPS);
 				counter++;
 				return false;
-			} else if (!helpers.hasGpsEnabled() & !deviceAdminActive) {
+			} else if (!helpers.isGpsEnabled() & !deviceAdminActive) {
 				notification_list.add(Status.GPS);
 				notification_list.add(Status.DEVICE_ADMIN);
 				counter += 2;
@@ -1395,6 +1397,8 @@ public class Home extends FragmentActivity {
 							DEVICE_ADMIN_ACTIVATION_REQUEST);
 					break;
 				case SYNC:
+					break;
+				default:
 					break;
 				}
 
@@ -1612,8 +1616,8 @@ public class Home extends FragmentActivity {
 			OnMyLocationChangeListener {
 
 		private GoogleMap map;
-		private View view;
-		private ToggleButton toggle;
+		private static View view;
+		private ToggleButton toggleButton;
 		private PreferencesHelper preferencesHelper;
 
 		public SecurityFragment() {
@@ -1623,38 +1627,40 @@ public class Home extends FragmentActivity {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 
-			preferencesHelper = new PreferencesHelper(this.getActivity());
-
+			preferencesHelper = new PreferencesHelper(getActivity());
+			if (view != null) {
+				ViewGroup parent = (ViewGroup) view.getParent();
+				if (parent != null)
+					parent.removeView(view);
+			}
 			try {
 				view = inflater.inflate(R.layout.fragment_security, container,
 						false);
 
 				map = ((SupportMapFragment) getActivity()
-						.getSupportFragmentManager().findFragmentById(R.id.map))
-						.getMap();
+						.getSupportFragmentManager()
+						.findFragmentById(R.id.map)).getMap();
 				map.getUiSettings().setAllGesturesEnabled(false);
 				map.getUiSettings().setZoomControlsEnabled(false);
 				map.getUiSettings().setMyLocationButtonEnabled(false);
 				map.setMyLocationEnabled(true);
 				map.setOnMyLocationChangeListener(this);
 				MapsInitializer.initialize(getActivity());
-			} catch (GooglePlayServicesNotAvailableException e) {
-				e.printStackTrace();
-			} catch (InflateException e) {
-
-			} catch (NullPointerException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
+
 			restoreToggleStates(view);
 			return view;
 		}
 
-		public void restoreToggleStates(View v) {
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_track);
-			toggle.setChecked(preferencesHelper
+		public void restoreToggleStates(View view) {
+
+			toggleButton = (ToggleButton) view.findViewById(R.id.toggle_track);
+			toggleButton.setChecked(preferencesHelper
 					.getBoolean(PreferencesHelper.AUTO_TRACK_STATUS));
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_blip);
-			toggle.setChecked(preferencesHelper
+			toggleButton = (ToggleButton) view.findViewById(R.id.toggle_blip);
+			toggleButton.setChecked(preferencesHelper
 					.getBoolean(PreferencesHelper.AUTO_BLIP_STATUS));
 		}
 
@@ -1698,27 +1704,68 @@ public class Home extends FragmentActivity {
 		}
 	}
 
-	public static class AntivirusFragment extends Fragment {
+	public static class MapFragment extends Fragment {
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			View view = inflater.inflate(R.layout.fragment_antivirus,
-					container, false);
+			View view = inflater.inflate(R.layout.fragment_map, container,
+					false);
 			return view;
 		}
 
 	}
 
-	public static class AboutDeviceFragment extends Fragment {
+	public static class MyDeviceFragment extends Fragment {
+		private PhoneHelper phoneHelper;
+		private PreferencesHelper preferencesHelper;
+		private Helpers helper;
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_about,
-					container, false);
-			return rootView;
+			View view = inflater.inflate(R.layout.fragment_about, container,
+					false);
+			preferencesHelper = PreferencesHelper.getInstance(getActivity());
+			phoneHelper = PhoneHelper.getInstance(getActivity());
+			helper = Helpers.getInstance(getActivity());
+			setupData(view);
+			return view;
 		}
+
+		public void setupData(View view) {
+			TextView text = (TextView) view.findViewById(R.id.c_account);
+			text.setText(preferencesHelper
+					.getString(PreferencesHelper.ACCOUNT_USER_ID));
+			text = (TextView) view.findViewById(R.id.c_name);
+			text.setText(preferencesHelper
+					.getString(PreferencesHelper.ACCOUNT_USER_NAME));
+			text = (TextView) view.findViewById(R.id.c_sim);
+			text.setText(phoneHelper.getData(Phone.SIM_ID));
+			text = (TextView) view.findViewById(R.id.c_imsi);
+			text.setText(phoneHelper.getData(Phone.IMSI));
+			text = (TextView) view.findViewById(R.id.c_iemi);
+			text.setText(phoneHelper.getData(Phone.IEMI));
+			text = (TextView) view.findViewById(R.id.c_gps);
+			text.setText(booleanToString(helper.isGpsEnabled()));
+			text = (TextView) view.findViewById(R.id.c_admin);
+			text.setText(booleanToString(preferencesHelper
+					.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS)));
+			text = (TextView) view.findViewById(R.id.c_operator);
+			text.setText(phoneHelper.getData(Phone.OPERATOR));
+			text = (TextView) view.findViewById(R.id.c_size);
+			text.setText(phoneHelper.getSize());
+			text = (TextView) view.findViewById(R.id.c_pixels);
+			text.setText(phoneHelper.getDensity());
+			text = (TextView) view.findViewById(R.id.c_apps);
+			text.setText(phoneHelper.getTotalApplications() + "");
+
+		}
+
+		public String booleanToString(boolean value) {
+			return (value) ? "ON" : "OFF";
+		}
+
 	}
 
 	public class FBSessionStatus implements Session.StatusCallback {
