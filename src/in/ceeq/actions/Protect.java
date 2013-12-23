@@ -2,6 +2,7 @@ package in.ceeq.actions;
 
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Protector;
+import in.ceeq.services.Protector.ProtectorType;
 import android.content.Context;
 import android.content.Intent;
 
@@ -26,6 +27,7 @@ public class Protect {
 
 	public void enable() {
 		Intent startProtector = new Intent(context, Protector.class);
+		startProtector.putExtra(Protector.ACTION, ProtectorType.START);
 		context.startService(startProtector);
 	}
 

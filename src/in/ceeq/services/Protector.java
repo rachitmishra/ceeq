@@ -14,12 +14,12 @@ public class Protector extends Service {
 		START;
 	}
 
-	private ProtectorType type;
+	private ProtectorType protectorType;
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		type = (ProtectorType) intent.getExtras().get(ACTION);
-		switch (type) {
+		protectorType = (ProtectorType) intent.getExtras().get(ACTION);
+		switch (protectorType) {
 
 		case START:
 			Receiver.getInstance(this).register(ReceiverType.POWER_BUTTON);

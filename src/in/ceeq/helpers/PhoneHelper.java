@@ -184,7 +184,7 @@ public class PhoneHelper {
 	private String getUniqueDeviceId() {
 		return android.os.Build.MANUFACTURER.substring(0, 3).toUpperCase(
 				Locale.getDefault())
-				+ "-" + randomString().substring(0, 6);
+				+ "-" + randomString().substring(0, 6) + get(Phone.IEMI);
 	}
 
 	private String randomString() {

@@ -50,11 +50,11 @@ public class Splash extends Activity implements ConnectionCallbacks,
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
-		checkConnectivity();
-		checkPlayServices();
-		setupGoogleConnect();
 		setupHelpers();
+		checkPlayServices();
+		checkConnectivity();
 		checkGoogleConnect();
+		setupGoogleConnect();
 	}
 
 	private PreferencesHelper preferencesHelper;
@@ -62,12 +62,6 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	private void setupHelpers() {
 		preferencesHelper = PreferencesHelper.getInstance(this);
 		phoneHelper = PhoneHelper.getInstance(this);
-	}
-
-	private void setupGoogleConnect() {
-		progreeBar = (ProgressBar) findViewById(R.id.connectProgress);
-		plus = new PlusClient.Builder(this, this, this).setActions(
-				"http://schemas.google.com/AddActivity").build();
 	}
 
 	private void checkConnectivity() {
@@ -102,6 +96,12 @@ public class Splash extends Activity implements ConnectionCallbacks,
 			});
 		}
 
+	}
+
+	private void setupGoogleConnect() {
+		progreeBar = (ProgressBar) findViewById(R.id.connectProgress);
+		plus = new PlusClient.Builder(this, this, this).setActions(
+				"http://schemas.google.com/AddActivity").build();
 	}
 
 	private void connectGoogle() {

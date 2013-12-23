@@ -99,6 +99,23 @@ public class Home extends FragmentActivity {
 	public final static int SHOW = 1;
 	public final static int HIDE = 0;
 	private static final int DEVICE_ADMIN_ACTIVATION_REQUEST = 9014;
+	private static ProgressBar progressBar;
+	private PreferencesHelper preferencesHelper;
+	private PhoneHelper phoneHelper;
+	private DialogsHelper dialogsHelper;
+	private boolean exit = false;
+	private static final String SENDER_ID = "909602096750";
+	private static final int PLUS_ONE_REQUEST_CODE = 9025;
+	private Session.StatusCallback statusCallback = new FBSessionStatus();
+	private FragmentManager fragmentManager;
+	private DrawerLayout drawerLayout;
+	private ActionBarDrawerToggle drawerToggle;
+	private ListView actionList;
+	private CharSequence drawerTitle;
+	private CharSequence title;
+	private TextView userId, userName;
+	private ImageView userImage;
+	private RelativeLayout userLoading, userDetails;
 
 	public enum DialogType {
 		PROTECT, STEALTH, FEEDBACK, BACKUP, RESTORE, BLIP, WIPE, WIPE_EXTERNAL_STORAGE, WIPE_DEVICE, WIPE_EXTERNAL_STORAGE_AND_DEVICE, DEVICE_ADMIN
@@ -125,24 +142,6 @@ public class Home extends FragmentActivity {
 	public enum ToggleState {
 		OFF, ON
 	}
-
-	private static ProgressBar progressBar;
-	private PreferencesHelper preferencesHelper;
-	private PhoneHelper phoneHelper;
-	private DialogsHelper dialogsHelper;
-	private boolean exit = false;
-	private static final String SENDER_ID = "909602096750";
-	private static final int PLUS_ONE_REQUEST_CODE = 9025;
-	private Session.StatusCallback statusCallback = new FBSessionStatus();
-	private FragmentManager fragmentManager;
-	private DrawerLayout drawerLayout;
-	private ActionBarDrawerToggle drawerToggle;
-	private ListView actionList;
-	private CharSequence drawerTitle;
-	private CharSequence title;
-	private TextView userId, userName;
-	private ImageView userImage;
-	private RelativeLayout userLoading, userDetails;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -250,6 +249,14 @@ public class Home extends FragmentActivity {
 			public void onDrawerOpened(View drawerView) {
 				getActionBar().setTitle(drawerTitle);
 			}
+
+			@Override
+			public void onDrawerSlide(View drawerView, float slideOffset) {
+				super.onDrawerSlide(drawerView, slideOffset);
+				drawerLayout.bringChildToFront(drawerView);
+				drawerLayout.requestLayout();
+			}
+
 		};
 		drawerLayout.setDrawerListener(drawerToggle);
 
@@ -520,7 +527,7 @@ public class Home extends FragmentActivity {
 	}
 
 	public void checkPlayServices() {
-		if (phoneHelper.enabled(Phone.PLAY_SERVICES)) {
+		if (!phoneHelper.enabled(Phone.PLAY_SERVICES)) {
 			startActivity(new Intent(this, GoogleServices.class).putExtra(
 					"from", 1));
 			this.finish();
@@ -955,8 +962,12 @@ public class Home extends FragmentActivity {
 						null);
 			case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
 				return inflater.inflate(R.layout.dialog_wipe, null);
+			case FEEDBACK:
+				feedbackView = inflater.inflate(R.layout.dialog_feedback, null);
+				return feedbackView;
 			default:
-				return inflater.inflate(R.layout.dialog_feedback, null);
+				feedbackView = inflater.inflate(R.layout.dialog_feedback, null);
+				return feedbackView;
 
 			}
 		}
