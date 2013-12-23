@@ -43,6 +43,7 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.facebook.LoggingBehavior;
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -91,6 +92,8 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 		addPreferencesFromResource(R.xml.app_preferences);
 		preferencesHelper = new PreferencesHelper(this.getActivity());
 		setupGoogle();
+		setupBugsense();
+
 		setupFacebook(savedInstanceState);
 
 		changePrimaryContact = (Preference) findPreference("changePrimaryContact");
@@ -116,6 +119,10 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 		notifications.setOnPreferenceChangeListener(new NotificationsToggle(
 				getActivity()));
 
+	}
+
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(getActivity(), "5996b3d9");
 	}
 
 	public void setupGoogle() {

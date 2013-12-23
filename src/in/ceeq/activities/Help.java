@@ -26,6 +26,8 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import com.bugsense.trace.BugSenseHandler;
+
 public class Help extends Activity {
 
 	@Override
@@ -33,6 +35,7 @@ public class Help extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_help);
 		setupActionbar();
+		setupBugsense();
 		createHelpQuestions();
 		createHelpAnswers();
 		setupHelplist();
@@ -40,13 +43,19 @@ public class Help extends Activity {
 
 	private ExpandableListView helpList;
 	private ExpandableListAdapter helpListAdapter;
+
 	public void setupHelplist() {
 		helpList = (ExpandableListView) findViewById(R.id.helpList);
 		helpListAdapter = new ListAdapter(this, help_list, text_list);
 		helpList.setAdapter(helpListAdapter);
 	}
 
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(Help.this, "5996b3d9");
+	}
+
 	ArrayList<String> help_list, text_list;
+
 	public void createHelpQuestions() {
 		help_list = new ArrayList<String>();
 		help_list.add("What is Ceeq ?");
@@ -182,9 +191,9 @@ public class Help extends Activity {
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case android.R.id.home :
-				NavUtils.navigateUpFromSameTask(this);
-				return true;
+		case android.R.id.home:
+			NavUtils.navigateUpFromSameTask(this);
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}

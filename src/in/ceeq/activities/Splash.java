@@ -25,6 +25,7 @@ import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -51,6 +52,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
 		setupHelpers();
+		setupBugsense();
 		checkPlayServices();
 		checkConnectivity();
 		checkGoogleConnect();
@@ -62,6 +64,10 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	private void setupHelpers() {
 		preferencesHelper = PreferencesHelper.getInstance(this);
 		phoneHelper = PhoneHelper.getInstance(this);
+	}
+
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(Splash.this, "5996b3d9");
 	}
 
 	private void checkConnectivity() {

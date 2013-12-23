@@ -35,6 +35,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bugsense.trace.BugSenseHandler;
+
 public class ViewBackups extends Activity {
 
 	public static final int CONTACT_FILE = 1;
@@ -51,6 +53,7 @@ public class ViewBackups extends Activity {
 		setContentView(R.layout.activity_view_backups);
 		setupActionbar();
 		setupHelpers();
+		setupBugsense();
 		setupFileGrid();
 	}
 
@@ -63,6 +66,10 @@ public class ViewBackups extends Activity {
 
 	private void setupHelpers() {
 		filesHelper = new FilesHelper(this);
+	}
+
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(ViewBackups.this, "5996b3d9");
 	}
 
 	private GridView gridView;

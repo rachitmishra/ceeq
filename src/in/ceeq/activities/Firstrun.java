@@ -51,6 +51,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -70,6 +71,7 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 		setContentView(R.layout.activity_firstrun);
 
 		setupHelpers();
+		setupBugsense();
 		setupGoogleConnect();
 		setupHelplist();
 		Logger.w("First run has been started");
@@ -94,6 +96,10 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 	public void setupHelpers() {
 		phoneHelper = PhoneHelper.getInstance(this);
 		preferencesHelper = PreferencesHelper.getInstance(this);
+	}
+
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(Firstrun.this, "5996b3d9");
 	}
 
 	private PlusClient plus;

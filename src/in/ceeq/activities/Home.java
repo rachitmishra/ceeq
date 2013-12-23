@@ -148,7 +148,7 @@ public class Home extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 
 		setupActionbar();
-		// setupBugsense();
+		setupBugsense();
 		setContentView(R.layout.activity_home);
 		this.title = drawerTitle = getTitle();
 
