@@ -29,7 +29,7 @@ public class Startup extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		preferencesHelper = new PreferencesHelper(context);
+		preferencesHelper = PreferencesHelper.getInstance(context);
 		showNotification(context);
 		checkSimChange(context);
 		if (preferencesHelper.getBoolean(PreferencesHelper.AUTO_BACKUP_STATUS))
@@ -48,7 +48,7 @@ public class Startup extends BroadcastReceiver {
 
 		try {
 			if (!tm.getSimSerialNumber().equals(
-					preferencesHelper.getString("simNumber"))) {
+					preferencesHelper.getString(PreferencesHelper.SIM_NUMBER))) {
 
 				try {
 					Intent commands = new Intent(context, Commander.class);

@@ -24,7 +24,7 @@ import android.os.Messenger;
 
 public class Backup {
 	private Context context;
-	public static final int ALARM_ACTIVATION_REQUEST = 9012;
+	public static final int ALARM_ACTIVATION_REQUEST = 2337;
 
 	public enum State {
 		ON, OFF

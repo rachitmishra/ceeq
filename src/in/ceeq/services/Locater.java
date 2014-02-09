@@ -49,10 +49,12 @@ public class Locater extends IntentService implements
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
+
 		locationRequest = LocationRequest.create();
 		locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		preferencesHelper = PreferencesHelper.getInstance(this);
 		locationClient = new LocationClient(this, this, this);
+
 		requestType = (RequestType) intent.getExtras().get(ACTION);
 		senderAddress = intent.getExtras().getString(SENDER_ADDRESS);
 		Logger.d("Type : " + requestType + " has sender address : "
