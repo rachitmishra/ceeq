@@ -19,7 +19,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -95,7 +94,7 @@ public class ViewBackups extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
+			finish();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

@@ -62,7 +62,8 @@
                     android:paddingLeft="4dp"
                     android:paddingRight="4dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="#999999" />
+                    android:textColor="#999999"
+                     />
             </RelativeLayout>
             <View
                 android:layout_width="match_parent"

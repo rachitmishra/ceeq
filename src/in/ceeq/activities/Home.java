@@ -421,6 +421,9 @@ public class Home extends FragmentActivity {
 						.parse(getString(R.string.ceeq_play_link)));
 				startActivity(rateIntent);
 				break;
+			default:
+				actionList.setItemChecked(position, false);
+				return;
 			}
 			if (fragment != null)
 				fragmentManager.beginTransaction()
