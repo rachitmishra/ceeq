@@ -7,14 +7,14 @@
 
 package in.ceeq.actions;
 
+import in.ceeq.services.Locater;
+import in.ceeq.services.Locater.RequestType;
 import android.content.Context;
 import android.content.Intent;
 
-import in.ceeq.services.Locater;
-import in.ceeq.services.Locater.RequestType;
-
 public class Blip {
 	private Context context;
+
 	public Blip(Context context) {
 		this.context = context;
 	}
@@ -23,7 +23,7 @@ public class Blip {
 		return new Blip(context);
 	}
 
-	public void send() {
+	public void send(String message) {
 		Intent getLocation = new Intent(context, Locater.class);
 		getLocation.putExtra(Locater.ACTION, RequestType.MESSAGE);
 		context.startService(getLocation);

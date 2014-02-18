@@ -1,14 +1,14 @@
 package in.ceeq.actions;
 
-import android.content.Context;
-import android.content.Intent;
-
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Uploader;
+import android.content.Context;
+import android.content.Intent;
 
 public class Feedback {
 	private Context context;
 	private PreferencesHelper preferencesHelper;
+
 	public Feedback(Context context) {
 		this.context = context;
 		preferencesHelper = PreferencesHelper.getInstance(context);

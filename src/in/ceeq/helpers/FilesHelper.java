@@ -1,8 +1,7 @@
 package in.ceeq.helpers;
 
-import android.content.Context;
-import android.os.Environment;
-import android.widget.Toast;
+import hirondelle.date4j.DateTime;
+import in.ceeq.helpers.PhoneHelper.Phone;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -16,21 +15,23 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.TimeZone;
 
-import hirondelle.date4j.DateTime;
+import android.content.Context;
+import android.os.Environment;
+import android.widget.Toast;
 
 public class FilesHelper {
 
 	private Context context;
 	private DataOutputStream out;
 	private File storageLocation;
-	private Helpers helpers;
+	private PhoneHelper phoneHelper;
 	public static final String APP_PATH = "/data/ceeq";
 	public static final String BACKUP_PATH = "/data/ceeq/backups";
 	public static final String CAM_PATH = "/data/ceeq/camera";
 
 	public FilesHelper(Context context) {
 		this.context = context.getApplicationContext();
-		helpers = Helpers.getInstance(context);
+		phoneHelper = PhoneHelper.getInstance(context);
 	}
 
 	public static FilesHelper getInstance(Context context) {
@@ -39,7 +40,7 @@ public class FilesHelper {
 
 	public File createFile(String path, String type) throws IOException,
 			ExternalStorageNotFoundException {
-		if (!helpers.hasExternalStorage()) {
+		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
 			throw new ExternalStorageNotFoundException();
 		}
 		storageLocation = new File(Environment.getExternalStorageDirectory(),
@@ -55,7 +56,7 @@ public class FilesHelper {
 	}
 
 	public boolean haveBackupFiles() {
-		if (!helpers.hasExternalStorage()) {
+		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
 			Toast.makeText(context, "Sorry, External storage not found.",
 					Toast.LENGTH_SHORT).show();
 		}
@@ -70,7 +71,7 @@ public class FilesHelper {
 	}
 
 	public File[] getFiles(String path) {
-		if (!helpers.hasExternalStorage()) {
+		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
 			Toast.makeText(context, "Sorry, External storage not found.",
 					Toast.LENGTH_SHORT).show();
 		}
@@ -88,12 +89,12 @@ public class FilesHelper {
 		for (File file : files)
 			fileNames.put(
 					file.getName(),
-					new ArrayList<String>(Arrays.asList(new String[]{
+					new ArrayList<String>(Arrays.asList(new String[] {
 							fileType(file.getName()),
 							(file.length() / 1024) + "",
 							DateTime.forInstant(file.lastModified(),
 									TimeZone.getDefault()).toString()
-									.substring(0, 10)})));
+									.substring(0, 10) })));
 		return fileNames;
 	}
 
@@ -123,7 +124,7 @@ public class FilesHelper {
 
 	public InputStream readFile(String fileName) throws FileNotFoundException,
 			ExternalStorageNotFoundException {
-		if (!helpers.hasExternalStorage()) {
+		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
 			throw new ExternalStorageNotFoundException();
 		}
 		return new FileInputStream(Environment.getExternalStorageDirectory()
@@ -133,7 +134,7 @@ public class FilesHelper {
 	public boolean deleteFile(String path, String[] fileName)
 			throws ExternalStorageNotFoundException {
 		boolean deleted = false;
-		if (!helpers.hasExternalStorage()) {
+		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
 			throw new ExternalStorageNotFoundException();
 		} else {
 
@@ -153,8 +154,13 @@ public class FilesHelper {
 
 	public String getFileName(String type) {
 		if (type.equals("cam"))
-			return type + "_" + helpers.getNewFileName() + ".jpg";
+			return type + "_" + getNewFileName() + ".jpg";
 		else
-			return type + "_" + helpers.getNewFileName() + ".xml";
+			return type + "_" + getNewFileName() + ".xml";
+	}
+
+	public String getNewFileName() {
+		return DateTime.now(TimeZone.getDefault()).format("DD-MM-YY-hh-mm-ss")
+				.toString();
 	}
 }

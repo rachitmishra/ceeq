@@ -1,10 +1,8 @@
 package in.ceeq.actions;
 
-import in.ceeq.R;
 import in.ceeq.activities.Splash;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Uploader;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -116,8 +114,6 @@ public class Reset {
 				launchSplash.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
 				context.startActivity(launchSplash);
-				((Activity) context).overridePendingTransition(
-						R.drawable.fadeout, R.drawable.fadein);
 			}
 
 		}.execute();

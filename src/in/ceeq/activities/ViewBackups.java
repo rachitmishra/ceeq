@@ -19,7 +19,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +33,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bugsense.trace.BugSenseHandler;
 
 public class ViewBackups extends Activity {
 
@@ -51,6 +52,7 @@ public class ViewBackups extends Activity {
 		setContentView(R.layout.activity_view_backups);
 		setupActionbar();
 		setupHelpers();
+		setupBugsense();
 		setupFileGrid();
 	}
 
@@ -63,6 +65,10 @@ public class ViewBackups extends Activity {
 
 	private void setupHelpers() {
 		filesHelper = new FilesHelper(this);
+	}
+
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(ViewBackups.this, "5996b3d9");
 	}
 
 	private GridView gridView;
@@ -88,7 +94,7 @@ public class ViewBackups extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
+			finish();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

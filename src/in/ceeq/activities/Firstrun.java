@@ -10,6 +10,7 @@ package in.ceeq.activities;
 import in.ceeq.R;
 import in.ceeq.actions.Choose;
 import in.ceeq.actions.Reset;
+import in.ceeq.helpers.Logger;
 import in.ceeq.helpers.PhoneHelper;
 import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
@@ -50,6 +51,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -69,9 +71,10 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 		setContentView(R.layout.activity_firstrun);
 
 		setupHelpers();
+		setupBugsense();
 		setupGoogleConnect();
 		setupHelplist();
-
+		Logger.w("First run has been started");
 		Reset.getInstance(this).defaults();
 		setupDevice();
 		pinNumber = (EditText) findViewById(R.id.pinNumber);
@@ -80,9 +83,11 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 
 	public void setupDevice() {
 		preferencesHelper.setString(PreferencesHelper.SIM_NUMBER,
-				phoneHelper.getData(Phone.SIM_ID));
+				phoneHelper.get(Phone.SIM_ID));
 		preferencesHelper.setString(PreferencesHelper.IEMI_NUMBER,
-				phoneHelper.getData(Phone.IEMI));
+				phoneHelper.get(Phone.IEMI));
+		preferencesHelper.setString(PreferencesHelper.DEVICE_ID,
+				phoneHelper.get(Phone.UNIQUE_ID));
 	}
 
 	private PreferencesHelper preferencesHelper;
@@ -91,6 +96,10 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 	public void setupHelpers() {
 		phoneHelper = PhoneHelper.getInstance(this);
 		preferencesHelper = PreferencesHelper.getInstance(this);
+	}
+
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(Firstrun.this, "5996b3d9");
 	}
 
 	private PlusClient plus;
@@ -149,11 +158,13 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 				launchHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				launchHome.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				startActivity(launchHome);
-				overridePendingTransition(R.drawable.fadeout, R.drawable.fadein);
-			} else if (!setPin)
-				Toast.makeText(Firstrun.this, R.string.toast_string_10,
-						Toast.LENGTH_SHORT).show();
-			else if (!setContact)
+				overridePendingTransition(0, 0);
+			} else if (!setPin) {
+				if (pinNumber.getText().length() == 0)
+					pinNumber.setError(getString(R.string.toast_string_10));
+				else if (pinNumber.getText().length() < 6)
+					pinNumber.setError("PIN should atleast be of 6 digits.");
+			} else if (!setContact)
 				Toast.makeText(Firstrun.this, R.string.toast_string_11,
 						Toast.LENGTH_SHORT).show();
 			break;
@@ -164,15 +175,6 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 
 		@Override
 		public void afterTextChanged(Editable s) {
-			if (s.length() < 6) {
-				pinNumber.setCompoundDrawablesWithIntrinsicBounds(0, 0,
-						R.drawable.ic_no, 0);
-				setPin = false;
-			} else {
-				pinNumber.setCompoundDrawablesWithIntrinsicBounds(0, 0,
-						R.drawable.ic_yes, 0);
-				setPin = true;
-			}
 		}
 
 		@Override
@@ -185,12 +187,17 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 		public void onTextChanged(CharSequence text, int arg1, int arg2,
 				int arg3) {
 			if (text.length() >= 6) {
+				pinNumber.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+						R.drawable.ic_yes, 0);
 				preferencesHelper.setString(PreferencesHelper.PIN_NUMBER,
 						pinNumber.getText().toString());
 
 				Toast.makeText(Firstrun.this, R.string.toast_string_2,
 						Toast.LENGTH_LONG).show();
 				setPin = true;
+			} else {
+				pinNumber.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+				setPin = false;
 			}
 
 		}

@@ -11,8 +11,6 @@ public class Stealth {
 	private Context context;
 	private PreferencesHelper preferencesHelper;
 	private Notifications notifications;
-	private static final boolean ENABLE = true;
-	private static final boolean DISABLE = false;
 
 	public Stealth(Context context) {
 		this.context = context;
@@ -32,14 +30,14 @@ public class Stealth {
 
 	public void enable() {
 		preferencesHelper.setBoolean(PreferencesHelper.STEALTH_MODE_STATUS,
-				ENABLE);
+				true);
 
 		context.getPackageManager().setComponentEnabledSetting(
 				new ComponentName("in.ceeq", "in.ceeq.Launcher"),
 				PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
 				PackageManager.DONT_KILL_APP);
 		preferencesHelper.setBoolean(PreferencesHelper.NOTIFICATIONS_STATUS,
-				DISABLE);
+				false);
 		notifications.remove();
 		try {
 			context.startActivity(new Intent(context, Launcher.class));
@@ -54,9 +52,9 @@ public class Stealth {
 				PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
 				PackageManager.DONT_KILL_APP);
 		preferencesHelper.setBoolean(PreferencesHelper.STEALTH_MODE_STATUS,
-				DISABLE);
+				false);
 		preferencesHelper.setBoolean(PreferencesHelper.NOTIFICATIONS_STATUS,
-				ENABLE);
+				true);
 		notifications.show();
 	}
 }

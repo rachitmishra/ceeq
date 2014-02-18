@@ -9,7 +9,8 @@ package in.ceeq.activities;
 
 import hirondelle.date4j.DateTime;
 import in.ceeq.R;
-import in.ceeq.helpers.Helpers;
+import in.ceeq.helpers.PhoneHelper;
+import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 
 import java.util.TimeZone;
@@ -24,6 +25,7 @@ import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -38,6 +40,10 @@ public class Splash extends Activity implements ConnectionCallbacks,
 		FIRSTRUN, HOME
 	}
 
+	private ProgressBar progreeBar;
+	private PlusClient plus;
+	private SignInButton button;
+	private PhoneHelper phoneHelper;
 	private boolean appHasInitialised, googleConnect;
 
 	@Override
@@ -45,31 +51,27 @@ public class Splash extends Activity implements ConnectionCallbacks,
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
-		checkConnectivity();
-		checkPlayServices();
-		setupGoogleConnect();
 		setupHelpers();
+		setupBugsense();
+		checkPlayServices();
+		checkConnectivity();
 		checkGoogleConnect();
+		setupGoogleConnect();
 	}
 
 	private PreferencesHelper preferencesHelper;
 
 	private void setupHelpers() {
-		preferencesHelper = new PreferencesHelper(this);
+		preferencesHelper = PreferencesHelper.getInstance(this);
+		phoneHelper = PhoneHelper.getInstance(this);
 	}
 
-	private ProgressBar progreeBar;
-	private PlusClient plus;
-	private SignInButton button;
-
-	private void setupGoogleConnect() {
-		progreeBar = (ProgressBar) findViewById(R.id.connectProgress);
-		plus = new PlusClient.Builder(this, this, this).setActions(
-				"http://schemas.google.com/AddActivity").build();
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(Splash.this, "5996b3d9");
 	}
 
 	private void checkConnectivity() {
-		if (!Helpers.getInstance(this).hasInternet()) {
+		if (!phoneHelper.enabled(Phone.INTERNET)) {
 			Toast.makeText(this, R.string.toast_string_0, Toast.LENGTH_SHORT)
 					.show();
 		}
@@ -77,7 +79,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	}
 
 	private void checkPlayServices() {
-		if (!Helpers.getInstance(this).isGooglePlayConnected()) {
+		if (!phoneHelper.enabled(Phone.PLAY_SERVICES)) {
 			startActivity(new Intent(this, GoogleServices.class).putExtra(
 					"from", 1));
 			this.finish();
@@ -100,6 +102,12 @@ public class Splash extends Activity implements ConnectionCallbacks,
 			});
 		}
 
+	}
+
+	private void setupGoogleConnect() {
+		progreeBar = (ProgressBar) findViewById(R.id.connectProgress);
+		plus = new PlusClient.Builder(this, this, this).setActions(
+				"http://schemas.google.com/AddActivity").build();
 	}
 
 	private void connectGoogle() {
@@ -149,7 +157,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 				launchNextActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				launchNextActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				startActivity(launchNextActivity);
-				overridePendingTransition(R.drawable.fadeout, R.drawable.fadein);
+				overridePendingTransition(0, 0);
 			}
 		}, secondsDelayed * 1000);
 	}

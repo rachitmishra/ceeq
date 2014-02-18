@@ -3,7 +3,6 @@ package in.ceeq.activities;
 import hirondelle.date4j.DateTime;
 import in.ceeq.Launcher;
 import in.ceeq.R;
-import in.ceeq.actions.Admin;
 import in.ceeq.actions.Backup;
 import in.ceeq.actions.Backup.State;
 import in.ceeq.actions.Notifications;
@@ -13,11 +12,12 @@ import in.ceeq.actions.Receiver.ReceiverType;
 import in.ceeq.actions.Restore;
 import in.ceeq.actions.Upload;
 import in.ceeq.actions.Wipe;
-import in.ceeq.helpers.Helpers;
-import in.ceeq.helpers.Logger;
+import in.ceeq.helpers.PhoneHelper;
+import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.receivers.DeviceAdmin;
 import in.ceeq.services.Backups;
+import in.ceeq.services.Locater.RequestType;
 import in.ceeq.services.Tracker;
 import in.ceeq.services.Uploader.UploadType;
 
@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.http.protocol.HTTP;
@@ -55,11 +54,8 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
-import android.view.InflateException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -88,7 +84,6 @@ import com.facebook.LoggingBehavior;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.Settings;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -103,6 +98,24 @@ public class Home extends FragmentActivity {
 	public static final String MESSENGER = "in.ceeq.Home";
 	public final static int SHOW = 1;
 	public final static int HIDE = 0;
+	private static final int DEVICE_ADMIN_ACTIVATION_REQUEST = 9014;
+	private static ProgressBar progressBar;
+	private PreferencesHelper preferencesHelper;
+	private PhoneHelper phoneHelper;
+	private DialogsHelper dialogsHelper;
+	private boolean exit = false;
+	private static final String SENDER_ID = "909602096750";
+	private static final int PLUS_ONE_REQUEST_CODE = 9025;
+	private Session.StatusCallback statusCallback = new FBSessionStatus();
+	private FragmentManager fragmentManager;
+	private DrawerLayout drawerLayout;
+	private ActionBarDrawerToggle drawerToggle;
+	private ListView actionList;
+	private CharSequence drawerTitle;
+	private CharSequence title;
+	private TextView userId, userName;
+	private ImageView userImage;
+	private RelativeLayout userLoading, userDetails;
 
 	public enum DialogType {
 		PROTECT, STEALTH, FEEDBACK, BACKUP, RESTORE, BLIP, WIPE, WIPE_EXTERNAL_STORAGE, WIPE_DEVICE, WIPE_EXTERNAL_STORAGE_AND_DEVICE, DEVICE_ADMIN
@@ -130,33 +143,19 @@ public class Home extends FragmentActivity {
 		OFF, ON
 	}
 
-	private Pager pagerAdapter;
-	private ViewPager pager;
-	private AlertDialog.Builder builder;
-	private LayoutInflater inflater;
-	private static LinearLayout timer;
-	private static ProgressBar progressBar;
-	private PreferencesHelper preferencesHelper;
-	private Helpers helpers;
-	private DialogsHelper dialogsHelper;
-	private boolean exit = false;
-	private static final String SENDER_ID = "909602096750";
-	private static final int PLUS_ONE_REQUEST_CODE = 9025;
-	private Session.StatusCallback statusCallback = new FBSessionStatus();
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setupActionbar();
-		// setupBugsense();
+		setupBugsense();
 		setContentView(R.layout.activity_home);
 		this.title = drawerTitle = getTitle();
 
 		setupHelpers();
 		checkPlayServices();
 		setupFacebookConnect(savedInstanceState);
-		setupPager();
+		setupHome();
 		setupDrawer();
 
 		if (preferencesHelper.getBoolean(PreferencesHelper.FIRST_LOGIN)) {
@@ -164,54 +163,28 @@ public class Home extends FragmentActivity {
 		}
 	}
 
-	/**
-	 * instantiate the helpers required in this activity.
-	 */
 	public void setupHelpers() {
 		preferencesHelper = new PreferencesHelper(this);
-		helpers = Helpers.getInstance(this);
+		phoneHelper = PhoneHelper.getInstance(this);
 	}
 
-	/**
-	 * set up the view pager
-	 */
-	public void setupPager() {
-		pagerAdapter = new Pager(getSupportFragmentManager(), this);
-		pager = (ViewPager) findViewById(R.id.pager);
-		pager.setAdapter(pagerAdapter);
-		pager.requestTransparentRegion(pager);
-	}
+	public void setupHome() {
+		fragmentManager = getSupportFragmentManager();
+		Fragment fragment = new HomeFragment();
+		fragmentManager.beginTransaction().replace(R.id.container, fragment)
+				.commit();
 
-	/**
-	 * set up the action bar
-	 */
+	}
 
 	public void setupActionbar() {
-		// get the action bar, and hide the title
 		getActionBar().setDisplayShowTitleEnabled(false);
-		// get the action bar, set different logo/icon
-		// getActionBar().setIcon(R.drawable.ic_app_action_logo);
-		// get the action bar, set home as clickable and button
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 	}
 
-	/**
-	 * setup bugsense bug tracking in the app
-	 */
 	public void setupBugsense() {
 		BugSenseHandler.initAndStartSession(Home.this, "5996b3d9");
 	}
-
-	private DrawerLayout drawerLayout;
-	private ActionBarDrawerToggle drawerToggle;
-	private ListView actionList;
-	private CharSequence drawerTitle;
-	private CharSequence title;
-	private TextView userId, userName;
-	private ImageView userImage;
-	private RelativeLayout userLoading, userDetails;
-	private PlusOneButton plusOneButton;
 
 	/**
 	 * setup the navigation drawer
@@ -262,8 +235,8 @@ public class Home extends FragmentActivity {
 		}.execute(preferencesHelper
 				.getString(PreferencesHelper.ACCOUNT_USER_IMAGE_URL));
 		actionList = (ListView) findViewById(R.id.drawer_action_list);
-		actionList.setAdapter(new DrawerAdapter());
-		actionList.setOnItemClickListener(new DrawerMenuClickListener());
+		actionList.setAdapter(new DrawerManager());
+		actionList.setOnItemClickListener(new DrawerManager());
 		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
 				R.drawable.ic_drawer, R.string.open_drawer,
@@ -276,25 +249,28 @@ public class Home extends FragmentActivity {
 			public void onDrawerOpened(View drawerView) {
 				getActionBar().setTitle(drawerTitle);
 			}
+
+			@Override
+			public void onDrawerSlide(View drawerView, float slideOffset) {
+				super.onDrawerSlide(drawerView, slideOffset);
+				drawerLayout.bringChildToFront(drawerView);
+				drawerLayout.requestLayout();
+			}
+
 		};
 		drawerLayout.setDrawerListener(drawerToggle);
 
 	}
 
-	/**
-	 * The drawer adapter class for creating the Dialog view, mainly for
-	 * inflating the listview in dialog.
-	 * 
-	 */
-	public class DrawerAdapter extends BaseAdapter {
+	public class DrawerManager extends BaseAdapter implements
+			ListView.OnItemClickListener {
 
-		public DrawerAdapter() {
-
+		public DrawerManager() {
 		}
 
 		@Override
 		public int getCount() {
-			return 11;
+			return 12;
 		}
 
 		@Override
@@ -310,18 +286,15 @@ public class Home extends FragmentActivity {
 		@Override
 		public View getView(int position, View convertView, ViewGroup arg2) {
 			TextView header, inner;
+			ImageView innerImage;
 			switch (position) {
 			case 1:
+			case 6:
 				convertView = getLayoutInflater().inflate(
 						R.layout.drawer_action_plus, null);
-				plusOneButton = (PlusOneButton) convertView
-						.findViewById(R.id.plus_one_button);
-				plusOneButton.initialize(
-						"http://plus.google.com/116561373543243917689",
-						PLUS_ONE_REQUEST_CODE);
 				return convertView;
 			case 2:
-			case 6:
+			case 7:
 				convertView = getLayoutInflater().inflate(
 						R.layout.drawer_action_header, null);
 				header = (TextView) convertView
@@ -334,7 +307,11 @@ public class Home extends FragmentActivity {
 				inner = (TextView) convertView
 						.findViewById(R.id.drawer_list_inner);
 				inner.setText(getInnerText(position));
+				innerImage = (ImageView) convertView
+						.findViewById(R.id.drawer_list_icon);
+				innerImage.setBackgroundResource(getInnerImage(position));
 				return convertView;
+
 			}
 
 		}
@@ -342,20 +319,20 @@ public class Home extends FragmentActivity {
 		public int getInnerText(int position) {
 			switch (position) {
 			case 0:
-				return R.string.disconnect;
+				return R.string.my_device;
 			case 3:
 				return R.string.tab_home;
 			case 4:
 				return R.string.tab_backup;
 			case 5:
 				return R.string.tab_security;
-			case 7:
-				return R.string.privacy;
 			case 8:
-				return R.string.menu_feedback;
+				return R.string.privacy;
 			case 9:
-				return R.string.about;
+				return R.string.menu_feedback;
 			case 10:
+				return R.string.about;
+			case 11:
 				return R.string.rate;
 			default:
 				return R.string.rate;
@@ -366,18 +343,97 @@ public class Home extends FragmentActivity {
 			switch (position) {
 			case 2:
 				return R.string.navigate;
-			case 6:
+			case 7:
 				return R.string.more;
 			default:
 				return R.string.more;
 			}
 		}
 
+		public int getInnerImage(int position) {
+			switch (position) {
+			case 0:
+				return R.drawable.ic_stat_my_device;
+			case 3:
+				return R.drawable.ic_stat_home;
+			case 4:
+				return R.drawable.ic_stat_storage;
+			case 5:
+				return R.drawable.ic_stat_security;
+			case 8:
+				return R.drawable.ic_stat_privacy;
+			case 9:
+				return R.drawable.ic_stat_content_email;
+			case 10:
+				return R.drawable.ic_stat_action_about;
+			case 11:
+				return R.drawable.ic_stat_rating_important;
+			default:
+				return R.drawable.ic_stat_rating_important;
+			}
+		}
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			selectItem(position);
+		}
+
+		private void selectItem(int position) {
+
+			Fragment fragment = null;
+			switch (position) {
+			case 0:
+				fragment = new MyDeviceFragment();
+				break;
+			case 3:
+				fragment = new HomeFragment();
+				break;
+			case 4:
+				fragment = new BackupFragment();
+				break;
+			case 5:
+				fragment = new SecurityFragment();
+				break;
+			case 8:
+				fragment = new PrivacyFragment();
+				break;
+			case 9:
+				Intent emailIntent = new Intent(Intent.ACTION_SEND)
+						.setType(HTTP.PLAIN_TEXT_TYPE);
+				emailIntent
+						.putExtra(
+								Intent.EXTRA_EMAIL,
+								new String[] { getString(R.string.ceeq_support_email) });
+				emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Suggestion/Bugs");
+				emailIntent.putExtra(
+						Intent.EXTRA_TEXT,
+						"[Ceeq Support \n User: "
+								+ preferencesHelper.getString("accountName")
+								+ "]");
+				startActivity(emailIntent);
+				break;
+			case 10:
+				fragment = new AboutApplicationFragment();
+				break;
+			case 11:
+				Intent rateIntent = new Intent(Intent.ACTION_VIEW).setData(Uri
+						.parse(getString(R.string.ceeq_play_link)));
+				startActivity(rateIntent);
+				break;
+			default:
+				actionList.setItemChecked(position, false);
+				return;
+			}
+			if (fragment != null)
+				fragmentManager.beginTransaction()
+						.replace(R.id.container, fragment).commit();
+			actionList.setItemChecked(position, true);
+			drawerLayout.closeDrawer(Gravity.START);
+		}
+
 	}
 
-	/**
-	 * if this is first run show the drawer once
-	 */
 	public void setupFirstrun() {
 		drawerLayout.openDrawer(Gravity.START);
 		preferencesHelper.setBoolean(PreferencesHelper.FIRST_LOGIN, false);
@@ -385,9 +441,8 @@ public class Home extends FragmentActivity {
 
 	private GoogleCloudMessaging gcm;
 
-	public void doRegisterGcm() {
+	public void setupGoogleCloudMessaging() {
 		gcm = GoogleCloudMessaging.getInstance(this);
-
 		new AsyncTask<Void, Void, Boolean>() {
 			private String registrationId;
 
@@ -398,7 +453,7 @@ public class Home extends FragmentActivity {
 						gcm = GoogleCloudMessaging.getInstance(Home.this);
 					}
 					registrationId = gcm.register(SENDER_ID);
-					helpers.storeRegistrationId(registrationId);
+					phoneHelper.set(Phone.REGISTRATION_ID, registrationId);
 					return true;
 				} catch (IOException ex) {
 					return false;
@@ -414,6 +469,7 @@ public class Home extends FragmentActivity {
 					preferencesHelper.setBoolean(
 							PreferencesHelper.GCM_REGISTRATION_STATUS, false);
 			}
+
 		};
 
 	}
@@ -439,64 +495,6 @@ public class Home extends FragmentActivity {
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		drawerToggle.onConfigurationChanged(newConfig);
-	}
-
-	private class DrawerMenuClickListener implements
-			ListView.OnItemClickListener {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-			selectItem(position);
-		}
-
-		private void selectItem(int position) {
-			switch (position) {
-			case 3:
-			case 4:
-			case 5:
-				pager.setCurrentItem(position - 3);
-				break;
-			case 7:
-				builder.setView(inflater.inflate(R.layout.dialog_privacy, null))
-						.setPositiveButton(R.string.close, null).create()
-						.show();
-				break;
-			case 8:
-				Intent emailIntent = new Intent(Intent.ACTION_SEND)
-						.setType(HTTP.PLAIN_TEXT_TYPE);
-				emailIntent
-						.putExtra(
-								Intent.EXTRA_EMAIL,
-								new String[] { getString(R.string.ceeq_support_email) });
-				emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Suggestion/Bugs");
-				emailIntent.putExtra(
-						Intent.EXTRA_TEXT,
-						"[Ceeq Support \n User: "
-								+ preferencesHelper.getString("accountName")
-								+ "]");
-				startActivity(emailIntent);
-				break;
-			case 9:
-				builder.setView(inflater.inflate(R.layout.dialog_about, null))
-						.setPositiveButton(R.string.close, null).create()
-						.show();
-				break;
-			case 10:
-				Intent rateIntent = new Intent(Intent.ACTION_VIEW).setData(Uri
-						.parse(getString(R.string.ceeq_play_link)));
-				startActivity(rateIntent);
-				break;
-			}
-
-			actionList.setItemChecked(position, true);
-			drawerLayout.closeDrawer(Gravity.START);
-		}
-	}
-
-	@Override
-	public void setTitle(CharSequence title) {
-		this.title = title;
-		getActionBar().setTitle(this.title);
 	}
 
 	public static Handler messageHandler = new MessageHandler();
@@ -532,7 +530,7 @@ public class Home extends FragmentActivity {
 	}
 
 	public void checkPlayServices() {
-		if (!helpers.isGooglePlayConnected()) {
+		if (!phoneHelper.enabled(Phone.PLAY_SERVICES)) {
 			startActivity(new Intent(this, GoogleServices.class).putExtra(
 					"from", 1));
 			this.finish();
@@ -554,7 +552,6 @@ public class Home extends FragmentActivity {
 	public void onButtonPressed(View v) {
 		ToggleButton toggleButton;
 
-		builder = new AlertDialog.Builder(this);
 		dialogsHelper = new DialogsHelper(this);
 
 		switch (v.getId()) {
@@ -571,7 +568,8 @@ public class Home extends FragmentActivity {
 
 		case R.id.toggle_backup:
 			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_backup);
-			setupScheduledBackup(toggleButton);
+			setupScheduledBackup(toggleButton.isChecked());
+			resetBackup();
 			break;
 
 		case R.id.b_backup:
@@ -615,6 +613,18 @@ public class Home extends FragmentActivity {
 
 	}
 
+	public void resetHome() {
+		Fragment fragment = new HomeFragment();
+		fragmentManager.beginTransaction().replace(R.id.container, fragment)
+				.commit();
+	}
+
+	public void resetBackup() {
+		Fragment fragment = new BackupFragment();
+		fragmentManager.beginTransaction().replace(R.id.container, fragment)
+				.commit();
+	}
+
 	private PackageManager packageManager;
 
 	private void setupStealthMode(ToggleButton toggleButton) {
@@ -647,21 +657,23 @@ public class Home extends FragmentActivity {
 		}
 	}
 
-	private void setupScheduledBackup(ToggleButton toggleButton) {
-		preferencesHelper.setBoolean(PreferencesHelper.AUTO_BACKUP_STATUS,
-				toggleButton.isChecked());
-		if (toggleButton.isChecked()) {
-			timer.setVisibility(View.VISIBLE);
+	private void setupScheduledBackup(boolean value) {
+
+		if (value) {
 			Toast.makeText(this,
 					"Automatic backups started, everyday at 2:00 AM",
 					Toast.LENGTH_SHORT).show();
 			Backup.getInstance(this).autoBackups(State.ON);
+			preferencesHelper.setBoolean(PreferencesHelper.AUTO_BACKUP_STATUS,
+					true);
 		} else {
-			timer.setVisibility(View.GONE);
 			Toast.makeText(this, "Automatic backups cancelled.",
 					Toast.LENGTH_SHORT).show();
 			Backup.getInstance(this).autoBackups(State.OFF);
+			preferencesHelper.setBoolean(PreferencesHelper.AUTO_BACKUP_STATUS,
+					false);
 		}
+
 	}
 
 	private void setupAutoBlips(ToggleButton toggleButton) {
@@ -682,7 +694,9 @@ public class Home extends FragmentActivity {
 		if (toggle.isChecked()) {
 			Toast.makeText(this, "Automatic tracking enabled.",
 					Toast.LENGTH_SHORT).show();
-			startService(new Intent(this, Tracker.class));
+			Intent startTracker = new Intent(this, Tracker.class);
+			startTracker.putExtra(Tracker.ACTION, RequestType.TRACKER);
+			startService(startTracker);
 		} else {
 			Toast.makeText(this, "Automatic tracking disabled.",
 					Toast.LENGTH_SHORT).show();
@@ -750,8 +764,6 @@ public class Home extends FragmentActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		builder = new AlertDialog.Builder(this);
-		inflater = this.getLayoutInflater();
 		if (drawerToggle.onOptionsItemSelected(item)) {
 			return true;
 		}
@@ -788,11 +800,12 @@ public class Home extends FragmentActivity {
 		private ToggleButton toggleButton;
 		private LayoutInflater inflater;
 		private static final int NONE = -1;
-		private Context context;
-		private Activity activity;
 		private AlertDialog.Builder alertDialogBuilder;
 		private PreferencesHelper preferencesHelper;
 		private View feedbackView, protectMeView;
+		private Activity activity;
+		private Context context;
+		private ComponentName deviceAdminComponentName;
 
 		private DialogType dialogType;
 
@@ -952,8 +965,12 @@ public class Home extends FragmentActivity {
 						null);
 			case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
 				return inflater.inflate(R.layout.dialog_wipe, null);
+			case FEEDBACK:
+				feedbackView = inflater.inflate(R.layout.dialog_feedback, null);
+				return feedbackView;
 			default:
-				return inflater.inflate(R.layout.dialog_feedback, null);
+				feedbackView = inflater.inflate(R.layout.dialog_feedback, null);
+				return feedbackView;
 
 			}
 		}
@@ -992,6 +1009,8 @@ public class Home extends FragmentActivity {
 
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
+			deviceAdminComponentName = new ComponentName(context,
+					DeviceAdmin.class);
 
 			switch (which) {
 
@@ -1013,13 +1032,13 @@ public class Home extends FragmentActivity {
 					break;
 				case WIPE:
 					switch (which) {
-					case 0:
+					case Wipe.EXTERNAL_STORAGE:
 						showDialog(DialogType.WIPE_EXTERNAL_STORAGE);
 						break;
-					case 1:
+					case Wipe.DEVICE:
 						showDialog(DialogType.WIPE_DEVICE);
 						break;
-					case 2:
+					case Wipe.EXTERNAL_STORAGE_AND_DEVICE:
 						showDialog(DialogType.WIPE_EXTERNAL_STORAGE_AND_DEVICE);
 						break;
 					}
@@ -1033,8 +1052,16 @@ public class Home extends FragmentActivity {
 					showToast("Auto blips enabled.");
 					break;
 				case DEVICE_ADMIN:
-					Logger.d("Activating device admin");
-					Admin.getInstance(context).register();
+					activity.startActivityForResult(
+							new Intent(
+									DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+									.putExtra(
+											DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+											deviceAdminComponentName)
+									.putExtra(
+											DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+											activity.getString(R.string.help_note_25)),
+							DEVICE_ADMIN_ACTIVATION_REQUEST);
 					break;
 				case FEEDBACK:
 					EditText feedbackMessage = (EditText) feedbackView
@@ -1082,7 +1109,8 @@ public class Home extends FragmentActivity {
 					showToast("Stealth Mode enabled.");
 					break;
 				case WIPE_DEVICE:
-					if (Admin.getInstance(context).isRegistered())
+					if (preferencesHelper
+							.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS))
 						Wipe.getInstance(context).device();
 					else
 						showDialog(DialogType.DEVICE_ADMIN);
@@ -1091,7 +1119,8 @@ public class Home extends FragmentActivity {
 					Wipe.getInstance(context).externalStorage();
 					break;
 				case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
-					if (Admin.getInstance(context).isRegistered())
+					if (preferencesHelper
+							.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS))
 						Wipe.getInstance(context).deviceAndExternalStorage();
 					else
 						showDialog(DialogType.DEVICE_ADMIN);
@@ -1121,7 +1150,7 @@ public class Home extends FragmentActivity {
 			ALL, AUTO_BACKUP, AUTO_TRACK, GPS, DEVICE_ADMIN, BACKUP, SYNC
 		}
 
-		private Helpers helpers;
+		private PhoneHelper phoneHelper;
 		private PreferencesHelper preferencesHelper;
 		private View view;
 		private int counter;
@@ -1130,7 +1159,8 @@ public class Home extends FragmentActivity {
 		private TextView statusText;
 		private LinearLayout statusBox;
 		private ArrayList<Status> notification_list;
-		private ToggleButton toggle;
+		private ToggleButton toggleButton;
+		private PlusOneButton plusOneButton;
 
 		public HomeFragment() {
 		}
@@ -1139,8 +1169,8 @@ public class Home extends FragmentActivity {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			view = inflater.inflate(R.layout.fragment_main, container, false);
-			preferencesHelper = new PreferencesHelper(this.getActivity());
-			helpers = Helpers.getInstance(getActivity());
+			setupHelpers();
+
 			notificationList = (ExpandableListView) view
 					.findViewById(R.id.notifications);
 			notification_list = new ArrayList<Status>();
@@ -1161,7 +1191,19 @@ public class Home extends FragmentActivity {
 					preferencesHelper.getBoolean(PreferencesHelper.APP_STATUS),
 					notification_list);
 			notificationList.setAdapter(notificationListAdapter);
+
+			plusOneButton = (PlusOneButton) view
+					.findViewById(R.id.plus_one_button);
+			plusOneButton.initialize(
+					"http://plus.google.com/116561373543243917689",
+					PLUS_ONE_REQUEST_CODE);
 			return view;
+		}
+
+		public void setupHelpers() {
+			phoneHelper = PhoneHelper.getInstance(getActivity());
+			preferencesHelper = PreferencesHelper.getInstance(this
+					.getActivity());
 		}
 
 		public void showNotification() {
@@ -1171,11 +1213,11 @@ public class Home extends FragmentActivity {
 		}
 
 		public void restoreToggleStates(View v) {
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_protect);
-			toggle.setChecked(preferencesHelper
+			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_protect);
+			toggleButton.setChecked(preferencesHelper
 					.getBoolean(PreferencesHelper.PROTECT_ME_STATUS));
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_stealth);
-			toggle.setChecked(preferencesHelper
+			toggleButton = (ToggleButton) v.findViewById(R.id.toggle_stealth);
+			toggleButton.setChecked(preferencesHelper
 					.getBoolean(PreferencesHelper.STEALTH_MODE_STATUS));
 		}
 
@@ -1183,12 +1225,13 @@ public class Home extends FragmentActivity {
 			counter = 0;
 			boolean backupStatus = setBackupStatus();
 			boolean securityStatus = setSecurityStatus();
-			if (backupStatus & securityStatus)
+			if (backupStatus & securityStatus) {
 				preferencesHelper
 						.setBoolean(PreferencesHelper.APP_STATUS, true);
-			else
+			} else {
 				preferencesHelper.setBoolean(PreferencesHelper.APP_STATUS,
 						false);
+			}
 			return counter;
 		}
 
@@ -1233,19 +1276,20 @@ public class Home extends FragmentActivity {
 		}
 
 		public boolean setSecurityStatus() {
-			boolean deviceAdminActive = Admin.getInstance(getActivity())
-					.isRegistered();
-			if (helpers.hasGpsEnabled() & deviceAdminActive) {
+			boolean deviceAdminEnabled = preferencesHelper
+					.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS);
+			boolean gpsEnabled = phoneHelper.enabled(Phone.GPS);
+			if (gpsEnabled & deviceAdminEnabled) {
 				return true;
-			} else if (helpers.hasGpsEnabled() & !deviceAdminActive) {
+			} else if (gpsEnabled & !deviceAdminEnabled) {
 				notification_list.add(Status.DEVICE_ADMIN);
 				counter++;
 				return false;
-			} else if (!helpers.hasGpsEnabled() & deviceAdminActive) {
+			} else if (!gpsEnabled & deviceAdminEnabled) {
 				notification_list.add(Status.GPS);
 				counter++;
 				return false;
-			} else if (!helpers.hasGpsEnabled() & !deviceAdminActive) {
+			} else if (!gpsEnabled & !deviceAdminEnabled) {
 				notification_list.add(Status.GPS);
 				notification_list.add(Status.DEVICE_ADMIN);
 				counter += 2;
@@ -1311,9 +1355,7 @@ public class Home extends FragmentActivity {
 					button.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							AlertDialog.Builder alert = getDialog((notifications
-									.get(childPosition)));
-							alert.create().show();
+							onButtonPress((notifications.get(childPosition)));
 						}
 					});
 				}
@@ -1348,108 +1390,39 @@ public class Home extends FragmentActivity {
 				}
 			}
 
-			public AlertDialog.Builder getDialog(Status status) {
+			public void onButtonPress(Status status) {
 				switch (status) {
 				case AUTO_BACKUP:
-					return new AlertDialog.Builder(
-							HomeFragment.this.getActivity())
-							.setTitle("Enable AutoBackup")
-							.setMessage("Activate auto backups ?")
-							.setPositiveButton(R.string.yes,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											preferencesHelper
-													.setBoolean(
-															PreferencesHelper.AUTO_BACKUP_STATUS,
-															true);
-											setStatus();
-										}
-									})
-							.setNegativeButton(R.string.cancel,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											dialog.cancel();
-										}
-									});
+					((Home) getActivity()).setupScheduledBackup(true);
+					break;
 				case AUTO_TRACK:
-					return new AlertDialog.Builder(
-							HomeFragment.this.getActivity())
-							.setTitle("Activate AutoTrack")
-							.setMessage("Activate auto tracking ?")
-							.setPositiveButton(R.string.yes,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											preferencesHelper
-													.setBoolean(
-															PreferencesHelper.AUTO_TRACK_STATUS,
-															true);
-											setStatus();
-										}
-									})
-							.setNegativeButton(R.string.cancel,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											dialog.cancel();
-										}
-									});
+					preferencesHelper.setBoolean(
+							PreferencesHelper.AUTO_TRACK_STATUS, true);
+					break;
 				case GPS:
-					return new AlertDialog.Builder(
-							HomeFragment.this.getActivity())
-							.setTitle("Activate GPS")
-							.setMessage("Activate GPS ?")
-							.setPositiveButton(R.string.yes,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											startActivity(new Intent(
-													android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-											setStatus();
-										}
-									})
-							.setNegativeButton(R.string.cancel,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											dialog.cancel();
-										}
-									});
+
+					startActivity(new Intent(
+							android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+					break;
 				case DEVICE_ADMIN:
-					return new AlertDialog.Builder(
-							HomeFragment.this.getActivity())
-							.setTitle("Activate Device Admin")
-							.setMessage("Activate Device Admin ?")
-							.setPositiveButton(R.string.yes,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											startActivityForResult(
-													new Intent(
-															DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-															.putExtra(
-																	DevicePolicyManager.EXTRA_DEVICE_ADMIN,
-																	deviceAdminComponentName)
-															.putExtra(
-																	DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-																	"Activating Device Administrator enables all the security features of the application."),
-													DEVICE_ADMIN_ACTIVATION_REQUEST);
-											setStatus();
-										}
-									})
-							.setNegativeButton(R.string.cancel,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											dialog.cancel();
-										}
-									});
+					startActivityForResult(
+							new Intent(
+									DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+									.putExtra(
+											DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+											deviceAdminComponentName)
+									.putExtra(
+											DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+											"Activating Device Administrator enables all the security features of the application."),
+							DEVICE_ADMIN_ACTIVATION_REQUEST);
+					break;
 				case SYNC:
+					break;
 				default:
-					return null;
+					break;
 				}
+
+				((Home) getActivity()).resetHome();
 			}
 
 			@Override
@@ -1525,13 +1498,10 @@ public class Home extends FragmentActivity {
 		private TextView hours, mins, unit, div, lastBackupDate;
 		private CountDownTimer timerClock;
 		private View view;
+		private LinearLayout timer;
 
 		public BackupFragment() {
 
-		}
-
-		public interface UpdateStatus {
-			public void updateStatus();
 		}
 
 		@Override
@@ -1563,10 +1533,6 @@ public class Home extends FragmentActivity {
 			lastBackupDate.setText(getLastBackupLabel());
 
 			return view;
-		}
-
-		public void checkBackupFiles() {
-
 		}
 
 		public void setTimerClock() {
@@ -1670,8 +1636,8 @@ public class Home extends FragmentActivity {
 			OnMyLocationChangeListener {
 
 		private GoogleMap map;
-		private View view;
-		private ToggleButton toggle;
+		private static View view;
+		private ToggleButton toggleButton;
 		private PreferencesHelper preferencesHelper;
 
 		public SecurityFragment() {
@@ -1681,8 +1647,7 @@ public class Home extends FragmentActivity {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 
-			preferencesHelper = new PreferencesHelper(this.getActivity());
-
+			preferencesHelper = new PreferencesHelper(getActivity());
 			if (view != null) {
 				ViewGroup parent = (ViewGroup) view.getParent();
 				if (parent != null)
@@ -1701,23 +1666,21 @@ public class Home extends FragmentActivity {
 				map.setMyLocationEnabled(true);
 				map.setOnMyLocationChangeListener(this);
 				MapsInitializer.initialize(getActivity());
-			} catch (GooglePlayServicesNotAvailableException e) {
-				e.printStackTrace();
-			} catch (InflateException e) {
-
-			} catch (NullPointerException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
+
 			restoreToggleStates(view);
 			return view;
 		}
 
-		public void restoreToggleStates(View v) {
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_track);
-			toggle.setChecked(preferencesHelper
+		public void restoreToggleStates(View view) {
+
+			toggleButton = (ToggleButton) view.findViewById(R.id.toggle_track);
+			toggleButton.setChecked(preferencesHelper
 					.getBoolean(PreferencesHelper.AUTO_TRACK_STATUS));
-			toggle = (ToggleButton) v.findViewById(R.id.toggle_blip);
-			toggle.setChecked(preferencesHelper
+			toggleButton = (ToggleButton) view.findViewById(R.id.toggle_blip);
+			toggleButton.setChecked(preferencesHelper
 					.getBoolean(PreferencesHelper.AUTO_BLIP_STATUS));
 		}
 
@@ -1739,27 +1702,88 @@ public class Home extends FragmentActivity {
 		}
 	}
 
-	public static class AntivirusFragment extends Fragment {
+	public static class PrivacyFragment extends Fragment {
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			View view = inflater.inflate(R.layout.fragment_antivirus,
+			View rootView = inflater.inflate(R.layout.fragment_privacy,
 					container, false);
+			return rootView;
+		}
+	}
+
+	public static class AboutApplicationFragment extends Fragment {
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.fragment_about_app,
+					container, false);
+			return rootView;
+		}
+	}
+
+	public static class MapFragment extends Fragment {
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View view = inflater.inflate(R.layout.fragment_map, container,
+					false);
 			return view;
 		}
 
 	}
 
-	public static class AboutDeviceFragment extends Fragment {
+	public static class MyDeviceFragment extends Fragment {
+		private PhoneHelper phoneHelper;
+		private PreferencesHelper preferencesHelper;
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_about,
-					container, false);
-			return rootView;
+			View view = inflater.inflate(R.layout.fragment_about, container,
+					false);
+			preferencesHelper = PreferencesHelper.getInstance(getActivity());
+			phoneHelper = PhoneHelper.getInstance(getActivity());
+			setupData(view);
+			return view;
 		}
+
+		public void setupData(View view) {
+			TextView text = (TextView) view.findViewById(R.id.c_account);
+			text.setText(preferencesHelper
+					.getString(PreferencesHelper.ACCOUNT_USER_ID));
+			text = (TextView) view.findViewById(R.id.c_name);
+			text.setText(preferencesHelper
+					.getString(PreferencesHelper.ACCOUNT_USER_NAME));
+			text = (TextView) view.findViewById(R.id.c_sim);
+			text.setText(phoneHelper.get(Phone.SIM_ID));
+			text = (TextView) view.findViewById(R.id.c_imsi);
+			text.setText(phoneHelper.get(Phone.IMSI));
+			text = (TextView) view.findViewById(R.id.c_iemi);
+			text.setText(phoneHelper.get(Phone.IEMI));
+			text = (TextView) view.findViewById(R.id.c_gps);
+			text.setText(booleanToString(phoneHelper.enabled(Phone.GPS)));
+			text = (TextView) view.findViewById(R.id.c_admin);
+			text.setText(booleanToString(preferencesHelper
+					.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS)));
+			text = (TextView) view.findViewById(R.id.c_operator);
+			text.setText(phoneHelper.get(Phone.OPERATOR));
+			text = (TextView) view.findViewById(R.id.c_size);
+			text.setText(phoneHelper.get(Phone.SIZE));
+			text = (TextView) view.findViewById(R.id.c_pixels);
+			text.setText(phoneHelper.get(Phone.DENSITY));
+			text = (TextView) view.findViewById(R.id.c_apps);
+			text.setText(phoneHelper.get(Phone.APP_COUNT) + "");
+
+		}
+
+		public String booleanToString(boolean value) {
+			return (value) ? "ON" : "OFF";
+		}
+
 	}
 
 	public class FBSessionStatus implements Session.StatusCallback {
@@ -1784,66 +1808,4 @@ public class Home extends FragmentActivity {
 			}
 		}
 	}
-
-	public class Pager extends FragmentPagerAdapter {
-
-		public Pager(FragmentManager fm, Context context) {
-			super(fm);
-		}
-
-		@Override
-		public Fragment getItem(int position) {
-			Fragment fragment = null;
-			switch (position) {
-			case 0:
-				fragment = new HomeFragment();
-				break;
-			case 1:
-				fragment = new BackupFragment();
-				break;
-			case 2:
-				fragment = new SecurityFragment();
-				break;
-			case 3:
-				fragment = new AntivirusFragment();
-				break;
-			case 4:
-				fragment = new AboutDeviceFragment();
-				break;
-			case 5:
-				fragment = new AntiSpamFragment();
-				break;
-			}
-
-			return fragment;
-		}
-
-		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
-			switch (position) {
-			case 0:
-				return getString(R.string.tab_home).toUpperCase(l);
-			case 1:
-				return getString(R.string.tab_backup).toUpperCase(l);
-			case 2:
-				return getString(R.string.tab_security).toUpperCase(l);
-			case 3:
-				return getString(R.string.tab_spam).toUpperCase(l);
-			case 4:
-				return getString(R.string.about).toUpperCase(l);
-			}
-			return null;
-		}
-
-		@Override
-		public int getCount() {
-			return 3;
-		}
-
-		@Override
-		public int getItemPosition(Object object) {
-			return POSITION_NONE;
-		}
-	}
-
 }

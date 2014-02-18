@@ -2,12 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="in.ceeq"
     android:installLocation="internalOnly"
-    android:versionCode="1000"
-    android:versionName="1.0.0 Beta" >
+    android:versionCode="1"
+    android:versionName="1.0.6" >
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="19" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -57,6 +57,7 @@
         android:resizeable="true"
         android:smallScreens="true"
         android:xlargeScreens="false" />
+
     <application
         android:allowBackup="true"
         android:allowClearUserData="false"
@@ -64,8 +65,8 @@
         android:label="@string/app_name" >
         <activity
             android:name="in.ceeq.Launcher"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"
-            android:noHistory="true" >
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -75,22 +76,19 @@
         <activity
             android:name="in.ceeq.activities.Splash"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"
-            >
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="in.ceeq.activities.Firstrun"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"
-            >
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="in.ceeq.activities.Home"
             android:excludeFromRecents="true"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Actionbar"
             android:logo="@drawable/ic_app_action_logo"
-			>
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Actionbar" >
         </activity>
         <activity
             android:name="in.ceeq.activities.Help"
@@ -112,8 +110,8 @@
         <activity
             android:name="in.ceeq.activities.GoogleServices"
             android:label="@string/title_activity_playservice"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"
-            android:noHistory="true" >
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity android:name="com.facebook.LoginActivity" >
         </activity>
@@ -165,7 +163,13 @@
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
-        <receiver android:name="in.ceeq.receivers.ScheduledBackups" />
+        <receiver
+            android:name="in.ceeq.receivers.ScheduledBackups"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="in.ceeq.action.BACKUP" />
+            </intent-filter>
+        </receiver>
         <receiver android:name="in.ceeq.receivers.Locations" />
         <receiver android:name="in.ceeq.receivers.PowerButton" >
             <intent-filter>
@@ -177,12 +181,12 @@
             </intent-filter>
         </receiver>
         <receiver android:name="in.ceeq.receivers.LowBattery" />
-        <receiver
-            android:name="in.ceeq.receivers.SimState" >
+        <receiver android:name="in.ceeq.receivers.SimState" >
             <intent-filter>
                 <action android:name="android.intent.action.SIM_STATE_CHANGED" />
             </intent-filter>
         </receiver>
+
         <service android:name="in.ceeq.services.Commander" />
         <service android:name="in.ceeq.services.Backups" />
         <service android:name="in.ceeq.services.Ringer" />
@@ -191,6 +195,7 @@
         <service android:name="in.ceeq.services.Uploader" />
         <service android:name="in.ceeq.services.Tracker" />
         <service android:name="in.ceeq.services.Protector" />
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCmPkcRCi-1hIcPG0KIvWrsZ7WTRlKedv4" />
@@ -201,6 +206,11 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
+        <service
+            android:name="in.ceeq.services.Syncer"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>

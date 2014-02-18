@@ -5,7 +5,7 @@
     <string name="app_name">Ceeq</string>
     <string name="app_id">413219985467370</string>
     <string name="app_welcome">Hi.</string>
-    <string name="app_version">1.0.0 Beta</string>
+    <string name="app_version">1.0.5 Beta</string>
     <string name="blank"></string>
     <string name="coming_soon">Coming Soon &#8230;</string>
     <string name="google">Google</string>
@@ -30,7 +30,7 @@
         <item>Device &amp; External Storage</item>
     </string-array>
     
-    <string name="disconnect"></string>
+    <string name="my_device"> My device</string>
 
     <!-- Tab Titles -->
     <string name="tab_home">Home</string>
@@ -46,7 +46,7 @@
     <!-- Menu Strings -->
     <string name="help">Help</string>
     <string name="settings">Settings</string>
-    <string name="menu_feedback">Email Feedback</string>
+    <string name="menu_feedback">Support</string>
     <string name="share">Share</string>
     <string name="rate">Rate us</string>
     <string name="about">About</string>
@@ -179,7 +179,7 @@
     <string name="help_note_4">This will hide the application launcher icon &amp; notifications. \n\nYou can start the application by dialing *#2337#*. \n\nAuto tracking, Auto Backups will remained enabled.</string>
     <string name="help_note_5">Click &amp; Hold a file for more options</string>
     <string name="help_note_6">No backup files found.</string>
-    <string name="help_note_7">Ceeq is an app to protect you and your device, to backup your data. It provides features such as remote commands, auto backups and much more. \nVisit http://ceeq.in/about to read more about us.</string>
+    <string name="help_note_7">Ceeq is an app to protect you and your device, to backup your data. It provides features such as remote commands, auto backups, sms commands and a lot more to explore.</string>
     <string name="help_note_8">GPS is required for accuracy while getting the location of device, in distress situations or while using the application.</string>
     <string name="help_note_9">Device administrator feature helps the application to wipe, lock your device remotely.</string>
     <string name="help_note_10">Remote Commands are messages which you may send in case your device is lost. 				\n\n To use a remote command, type the remote command, followed by your pin ex. CEEQ LOCATE 000000. 				\n\n The main remote commands are 				\n1. CEEQ ALARM : sounds a loud alarm on your mobile, 				\n2. CEEQ LOCK : locks your device, 				\n3. CEEQ ERASE : completely erases your device of any data, 				\n4. CEEQ NOW : sends you the current sim number, imsi number and other mobile details, 				\n5. CEEQ CALLS : sends you the last 10 called numbers, 				\n6. CEEQ SPY : spies on the device location and calls and send them to you, 				\n7. CEEQ LOCATE : sends you the last stored location, and any new location if location of mobile changes.</string>
@@ -190,7 +190,7 @@
     <string name="help_note_15">Stealth Mode hides the application icon &amp; its notifications.\nDon\'t worry you can still launch the application by dialing *#*#2337#*#*. Note, it won\'t stops the background process such as Auto Backups, or device Tracking</string>
     <string name="help_note_16">We highly respect your privacy and data, and so this application in no way collects any data from your mobile.\nWe just store your email address, so you can access the application from the web, seriously that\'s all we need.</string>
     <string name="help_note_17">Yup, we are right at your back.\nContact us anytime by sending us your message at \nsupport@ceeq.in \nor visiting and posting at \nhttp://ceeq.in/contact, \nwe will contact you within minutes, okay mostly in an hour ;).</string>
-    <string name="help_note_18">This project has been developed for SCHOLARLY purposes, and it is being shared with you for FREE so that you can enjoy our work and your gadget is safe too.\nIf you have any suggestions, or found bugs, any feedbacks, you can shout at us at support@ceeq.in.\nThis project by no means collects any user data for any purpose.</string>
+    <string name="help_note_18">This project has been developed for scholarly purposes, and it is being shared with you for free so that you can enjoy our work and your gadget is safe too.\nThis project by no means collects any user data for any purpose, except your email id which is used to register you.\nIf you have more queries, feel free to contact us at support@ceeq.in.</string>
     <string name="help_note_19">Connect your social accounts</string>
     <string name="help_note_20">P.S. Your Google account is connected.</string>
     <string name="help_note_21">Add an emergency message.</string>
@@ -223,7 +223,7 @@
     <string name="toast_string_10">Sorry, You forgot to set the pin !</string>
     <string name="toast_string_11">Please, Choose an emergency contact !</string>
     <string name="toast_string_12">Uninstall protection disabled.</string>
-    <string name="toast_string_13">All notifications disabled !</string> 
+    <string name="toast_string_13">All notifications disabled.</string> 
     
     <string name="total_size">Total Size</string>
     <string name="name">Name</string>

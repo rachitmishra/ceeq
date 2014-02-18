@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ic_bg_main"
+    android:orientation="vertical"
+    android:padding="8dp" >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/ic_app_splash"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:text="@string/app_version"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/text_light" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:autoLink="web"
+        android:gravity="center_horizontal"
+        android:text="@string/ceeq_link"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/blue" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:autoLink="web"
+        android:background="@drawable/ic_bg_white"
+        android:gravity="left"
+        android:padding="8dp"
+        android:text="@string/help_note_7"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/text_medium"
+        android:textSize="14sp" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:background="@drawable/ic_bg_shadow" />
+
+</LinearLayout>

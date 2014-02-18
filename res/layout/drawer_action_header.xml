@@ -14,14 +14,8 @@
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
         android:textAppearance="?android:attr/textAppearanceListItemSmall"
-        android:textColor="#f0f0f0"
-        android:textSize="15sp"
+        android:textColor="#505050"
+        android:textSize="14sp"
         android:textStyle="bold" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_gravity="bottom"
-        android:background="#808080" />
 
 </FrameLayout>

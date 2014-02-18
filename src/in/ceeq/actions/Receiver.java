@@ -1,5 +1,6 @@
 package in.ceeq.actions;
 
+import in.ceeq.interfaces.ReceiverManager;
 import in.ceeq.receivers.LowBattery;
 import in.ceeq.receivers.OutgoingCalls;
 import in.ceeq.receivers.PowerButton;
@@ -10,7 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 
-public class Receiver {
+public class Receiver implements ReceiverManager {
 
 	private Context context;
 	PackageManager packageManager;

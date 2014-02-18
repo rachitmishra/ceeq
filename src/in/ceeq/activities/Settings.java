@@ -43,6 +43,7 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.facebook.LoggingBehavior;
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -82,7 +83,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	private Preference changePrimaryContact, facebookConnect, googleConnect,
 			notifications;
 	private PlusClient googlePlusClient;
-	private Session.StatusCallback statusCallback = new FBSessionStatus();
+	public Session.StatusCallback statusCallback = new FBSessionStatus();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -91,6 +92,8 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 		addPreferencesFromResource(R.xml.app_preferences);
 		preferencesHelper = new PreferencesHelper(this.getActivity());
 		setupGoogle();
+		setupBugsense();
+
 		setupFacebook(savedInstanceState);
 
 		changePrimaryContact = (Preference) findPreference("changePrimaryContact");
@@ -113,17 +116,13 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 						getActivity()));
 
 		notifications = (Preference) findPreference("notifications");
-		notifications
-				.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+		notifications.setOnPreferenceChangeListener(new NotificationsToggle(
+				getActivity()));
 
-					@Override
-					public boolean onPreferenceChange(Preference preference,
-							Object newValue) {
-						Notifications.getInstance(getActivity()).remove();
-						return false;
-					}
-				});
+	}
 
+	public void setupBugsense() {
+		BugSenseHandler.initAndStartSession(getActivity(), "5996b3d9");
 	}
 
 	public void setupGoogle() {
@@ -190,7 +189,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 
 	}
 
-	private class FBSessionStatus implements Session.StatusCallback {
+	public class FBSessionStatus implements Session.StatusCallback {
 
 		@Override
 		public void call(Session session, SessionState state,
@@ -232,119 +231,140 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 		}
 
 	}
-}
 
-class ChangeContactListener implements OnPreferenceClickListener {
+	class ChangeContactListener implements OnPreferenceClickListener {
 
-	private Activity activity;
+		private Activity activity;
 
-	public ChangeContactListener(Activity activity) {
-		this.activity = activity;
-	}
+		public ChangeContactListener(Activity activity) {
+			this.activity = activity;
+		}
 
-	@Override
-	public boolean onPreferenceClick(android.preference.Preference arg0) {
-		Choose.getInstance(activity).contact();
-		return false;
-	}
-}
-
-class FacebookConnectListener implements OnPreferenceChangeListener {
-
-	private Context context;
-	private PreferencesHelper preferencesHelper;
-
-	public FacebookConnectListener(Context context) {
-		this.context = context;
-		preferencesHelper = new PreferencesHelper(context);
-	}
-
-	@Override
-	public boolean onPreferenceChange(Preference arg0, Object arg1) {
-		new AlertDialog.Builder(context)
-				.setTitle("Warning")
-				.setMessage(
-						"Please note, your friends won't be able to help you in trouble times.")
-				.setPositiveButton(R.string.continue_,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								disConnectFacebook();
-							}
-						})
-				.setNegativeButton(R.string.cancel,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						}).setOnKeyListener(new OnKeyListener() {
-
-					@Override
-					public boolean onKey(DialogInterface dialog, int keyCode,
-							KeyEvent event) {
-						if (keyCode == KeyEvent.KEYCODE_BACK
-								&& event.getAction() == KeyEvent.ACTION_UP) {
-							dialog.cancel();
-						}
-						return false;
-					}
-				}).create().show();
-
-		return true;
-	}
-
-	public void disConnectFacebook() {
-		preferencesHelper.setBoolean(PreferencesHelper.FACEBOOK_CONNECT_STATUS,
-				false);
-		Session session = Session.getActiveSession();
-		if (!session.isClosed()) {
-			session.closeAndClearTokenInformation();
+		@Override
+		public boolean onPreferenceClick(android.preference.Preference arg0) {
+			Choose.getInstance(activity).contact();
+			return false;
 		}
 	}
-}
 
-class GoogleConnectListener implements OnPreferenceChangeListener {
+	class FacebookConnectListener implements OnPreferenceChangeListener {
 
-	private Context context;
-	private PlusClient googlePlusClient;
+		private Context context;
+		private PreferencesHelper preferencesHelper;
 
-	public GoogleConnectListener(Context context, PlusClient googlePlusClient) {
-		this.context = context;
-		this.googlePlusClient = googlePlusClient;
+		public FacebookConnectListener(Context context) {
+			this.context = context;
+			preferencesHelper = new PreferencesHelper(context);
+		}
+
+		@Override
+		public boolean onPreferenceChange(Preference arg0, Object obj) {
+			if (Boolean.parseBoolean(obj.toString())) {
+				connectFacebook();
+			} else {
+				new AlertDialog.Builder(context)
+						.setTitle("Warning")
+						.setMessage(
+								"Please note, your friends won't be able to help you in trouble times.")
+						.setPositiveButton(R.string.continue_,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+										disConnectFacebook();
+									}
+								})
+						.setNegativeButton(R.string.cancel,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+										dialog.cancel();
+									}
+								}).setOnKeyListener(new OnKeyListener() {
+
+							@Override
+							public boolean onKey(DialogInterface dialog,
+									int keyCode, KeyEvent event) {
+								if (keyCode == KeyEvent.KEYCODE_BACK
+										&& event.getAction() == KeyEvent.ACTION_UP) {
+									dialog.cancel();
+								}
+								return false;
+							}
+						}).create().show();
+			}
+
+			return true;
+		}
+
+		public void connectFacebook() {
+			Session session = Session.getActiveSession();
+			if (!session.isOpened() && !session.isClosed()) {
+				session.openForRead(new Session.OpenRequest((Activity) context)
+						.setCallback(statusCallback));
+			} else {
+				Session.openActiveSession((Activity) context, true,
+						statusCallback);
+			}
+		}
+
+		public void disConnectFacebook() {
+			preferencesHelper.setBoolean(
+					PreferencesHelper.FACEBOOK_CONNECT_STATUS, false);
+			Session session = Session.getActiveSession();
+			if (!session.isClosed()) {
+				session.closeAndClearTokenInformation();
+			}
+		}
 	}
 
-	@Override
-	public boolean onPreferenceChange(Preference arg0, Object arg1) {
-		new AlertDialog.Builder(context)
-				.setTitle("Warning")
-				.setMessage(
-						"Please note, this will reset the application preferences, although the backup files will be kept. You will have to reconnect google to use this application.")
-				.setPositiveButton(R.string.continue_,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								if (googlePlusClient.isConnected()) {
-									Reset.getInstance(context, googlePlusClient)
-											.reset();
+	class GoogleConnectListener implements OnPreferenceChangeListener {
+
+		private Context context;
+		private PlusClient googlePlusClient;
+
+		public GoogleConnectListener(Context context,
+				PlusClient googlePlusClient) {
+			this.context = context;
+			this.googlePlusClient = googlePlusClient;
+		}
+
+		@Override
+		public boolean onPreferenceChange(Preference arg0, Object arg1) {
+			new AlertDialog.Builder(context)
+					.setTitle("Warning")
+					.setMessage(
+							"Please note, this will reset the application preferences, although the backup files will be kept. You will have to reconnect google to use this application.")
+					.setPositiveButton(R.string.continue_,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									if (googlePlusClient.isConnected()) {
+										Reset.getInstance(context,
+												googlePlusClient).reset();
+									}
 								}
-							}
-						})
-				.setNegativeButton(R.string.cancel,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
+							})
+					.setNegativeButton(R.string.cancel,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+								}
+							}).setOnKeyListener(new OnKeyListener() {
+
+						@Override
+						public boolean onKey(DialogInterface dialog,
+								int keyCode, KeyEvent event) {
+							if (keyCode == KeyEvent.KEYCODE_BACK
+									&& event.getAction() == KeyEvent.ACTION_UP) {
 								dialog.cancel();
 							}
-						}).setOnKeyListener(new OnKeyListener() {
-
-					@Override
-					public boolean onKey(DialogInterface dialog, int keyCode,
-							KeyEvent event) {
-						if (keyCode == KeyEvent.KEYCODE_BACK
-								&& event.getAction() == KeyEvent.ACTION_UP) {
-							dialog.cancel();
+							return false;
 						}
-						return false;
-					}
-				}).create().show();
-		return true;
+					}).create().show();
+			return true;
+		}
+
 	}
 
 }
@@ -532,7 +552,6 @@ class NotificationsToggle implements OnPreferenceChangeListener {
 		}
 		return true;
 	}
-
 }
 
 class ChangeEmergencyMessage extends DialogPreference {
