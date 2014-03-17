@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="c-margin-medium">4dp</dimen>
-    <dimen name="c-margin-small">2dp</dimen>
-    <dimen name="c-margin-large">6dp</dimen>
-    <dimen name="c-padding-medium">4dp</dimen>
-    <dimen name="c-padding-x-large">10dp</dimen>
+    <dimen name="c_margin_medium">4dp</dimen>
+    <dimen name="c_margin_small">2dp</dimen>
+    <dimen name="c_margin_large">6dp</dimen>
+    <dimen name="c_margin_x_large">8dp</dimen>
+    <dimen name="c_padding_medium">4dp</dimen>
+    <dimen name="c_padding_x_large">10dp</dimen>
     
 </resources>

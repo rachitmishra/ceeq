@@ -8,7 +8,7 @@
 package in.ceeq.services;
 
 import hirondelle.date4j.DateTime;
-import in.ceeq.actions.Backup.State;
+import in.ceeq.actions.Backup;
 import in.ceeq.actions.Notifications;
 import in.ceeq.activities.Home;
 import in.ceeq.helpers.FilesHelper;
@@ -126,11 +126,11 @@ public class Backups extends IntentService {
 			sendMessage(Home.SHOW);
 		}
 
-		notify(State.ON);
+		notify(Backup.ON);
 
 		try {
 			switch (action) {
-			case BACKUP:
+			case ACTION_BACKUP:
 				switch (actionType) {
 				case ACTION_TYPE_ALL:
 					backup();
@@ -149,7 +149,7 @@ public class Backups extends IntentService {
 					break;
 				}
 				break;
-			case RESTORE:
+			case ACTION_RESTORE:
 				switch (actionType) {
 
 				case ACTION_TYPE_ALL:
@@ -175,21 +175,21 @@ public class Backups extends IntentService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			notify(State.OFF);
+			notify(Backup.OFF);
 			if (actionParent == ACTION_PARENT_ACTIVITY) {
 				sendMessage(Home.HIDE);
 			}
 		}
 	}
 
-	public void notify(State state) {
+	public void notify(int state) {
 		if (preferencesHelper
 				.getBoolean(PreferencesHelper.NOTIFICATIONS_STATUS)) {
 			switch (state) {
-			case OFF:
+			case Backup.OFF:
 				Notifications.getInstance(this).finish(action);
 				break;
-			case ON:
+			case Backup.ON:
 				Notifications.getInstance(this).start(action);
 				break;
 			}

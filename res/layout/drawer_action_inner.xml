@@ -1,32 +1,31 @@
-                                                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="#44fafafa" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#44fafafa" >
 
-        <FrameLayout
-            android:layout_width="32dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="12dp" >
+    <ImageView
+        android:id="@+id/drawer_list_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="12dp"
+        android:contentDescription="@string/app_name" />
 
-            <ImageView
-                android:id="@+id/drawer_list_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:contentDescription="@string/app_name"/>
+    <TextView
+        android:id="@+id/drawer_list_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="12dp"
+        android:layout_toRightOf="@+id/drawer_list_icon"
+        android:background="?android:attr/activatedBackgroundIndicator"
+        android:gravity="center_vertical"
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall"
+        android:textColor="#555555"
+        android:textSize="16sp" />
 
-        </FrameLayout>
-
-        <TextView
-            android:id="@+id/drawer_list_inner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/activatedBackgroundIndicator"
-            android:gravity="center_vertical"
-            android:minHeight="?android:attr/listPreferredItemHeightSmall"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall"
-            android:textColor="#555555"
-            android:textSize="16sp" />
-
-    </LinearLayout>
+</RelativeLayout>

@@ -8,7 +8,6 @@
 package in.ceeq.receivers;
 
 import in.ceeq.actions.Backup;
-import in.ceeq.actions.Backup.State;
 import in.ceeq.actions.Notifications;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Commander;
@@ -65,7 +64,7 @@ public class Startup extends BroadcastReceiver {
 	}
 
 	public void setupAlarms(Context context) {
-		Backup.getInstance(context).autoBackups(State.ON);
+		Backup.getInstance(context).autoBackups(Backup.ON);
 	}
 
 }

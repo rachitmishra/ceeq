@@ -9,5 +9,6 @@
     <color name="text_dark">#252525</color>
     <color name="text_medium">#454545</color>
     <color name="text_light">#606060</color>
+    <color name="text_white">#fafafa</color>
     <color name="pressed_actionbar">#CC0099CC</color>
 </resources>

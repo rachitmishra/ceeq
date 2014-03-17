@@ -8,11 +8,8 @@
 package in.ceeq.actions;
 
 import hirondelle.date4j.DateTime;
-import in.ceeq.activities.Home;
 import in.ceeq.helpers.Logger;
 import in.ceeq.services.Backups;
-import in.ceeq.services.Backups.Action;
-import in.ceeq.services.Backups.ActionParent;
 
 import java.util.TimeZone;
 
@@ -20,15 +17,13 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Messenger;
 
 public class Backup {
 	private Context context;
 	public static final int ALARM_ACTIVATION_REQUEST = 2337;
 
-	public enum State {
-		ON, OFF
-	}
+	public static final int OFF = 0;
+	public static final int ON = 1;
 
 	public Backup(Context context) {
 		this.context = context;
@@ -40,14 +35,13 @@ public class Backup {
 
 	public void backup(int data) {
 		Intent startBackup = new Intent(context, Backups.class)
-				.putExtra(Backups.ACTION, Action.BACKUP)
+				.putExtra(Backups.ACTION, Backups.ACTION_BACKUP)
 				.putExtra(Backups.ACTION_TYPE, data)
-				.putExtra(Backups.ACTION_PARENT, ActionParent.ACTIVITY)
-				.putExtra(Home.MESSENGER, new Messenger(Home.messageHandler));
+				.putExtra(Backups.ACTION_PARENT, Backups.ACTION_PARENT_ACTIVITY);
 		context.startService(startBackup);
 	}
 
-	public void autoBackups(State state) {
+	public void autoBackups(int state) {
 		PendingIntent pi;
 		AlarmManager alarms = (AlarmManager) context
 				.getSystemService(Context.ALARM_SERVICE);

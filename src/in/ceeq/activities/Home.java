@@ -4,7 +4,6 @@ import hirondelle.date4j.DateTime;
 import in.ceeq.Launcher;
 import in.ceeq.R;
 import in.ceeq.actions.Backup;
-import in.ceeq.actions.Backup.State;
 import in.ceeq.actions.Notifications;
 import in.ceeq.actions.Protect;
 import in.ceeq.actions.Receiver;
@@ -273,7 +272,7 @@ public class Home extends FragmentActivity {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup arg2) {
-			TextView header, inner;
+			TextView header, innerText;
 			ImageView innerImage;
 			switch (position) {
 			case 1:
@@ -292,9 +291,9 @@ public class Home extends FragmentActivity {
 			default:
 				convertView = getLayoutInflater().inflate(
 						R.layout.drawer_action_inner, null);
-				inner = (TextView) convertView
-						.findViewById(R.id.drawer_list_inner);
-				inner.setText(getInnerText(position));
+				innerText = (TextView) convertView
+						.findViewById(R.id.drawer_list_text);
+				innerText.setText(getInnerText(position));
 				innerImage = (ImageView) convertView
 						.findViewById(R.id.drawer_list_icon);
 				innerImage.setBackgroundResource(getInnerImage(position));
@@ -365,6 +364,7 @@ public class Home extends FragmentActivity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			selectItem(position);
+			
 		}
 
 		private void selectItem(int position) {
@@ -413,6 +413,7 @@ public class Home extends FragmentActivity {
 				actionList.setItemChecked(position, false);
 				return;
 			}
+
 			if (fragment != null)
 				fragmentManager.beginTransaction()
 						.replace(R.id.container, fragment).commit();
@@ -651,13 +652,13 @@ public class Home extends FragmentActivity {
 			Toast.makeText(this,
 					"Automatic backups started, everyday at 2:00 AM",
 					Toast.LENGTH_SHORT).show();
-			Backup.getInstance(this).autoBackups(State.ON);
+			Backup.getInstance(this).autoBackups(Backup.ON);
 			preferencesHelper.setBoolean(PreferencesHelper.AUTO_BACKUP_STATUS,
 					true);
 		} else {
 			Toast.makeText(this, "Automatic backups cancelled.",
 					Toast.LENGTH_SHORT).show();
-			Backup.getInstance(this).autoBackups(State.OFF);
+			Backup.getInstance(this).autoBackups(Backup.OFF);
 			preferencesHelper.setBoolean(PreferencesHelper.AUTO_BACKUP_STATUS,
 					false);
 		}
