@@ -79,7 +79,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.bugsense.trace.BugSenseHandler;
 import com.facebook.LoggingBehavior;
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -96,8 +95,6 @@ import com.google.android.gms.plus.PlusOneButton;
 public class Home extends FragmentActivity {
 
 	public static final String MESSENGER = "in.ceeq.Home";
-	public final static int SHOW = 1;
-	public final static int HIDE = 0;
 	private static final int DEVICE_ADMIN_ACTIVATION_REQUEST = 9014;
 	private static ProgressBar progressBar;
 	private PreferencesHelper preferencesHelper;
@@ -116,39 +113,34 @@ public class Home extends FragmentActivity {
 	private TextView userId, userName;
 	private ImageView userImage;
 	private RelativeLayout userLoading, userDetails;
+	
+	public static final int PROTECT_DIALOG = 0;
+	public static final int STEALTH_DIALOG = 1;
+	public static final int FEEDBACK_DIALOG = 2;
+	public static final int BACKUP_DIALOG = 3;
+	public static final int RESTORE_DIALOG = 4;
+	public static final int BLIP_DIALOG = 5;
+	public static final int WIPE_DIALOG = 6;
+	public static final int WIPE_EXTERNAL_STORAGE_DIALOG = 7;
+	public static final int WIPE_DEVICE_DIALOG = 8;
+	public static final int WIPE_EXTERNAL_STORAGE_AND_DEVICE_DIALOG = 9;
+	public static final int DEVICE_ADMIN_DIALOG = 10;
+	public static final int WIPE = 11;
 
-	public enum DialogType {
-		PROTECT, STEALTH, FEEDBACK, BACKUP, RESTORE, BLIP, WIPE, WIPE_EXTERNAL_STORAGE, WIPE_DEVICE, WIPE_EXTERNAL_STORAGE_AND_DEVICE, DEVICE_ADMIN
-	}
+	public static final int OFF = 0;
+	public static final int ON = 1;
 
-	/**
-	 * 
-	 * Switch button states constant enum, used in switch cases to change or
-	 * save button states.
-	 * 
-	 */
-	public enum SwitchState {
-		ON, OFF
-	}
+	public static final int HIDE = 0;
+	public static final int SHOW = 1;
 
-	public enum ProgressBarState {
-		SHOW, HIDE
-	}
-
-	public enum ComponentState {
-		DISABLE, ENABLE
-	}
-
-	public enum ToggleState {
-		OFF, ON
-	}
+	public static final int DISABLE = 0;
+	public static final int ENABLE = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setupActionbar();
-		setupBugsense();
 		setContentView(R.layout.activity_home);
 		this.title = drawerTitle = getTitle();
 
@@ -180,10 +172,6 @@ public class Home extends FragmentActivity {
 		getActionBar().setDisplayShowTitleEnabled(false);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
-	}
-
-	public void setupBugsense() {
-		BugSenseHandler.initAndStartSession(Home.this, "5996b3d9");
 	}
 
 	/**
@@ -577,11 +565,11 @@ public class Home extends FragmentActivity {
 			break;
 
 		case R.id.backup:
-			dialogsHelper.showDialog(DialogType.BACKUP);
+			dialogsHelper.showDialog(BACKUP_DIALOG);
 			break;
 
 		case R.id.restore:
-			dialogsHelper.showDialog(DialogType.RESTORE);
+			dialogsHelper.showDialog(RESTORE_DIALOG);
 			break;
 
 		case R.id.b_view:
@@ -599,7 +587,7 @@ public class Home extends FragmentActivity {
 			break;
 
 		case R.id.wipe:
-			dialogsHelper.showDialog(DialogType.WIPE);
+			dialogsHelper.showDialog(WIPE_DIALOG);
 			break;
 
 		case R.id.wipe_cache:
@@ -607,7 +595,7 @@ public class Home extends FragmentActivity {
 			break;
 
 		case R.id.b_feedback:
-			dialogsHelper.showDialog(DialogType.FEEDBACK);
+			dialogsHelper.showDialog(FEEDBACK_DIALOG);
 			break;
 		}
 
@@ -630,7 +618,7 @@ public class Home extends FragmentActivity {
 	private void setupStealthMode(ToggleButton toggleButton) {
 		packageManager = this.getPackageManager();
 		if (toggleButton.isChecked()) {
-			dialogsHelper.showDialog(DialogType.STEALTH, toggleButton);
+			dialogsHelper.showDialog(STEALTH_DIALOG, toggleButton);
 		} else {
 			getPackageManager().setComponentEnabledSetting(
 					new ComponentName(Home.this, Launcher.class),
@@ -647,7 +635,7 @@ public class Home extends FragmentActivity {
 
 	private void setupProtectMe(ToggleButton toggleButton) {
 		if (toggleButton.isChecked()) {
-			dialogsHelper.showDialog(DialogType.PROTECT, toggleButton);
+			dialogsHelper.showDialog(PROTECT_DIALOG, toggleButton);
 		} else {
 			Protect.getInstance(this).disable();
 			preferencesHelper.setBoolean(PreferencesHelper.PROTECT_ME_STATUS,
@@ -678,7 +666,7 @@ public class Home extends FragmentActivity {
 
 	private void setupAutoBlips(ToggleButton toggleButton) {
 		if (toggleButton.isChecked()) {
-			dialogsHelper.showDialog(DialogType.BLIP, toggleButton);
+			dialogsHelper.showDialog(BLIP_DIALOG, toggleButton);
 		} else {
 			Receiver.getInstance(this).unregister(ReceiverType.LOW_BATTERY);
 			preferencesHelper.setBoolean(PreferencesHelper.AUTO_BLIP_STATUS,
@@ -807,7 +795,7 @@ public class Home extends FragmentActivity {
 		private Context context;
 		private ComponentName deviceAdminComponentName;
 
-		private DialogType dialogType;
+		private int dialogType;
 
 		public DialogsHelper(Context context) {
 			this.context = context;
@@ -815,31 +803,31 @@ public class Home extends FragmentActivity {
 			preferencesHelper = PreferencesHelper.getInstance(context);
 		}
 
-		public void showDialog(DialogType dialogType) {
+		public void showDialog(int dialogType) {
 			this.dialogType = dialogType;
 			alertDialogBuilder = new AlertDialog.Builder(context)
 					.setTitle(getTitle());
 			switch (dialogType) {
-			case FEEDBACK:
-				alertDialogBuilder.setView(getView(DialogType.FEEDBACK))
+			case FEEDBACK_DIALOG:
+				alertDialogBuilder.setView(getView(FEEDBACK_DIALOG))
 						.setPositiveButton(getPositiveButtonString(), this);
 				break;
-			case DEVICE_ADMIN:
-				alertDialogBuilder.setView(getView(DialogType.DEVICE_ADMIN))
+			case DEVICE_ADMIN_DIALOG:
+				alertDialogBuilder.setView(getView(DEVICE_ADMIN_DIALOG))
 						.setPositiveButton(getPositiveButtonString(), this);
 				break;
-			case WIPE_DEVICE:
-				alertDialogBuilder.setView(getView(DialogType.WIPE_DEVICE))
+			case WIPE_DEVICE_DIALOG:
+				alertDialogBuilder.setView(getView(WIPE_DEVICE_DIALOG))
 						.setPositiveButton(getPositiveButtonString(), this);
 				break;
-			case WIPE_EXTERNAL_STORAGE:
+			case WIPE_EXTERNAL_STORAGE_DIALOG:
 				alertDialogBuilder.setView(
-						getView(DialogType.WIPE_EXTERNAL_STORAGE))
+						getView(WIPE_EXTERNAL_STORAGE_DIALOG))
 						.setPositiveButton(getPositiveButtonString(), this);
 				break;
-			case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
+			case WIPE_EXTERNAL_STORAGE_AND_DEVICE_DIALOG:
 				alertDialogBuilder.setView(
-						getView(DialogType.WIPE_EXTERNAL_STORAGE_AND_DEVICE))
+						getView(WIPE_EXTERNAL_STORAGE_AND_DEVICE_DIALOG))
 						.setPositiveButton(getPositiveButtonString(), this);
 				break;
 			default:
@@ -852,7 +840,7 @@ public class Home extends FragmentActivity {
 					.create().show();
 		}
 
-		public void showDialog(DialogType dialogType, ToggleButton toggleButton) {
+		public void showDialog(int dialogType, ToggleButton toggleButton) {
 			this.dialogType = dialogType;
 			this.toggleButton = toggleButton;
 
@@ -860,17 +848,17 @@ public class Home extends FragmentActivity {
 					.setTitle(getTitle());
 
 			switch (dialogType) {
-			case BLIP:
-				alertDialogBuilder.setView(getView(DialogType.BLIP));
+			case BLIP_DIALOG:
+				alertDialogBuilder.setView(getView(BLIP_DIALOG));
 				break;
-			case DEVICE_ADMIN:
-				alertDialogBuilder.setView(getView(DialogType.DEVICE_ADMIN));
+			case DEVICE_ADMIN_DIALOG:
+				alertDialogBuilder.setView(getView(DEVICE_ADMIN_DIALOG));
 				break;
-			case PROTECT:
-				alertDialogBuilder.setView(getView(DialogType.PROTECT));
+			case PROTECT_DIALOG:
+				alertDialogBuilder.setView(getView(PROTECT_DIALOG));
 				break;
-			case STEALTH:
-				alertDialogBuilder.setView(getView(DialogType.STEALTH));
+			case STEALTH_DIALOG:
+				alertDialogBuilder.setView(getView(STEALTH_DIALOG));
 				break;
 			default:
 				break;
@@ -885,21 +873,21 @@ public class Home extends FragmentActivity {
 
 		public int getTitle() {
 			switch (dialogType) {
-			case BACKUP:
+			case BACKUP_DIALOG:
 				return R.string.dialog_title_backup;
-			case RESTORE:
+			case RESTORE_DIALOG:
 				return R.string.dialog_title_restore;
-			case WIPE:
+			case WIPE_DIALOG:
 				return R.string.dialog_title_wipe;
-			case BLIP:
+			case BLIP_DIALOG:
 				return R.string.dialog_title_blip;
-			case FEEDBACK:
+			case FEEDBACK_DIALOG:
 				return R.string.dialog_title_feedback;
-			case PROTECT:
+			case PROTECT_DIALOG:
 				return R.string.dialog_title_protect;
-			case STEALTH:
+			case STEALTH_DIALOG:
 				return R.string.dialog_title_stealth;
-			case DEVICE_ADMIN:
+			case DEVICE_ADMIN_DIALOG:
 				return R.string.dialog_title_device_admin;
 			default:
 				return R.string.dialog_title_wipe_device;
@@ -908,8 +896,8 @@ public class Home extends FragmentActivity {
 
 		public int getChoices() {
 			switch (dialogType) {
-			case BACKUP:
-			case RESTORE:
+			case BACKUP_DIALOG:
+			case RESTORE_DIALOG:
 				return R.array.backup_options;
 			case WIPE:
 				return R.array.wipe_options;
@@ -918,21 +906,21 @@ public class Home extends FragmentActivity {
 			}
 		}
 
-		public View getView(DialogType dialogType) {
+		public View getView(int dialogType) {
 			this.dialogType = dialogType;
 			inflater = activity.getLayoutInflater();
 			switch (dialogType) {
 
-			case BLIP:
+			case BLIP_DIALOG:
 				return inflater.inflate(R.layout.dialog_blips_info, null);
 
-			case DEVICE_ADMIN:
+			case DEVICE_ADMIN_DIALOG:
 				return inflater.inflate(R.layout.dialog_device_admin, null);
 
-			case STEALTH:
+			case STEALTH_DIALOG:
 				return inflater.inflate(R.layout.dialog_stealth_mode, null);
 
-			case PROTECT:
+			case PROTECT_DIALOG:
 				protectMeView = inflater.inflate(R.layout.dialog_protect_me,
 						null);
 				Button facebookConnect = (Button) protectMeView
@@ -958,14 +946,14 @@ public class Home extends FragmentActivity {
 				if (!storedMessage.isEmpty())
 					distressMessage.setText(storedMessage);
 				return protectMeView;
-			case WIPE_DEVICE:
+			case WIPE_DEVICE_DIALOG:
 				return inflater.inflate(R.layout.dialog_wipe, null);
-			case WIPE_EXTERNAL_STORAGE:
+			case WIPE_EXTERNAL_STORAGE_DIALOG:
 				return inflater.inflate(R.layout.dialog_wipe_external_storage,
 						null);
-			case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
+			case WIPE_EXTERNAL_STORAGE_AND_DEVICE_DIALOG:
 				return inflater.inflate(R.layout.dialog_wipe, null);
-			case FEEDBACK:
+			case FEEDBACK_DIALOG:
 				feedbackView = inflater.inflate(R.layout.dialog_feedback, null);
 				return feedbackView;
 			default:
@@ -977,13 +965,13 @@ public class Home extends FragmentActivity {
 
 		public int getPositiveButtonString() {
 			switch (dialogType) {
-			case PROTECT:
+			case PROTECT_DIALOG:
 				return R.string.save;
-			case STEALTH:
+			case STEALTH_DIALOG:
 				return R.string.enable;
-			case BLIP:
+			case BLIP_DIALOG:
 				return R.string.okay;
-			case FEEDBACK:
+			case FEEDBACK_DIALOG:
 				return R.string.send;
 			default:
 				return R.string.continue_;
@@ -1022,36 +1010,36 @@ public class Home extends FragmentActivity {
 			case Dialog.BUTTON_POSITIVE:
 			default:
 				switch (dialogType) {
-				case BACKUP:
+				case BACKUP_DIALOG:
 					Backup.getInstance(context).backup(which);
 					dialog.dismiss();
 					break;
-				case RESTORE:
+				case RESTORE_DIALOG:
 					Restore.getInstance(context).restore(which);
 					dialog.dismiss();
 					break;
-				case WIPE:
+				case WIPE_DIALOG:
 					switch (which) {
 					case Wipe.EXTERNAL_STORAGE:
-						showDialog(DialogType.WIPE_EXTERNAL_STORAGE);
+						showDialog(WIPE_EXTERNAL_STORAGE_DIALOG);
 						break;
 					case Wipe.DEVICE:
-						showDialog(DialogType.WIPE_DEVICE);
+						showDialog(WIPE_DEVICE_DIALOG);
 						break;
 					case Wipe.EXTERNAL_STORAGE_AND_DEVICE:
-						showDialog(DialogType.WIPE_EXTERNAL_STORAGE_AND_DEVICE);
+						showDialog(WIPE_EXTERNAL_STORAGE_AND_DEVICE_DIALOG);
 						break;
 					}
 					dialog.dismiss();
 					break;
-				case BLIP:
+				case BLIP_DIALOG:
 					Receiver.getInstance(context).register(
 							ReceiverType.LOW_BATTERY);
 					preferencesHelper.setBoolean(
 							PreferencesHelper.AUTO_BLIP_STATUS, true);
 					showToast("Auto blips enabled.");
 					break;
-				case DEVICE_ADMIN:
+				case DEVICE_ADMIN_DIALOG:
 					activity.startActivityForResult(
 							new Intent(
 									DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
@@ -1063,7 +1051,7 @@ public class Home extends FragmentActivity {
 											activity.getString(R.string.help_note_25)),
 							DEVICE_ADMIN_ACTIVATION_REQUEST);
 					break;
-				case FEEDBACK:
+				case FEEDBACK_DIALOG:
 					EditText feedbackMessage = (EditText) feedbackView
 							.findViewById(R.id.feedbackMessage);
 					preferencesHelper.setString(
@@ -1071,7 +1059,7 @@ public class Home extends FragmentActivity {
 									.getText().toString());
 					Upload.getInstance(context).start(UploadType.FEEDBACK);
 					break;
-				case PROTECT:
+				case PROTECT_DIALOG:
 					Protect.getInstance(context).enable();
 					EditText distressMessage = (EditText) protectMeView
 							.findViewById(R.id.distressMessage);
@@ -1082,7 +1070,7 @@ public class Home extends FragmentActivity {
 							PreferencesHelper.PROTECT_ME_STATUS, true);
 					showToast("Protect me enabled. Just press power button 10 times for help.");
 					break;
-				case STEALTH:
+				case STEALTH_DIALOG:
 					Notifications.getInstance(context).remove();
 					preferencesHelper.setBoolean(
 							PreferencesHelper.NOTIFICATIONS_STATUS, false);
@@ -1108,22 +1096,22 @@ public class Home extends FragmentActivity {
 							PreferencesHelper.STEALTH_MODE_STATUS, true);
 					showToast("Stealth Mode enabled.");
 					break;
-				case WIPE_DEVICE:
+				case WIPE_DEVICE_DIALOG:
 					if (preferencesHelper
 							.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS))
 						Wipe.getInstance(context).device();
 					else
-						showDialog(DialogType.DEVICE_ADMIN);
+						showDialog(DEVICE_ADMIN_DIALOG);
 					break;
-				case WIPE_EXTERNAL_STORAGE:
+				case WIPE_EXTERNAL_STORAGE_DIALOG:
 					Wipe.getInstance(context).externalStorage();
 					break;
-				case WIPE_EXTERNAL_STORAGE_AND_DEVICE:
+				case WIPE_EXTERNAL_STORAGE_AND_DEVICE_DIALOG:
 					if (preferencesHelper
 							.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS))
 						Wipe.getInstance(context).deviceAndExternalStorage();
 					else
-						showDialog(DialogType.DEVICE_ADMIN);
+						showDialog(DEVICE_ADMIN_DIALOG);
 					break;
 				default:
 					break;
@@ -1241,8 +1229,7 @@ public class Home extends FragmentActivity {
 					& isBackupDelayed()) {
 				return true;
 			} else if (!preferencesHelper
-					.getBoolean(PreferencesHelper.AUTO_BACKUP_STATUS)
-					& isBackupDelayed()) {
+					.getBoolean(PreferencesHelper.AUTO_BACKUP_STATUS)) {
 				notification_list.add(Status.AUTO_BACKUP);
 				counter++;
 				return false;

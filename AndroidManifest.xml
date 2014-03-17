@@ -211,6 +211,11 @@
             android:enabled="true"
             android:exported="true" >
         </service>
+
+
+    
+
+    <meta-data android:name="com.crashlytics.ApiKey" android:value="1293eb841cb0c6fad272055247fd16354fe51889"/>
     </application>
 
 </manifest>

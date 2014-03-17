@@ -11,8 +11,8 @@ import hirondelle.date4j.DateTime;
 import in.ceeq.actions.Backup.State;
 import in.ceeq.actions.Notifications;
 import in.ceeq.activities.Home;
-import in.ceeq.activities.Home.ProgressBarState;
 import in.ceeq.helpers.FilesHelper;
+import in.ceeq.helpers.Logger;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.helpers.XmlDataParseHelper;
 
@@ -68,28 +68,25 @@ public class Backups extends IntentService {
 	public static final String ACTION = "action";
 	public static final String ACTION_TYPE = "actionType";
 	public static final String ACTION_PARENT = "actionParent";
-
+	
 	public final static int ACTION_TYPE_ALL = 0;
 	public final static int ACTION_TYPE_CONTACTS = 1;
 	public final static int ACTION_TYPE_MESSAGES = 2;
 	public final static int ACTION_TYPE_CALLS = 3;
 	public final static int ACTION_TYPE_WORDS = 4;
 
-	public enum Action {
-		BACKUP, RESTORE
-	};
+	public static final int ACTION_BACKUP = 1;
+	public static final int ACTION_RESTORE = 2;
 
-	public enum NotificationState {
-		SHOW, HIDE
-	};
+	public static final int SHOW = 0;
+	public static final int HIDE = 1;
 
-	public enum ActionParent {
-		ACTIVITY, SERVICE
-	};
+	public static int ACTION_PARENT_ACTIVITY = 1;
+	public static int ACTION_PARENT_SERVICE = 2;
 
-	private Action action;
+	private int action;
 	private int actionType;
-	private ActionParent actionParent;
+	private int actionParent;
 	private ContentResolver resolver;
 	private XmlSerializer serializer;
 	private StringWriter writer;
@@ -120,12 +117,13 @@ public class Backups extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		Bundle extras = intent.getExtras();
-		action = (Action) extras.get(ACTION);
+		action = extras.getInt(ACTION);
 		actionType = extras.getInt(ACTION_TYPE);
-		actionParent = (ActionParent) extras.get(ACTION_PARENT);
-		if (actionParent == ActionParent.ACTIVITY) {
+		actionParent = extras.getInt(ACTION_PARENT);
+		
+		if (actionParent == ACTION_PARENT_ACTIVITY) {
 			messageHandler = (Messenger) extras.get(Home.MESSENGER);
-			sendMessage(ProgressBarState.SHOW);
+			sendMessage(Home.SHOW);
 		}
 
 		notify(State.ON);
@@ -155,35 +153,31 @@ public class Backups extends IntentService {
 				switch (actionType) {
 
 				case ACTION_TYPE_ALL:
-					restoreContacts(preferencesHelper
-							.getString(PREFS_L_CONTACTS));
-					restoreMessages(preferencesHelper
-							.getString(PREFS_L_MESSAGES));
-					restoreCallLogs(preferencesHelper.getString(PREFS_L_CALLS));
-					restoreDictionary(preferencesHelper
-							.getString(PREFS_L_WORDS));
+					restore();
 					break;
 				case ACTION_TYPE_CONTACTS:
 					restoreContacts(preferencesHelper
 							.getString(PREFS_L_CONTACTS));
+					break;
 				case ACTION_TYPE_MESSAGES:
 					restoreMessages(preferencesHelper
 							.getString(PREFS_L_MESSAGES));
-
+					break;
 				case ACTION_TYPE_CALLS:
 					restoreCallLogs(preferencesHelper.getString(PREFS_L_CALLS));
-
+					break;
 				case ACTION_TYPE_WORDS:
 					restoreDictionary(preferencesHelper
 							.getString(PREFS_L_WORDS));
+					break;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			notify(State.OFF);
-			if (actionParent == ActionParent.ACTIVITY) {
-				sendMessage(ProgressBarState.HIDE);
+			if (actionParent == ACTION_PARENT_ACTIVITY) {
+				sendMessage(Home.HIDE);
 			}
 		}
 	}
@@ -193,22 +187,22 @@ public class Backups extends IntentService {
 				.getBoolean(PreferencesHelper.NOTIFICATIONS_STATUS)) {
 			switch (state) {
 			case OFF:
-				Notifications.getInstance(this).remove(action);
+				Notifications.getInstance(this).finish(action);
 				break;
 			case ON:
-				Notifications.getInstance(this).show(action);
+				Notifications.getInstance(this).start(action);
 				break;
 			}
 		}
 	}
 
-	public void sendMessage(ProgressBarState state) {
+	public void sendMessage(int state) {
 		Message message = Message.obtain();
 		switch (state) {
-		case SHOW:
+		case Home.SHOW:
 			message.arg1 = Home.SHOW;
 			break;
-		case HIDE:
+		case Home.HIDE:
 			message.arg1 = Home.HIDE;
 			break;
 		}
@@ -220,63 +214,60 @@ public class Backups extends IntentService {
 	}
 
 	public void backup() {
-		try {
-			preferencesHelper.setString(PREFS_L_CONTACTS, filesHelper
-					.writeFile(contactsManager.readContacts(),
-							FILE_NAME_PREFIX_CONTACTS));
-			preferencesHelper.setString(PREFS_L_MESSAGES, filesHelper
-					.writeFile(messagesManager.readMessages(),
-							FILE_NAME_PREFIX_MESSAGES));
-			preferencesHelper.setString(PREFS_L_CALLS, filesHelper.writeFile(
-					callsManager.readCalls(), FILE_NAME_PREFIX_CALLS));
-
-			preferencesHelper
-					.setString(PREFS_L_WORDS, filesHelper.writeFile(
-							dictionaryManager.readDictionary(),
-							FILE_NAME_PREFIX_WORDS));
-			preferencesHelper.setString(LAST_BACKUP_DATE,
-					DateTime.today(TimeZone.getDefault()).toString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		Logger.s("backup()");
+		backupContacts();
+		backupCallLogs();
+		backupMessages();
+		backupDictionary();
+		Logger.c("backup()");
 	}
 
 	public void backupContacts() {
+		Logger.s("backupContacts()");
 		try {
 			preferencesHelper.setString(PREFS_L_CONTACTS, filesHelper
 					.writeFile(contactsManager.readContacts(),
 							FILE_NAME_PREFIX_CONTACTS));
 			preferencesHelper.setString(LAST_BACKUP_DATE,
 					DateTime.today(TimeZone.getDefault()).toString());
+			Logger.c("backupContacts()");
 		} catch (IOException e) {
+			Logger.f("backupContacts()");
 			e.printStackTrace();
 		}
 	}
 
 	public void backupMessages() {
+		Logger.s("backupMessages()");
 		try {
 			preferencesHelper.setString(PREFS_L_MESSAGES, filesHelper
 					.writeFile(messagesManager.readMessages(),
 							FILE_NAME_PREFIX_MESSAGES));
 			preferencesHelper.setString(LAST_BACKUP_DATE,
 					DateTime.today(TimeZone.getDefault()).toString());
+			Logger.c("backupMessages()");
 		} catch (IOException e) {
+			Logger.f("backupMessages()");
 			e.printStackTrace();
 		}
 	}
 
 	public void backupCallLogs() {
+		Logger.s("backupCallLogs()");
 		try {
 			preferencesHelper.setString(PREFS_L_CALLS, filesHelper.writeFile(
 					callsManager.readCalls(), FILE_NAME_PREFIX_CALLS));
 			preferencesHelper.setString(LAST_BACKUP_DATE,
 					DateTime.today(TimeZone.getDefault()).toString());
+			Logger.c("backupCallLogs()");
 		} catch (IOException e) {
+			Logger.f("backupCallLogs()");
 			e.printStackTrace();
 		}
 	}
 
 	public void backupDictionary() {
+		Logger.s("backupDictionary()");
 		try {
 			preferencesHelper
 					.setString(PREFS_L_WORDS, filesHelper.writeFile(
@@ -284,7 +275,9 @@ public class Backups extends IntentService {
 							FILE_NAME_PREFIX_WORDS));
 			preferencesHelper.setString(LAST_BACKUP_DATE,
 					DateTime.today(TimeZone.getDefault()).toString());
+			Logger.c("backupDictionary()");
 		} catch (IOException e) {
+			Logger.f("backupDictionary()");
 			e.printStackTrace();
 		}
 	}
@@ -380,8 +373,10 @@ public class Backups extends IntentService {
 		private final Uri URI = CallLog.Calls.CONTENT_URI;
 
 		public String readCalls() {
+
 			Cursor cs = resolver.query(URI, null, null, null, null);
 			try {
+
 				if (cs.moveToFirst()) {
 					serializer.setOutput(writer);
 					serializer.startDocument("UTF-8", true);

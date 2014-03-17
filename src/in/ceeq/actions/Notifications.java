@@ -3,7 +3,6 @@ package in.ceeq.actions;
 import in.ceeq.R;
 import in.ceeq.activities.Home;
 import in.ceeq.helpers.PreferencesHelper;
-import in.ceeq.services.Backups.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -20,6 +19,11 @@ public class Notifications {
 	private NotificationCompat.Builder nBuilder, bBuilder;
 	private PreferencesHelper preferencesHelper;
 
+	public static final int BACKUP = 1;
+	public static final int RESTORE = 2;
+	public static final int SHOW = 0;
+	public static final int HIDE = 1;
+	
 	public Notifications(Context context) {
 		this.context = context;
 		notificationManager = (NotificationManager) context
@@ -46,7 +50,7 @@ public class Notifications {
 		notificationManager.notify(DEFAULT_NOTIFICATION_ID, nBuilder.build());
 	}
 
-	public void show(Action action) {
+	public void start(int action) {
 
 		Intent openHome = new Intent(context, Home.class)
 				.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -74,7 +78,7 @@ public class Notifications {
 		notificationManager.cancelAll();
 	}
 
-	public void remove(Action action) {
+	public void finish(int action) {
 		bBuilder = new NotificationCompat.Builder(context)
 				.setContentTitle("Ceeq").setProgress(100, 100, false)
 				.setOngoing(false);

@@ -38,23 +38,6 @@ public class FilesHelper {
 		return new FilesHelper(context);
 	}
 
-	public File createFile(String path, String type) throws IOException,
-			ExternalStorageNotFoundException {
-		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
-			throw new ExternalStorageNotFoundException();
-		}
-		storageLocation = new File(Environment.getExternalStorageDirectory(),
-				path);
-
-		if (!storageLocation.exists()) {
-			storageLocation.mkdirs();
-		}
-
-		File file = new File(storageLocation, getFileName(type));
-		file.createNewFile();
-		return file;
-	}
-
 	public boolean haveBackupFiles() {
 		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
 			Toast.makeText(context, "Sorry, External storage not found.",
@@ -110,16 +93,21 @@ public class FilesHelper {
 		return name;
 	}
 
-	public String writeFile(String text, String type) throws IOException,
+	public File createFile(String path, String type) throws IOException,
 			ExternalStorageNotFoundException {
+		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
+			throw new ExternalStorageNotFoundException();
+		}
+		storageLocation = new File(Environment.getExternalStorageDirectory(),
+				path);
 
-		FileOutputStream fos = new FileOutputStream(createFile(BACKUP_PATH,
-				type));
-		out = new DataOutputStream(fos);
-		out.writeBytes(text);
-		out.close();
+		if (!storageLocation.exists()) {
+			storageLocation.mkdirs();
+		}
 
-		return getFileName(type);
+		File file = new File(storageLocation, getFileName(type));
+		file.createNewFile();
+		return file;
 	}
 
 	public InputStream readFile(String fileName) throws FileNotFoundException,
@@ -129,6 +117,17 @@ public class FilesHelper {
 		}
 		return new FileInputStream(Environment.getExternalStorageDirectory()
 				+ BACKUP_PATH + "/" + fileName);
+	}
+
+	public String writeFile(String text, String type) throws IOException,
+			ExternalStorageNotFoundException {
+
+		FileOutputStream fos = new FileOutputStream(createFile(BACKUP_PATH,
+				type));
+		out = new DataOutputStream(fos);
+		out.writeBytes(text);
+		out.close();
+		return getFileName(type);
 	}
 
 	public boolean deleteFile(String path, String[] fileName)
@@ -154,12 +153,12 @@ public class FilesHelper {
 
 	public String getFileName(String type) {
 		if (type.equals("cam"))
-			return type + "_" + getNewFileName() + ".jpg";
+			return type + "_" + getDate() + ".jpg";
 		else
-			return type + "_" + getNewFileName() + ".xml";
+			return type + "_" + getDate() + ".xml";
 	}
 
-	public String getNewFileName() {
+	public String getDate() {
 		return DateTime.now(TimeZone.getDefault()).format("DD-MM-YY-hh-mm-ss")
 				.toString();
 	}
