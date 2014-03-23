@@ -8,9 +8,7 @@
 package in.ceeq.services;
 
 import hirondelle.date4j.DateTime;
-import in.ceeq.actions.Backup;
 import in.ceeq.actions.Notifications;
-import in.ceeq.activities.Home;
 import in.ceeq.helpers.FilesHelper;
 import in.ceeq.helpers.Logger;
 import in.ceeq.helpers.PreferencesHelper;
@@ -34,19 +32,21 @@ import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.RemoteException;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.UserDictionary;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Xml;
 
 public class Backups extends IntentService {
 
+
+	public static final String INTENT_ACTION_MESSAGE = "in.ceeq.action.MESSAGE";
+	
 	private Calls_ callsManager;
 	private Contacts_ contactsManager;
 	private Messages_ messagesManager;
@@ -68,7 +68,7 @@ public class Backups extends IntentService {
 	public static final String ACTION = "action";
 	public static final String ACTION_TYPE = "actionType";
 	public static final String ACTION_PARENT = "actionParent";
-	
+
 	public final static int ACTION_TYPE_ALL = 0;
 	public final static int ACTION_TYPE_CONTACTS = 1;
 	public final static int ACTION_TYPE_MESSAGES = 2;
@@ -81,16 +81,18 @@ public class Backups extends IntentService {
 	public static final int SHOW = 0;
 	public static final int HIDE = 1;
 
+	public static final int FINISH = 0;
+	public static final int START = 1;
+
 	public static int ACTION_PARENT_ACTIVITY = 1;
 	public static int ACTION_PARENT_SERVICE = 2;
 
 	private int action;
 	private int actionType;
-	private int actionParent;
 	private ContentResolver resolver;
 	private XmlSerializer serializer;
 	private StringWriter writer;
-	private Messenger messageHandler;
+	private static LocalBroadcastManager localBroadcastManager;
 
 	public Backups() {
 		super("Servicebackups");
@@ -112,6 +114,7 @@ public class Backups extends IntentService {
 		resolver = getContentResolver();
 		serializer = Xml.newSerializer();
 		writer = new StringWriter();
+		localBroadcastManager = LocalBroadcastManager.getInstance(this);
 	}
 
 	@Override
@@ -119,15 +122,9 @@ public class Backups extends IntentService {
 		Bundle extras = intent.getExtras();
 		action = extras.getInt(ACTION);
 		actionType = extras.getInt(ACTION_TYPE);
-		actionParent = extras.getInt(ACTION_PARENT);
-		
-		if (actionParent == ACTION_PARENT_ACTIVITY) {
-			messageHandler = (Messenger) extras.get(Home.MESSENGER);
-			sendMessage(Home.SHOW);
-		}
 
-		notify(Backup.ON);
-
+		notify(START);
+		broadcast(START);
 		try {
 			switch (action) {
 			case ACTION_BACKUP:
@@ -175,10 +172,8 @@ public class Backups extends IntentService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			notify(Backup.OFF);
-			if (actionParent == ACTION_PARENT_ACTIVITY) {
-				sendMessage(Home.HIDE);
-			}
+			notify(FINISH);
+			broadcast(FINISH);
 		}
 	}
 
@@ -186,31 +181,30 @@ public class Backups extends IntentService {
 		if (preferencesHelper
 				.getBoolean(PreferencesHelper.NOTIFICATIONS_STATUS)) {
 			switch (state) {
-			case Backup.OFF:
+			case FINISH:
 				Notifications.getInstance(this).finish(action);
 				break;
-			case Backup.ON:
+			case START:
 				Notifications.getInstance(this).start(action);
 				break;
 			}
 		}
 	}
 
-	public void sendMessage(int state) {
-		Message message = Message.obtain();
+	public void broadcast(int state) {
+		Intent intent = new Intent();
+		intent.setAction(INTENT_ACTION_MESSAGE);
+
 		switch (state) {
-		case Home.SHOW:
-			message.arg1 = Home.SHOW;
+		case FINISH:
+			intent.putExtra(ACTION, FINISH);
 			break;
-		case Home.HIDE:
-			message.arg1 = Home.HIDE;
+		case START:
+			intent.putExtra(ACTION, START);
 			break;
 		}
-		try {
-			messageHandler.send(message);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+		
+		localBroadcastManager.sendBroadcast(intent);
 	}
 
 	public void backup() {

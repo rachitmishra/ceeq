@@ -19,11 +19,13 @@ import android.content.Context;
 import android.content.Intent;
 
 public class Backup {
-	private Context context;
+	public static final String INTENT_ACTION_ACTION_BACKUP = "in.ceeq.action.BACKUP";
 	public static final int ALARM_ACTIVATION_REQUEST = 2337;
-
+	public static final String INTENT_ACTION_MESSAGE = "in.ceeq.action.MESSAGE";
 	public static final int OFF = 0;
 	public static final int ON = 1;
+
+	private Context context;
 
 	public Backup(Context context) {
 		this.context = context;
@@ -48,7 +50,7 @@ public class Backup {
 		switch (state) {
 		case OFF:
 			pi = PendingIntent.getBroadcast(context, ALARM_ACTIVATION_REQUEST,
-					new Intent("in.ceeq.action.BACKUP"),
+					new Intent(INTENT_ACTION_ACTION_BACKUP),
 					PendingIntent.FLAG_CANCEL_CURRENT);
 			alarms.cancel(pi);
 
@@ -56,7 +58,7 @@ public class Backup {
 		case ON:
 			Logger.d("Turning alarm ON");
 			pi = PendingIntent.getBroadcast(context, ALARM_ACTIVATION_REQUEST,
-					new Intent("in.ceeq.action.BACKUP"),
+					new Intent(INTENT_ACTION_ACTION_BACKUP),
 					PendingIntent.FLAG_CANCEL_CURRENT);
 			alarms.setInexactRepeating(AlarmManager.RTC_WAKEUP, new DateTime(
 					DateTime.today(TimeZone.getDefault()) + " 02:00:00")

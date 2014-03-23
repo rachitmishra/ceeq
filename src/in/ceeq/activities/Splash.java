@@ -20,31 +20,34 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.bugsense.trace.BugSenseHandler;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.plus.PlusClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
 public class Splash extends Activity implements ConnectionCallbacks,
 		OnConnectionFailedListener {
 
-	private enum Next {
-		FIRSTRUN, HOME
-	}
+	private static final int NEXT_FIRSTRUN = 1;
+	private static final int NEXT_HOME = 2;
+	private static final int REQUEST_CODE_SIGN_IN = 9010;
 
-	private ProgressBar progreeBar;
-	private PlusClient plus;
-	private SignInButton button;
+	private ProgressBar progressBar;
+	private GoogleApiClient googleApiClient;
+	private SignInButton signInButton;
 	private PhoneHelper phoneHelper;
-	private boolean appHasInitialised, googleConnect;
+	private boolean isSetupComplete, isGoogleConnected, mSignInClicked,
+			mIntentInProgress;
+	private ConnectionResult mConnectionResult;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +55,6 @@ public class Splash extends Activity implements ConnectionCallbacks,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
 		setupHelpers();
-		setupBugsense();
 		checkPlayServices();
 		checkConnectivity();
 		checkGoogleConnect();
@@ -64,10 +66,6 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	private void setupHelpers() {
 		preferencesHelper = PreferencesHelper.getInstance(this);
 		phoneHelper = PhoneHelper.getInstance(this);
-	}
-
-	public void setupBugsense() {
-		BugSenseHandler.initAndStartSession(Splash.this, "5996b3d9");
 	}
 
 	private void checkConnectivity() {
@@ -87,16 +85,17 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	}
 
 	private void checkGoogleConnect() {
-		googleConnect = preferencesHelper
+		isGoogleConnected = preferencesHelper
 				.getBoolean(PreferencesHelper.GOOGLE_CONNECT_STATUS);
-		button = (SignInButton) findViewById(R.id.sign_in_button);
-		if (!googleConnect) {
-			button.setVisibility(View.VISIBLE);
-			button.setSize(SignInButton.SIZE_WIDE);
-			button.setOnClickListener(new OnClickListener() {
+		signInButton = (SignInButton) findViewById(R.id.sign_in_button);
+		if (!isGoogleConnected) {
+			signInButton.setVisibility(View.VISIBLE);
+			signInButton.setSize(SignInButton.SIZE_WIDE);
+			signInButton.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View arg0) {
+					mSignInClicked = true;
 					connectGoogle();
 				}
 			});
@@ -105,25 +104,47 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	}
 
 	private void setupGoogleConnect() {
-		progreeBar = (ProgressBar) findViewById(R.id.connectProgress);
-		plus = new PlusClient.Builder(this, this, this).setActions(
-				"http://schemas.google.com/AddActivity").build();
+		progressBar = (ProgressBar) findViewById(R.id.connectProgress);
+		googleApiClient = new GoogleApiClient.Builder(this)
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this).addApi(Plus.API, null)
+				.addScope(Plus.SCOPE_PLUS_PROFILE).build();
 	}
 
 	private void connectGoogle() {
-		if (!plus.isConnected()) {
-			if (connectionResult == null) {
-				progreeBar.setVisibility(View.VISIBLE);
-				plus.connect();
+		if (mConnectionResult.hasResolution()) {
+			try {
+				mIntentInProgress = true;
+				mConnectionResult.startResolutionForResult(this,
+						REQUEST_CODE_SIGN_IN);
+			} catch (SendIntentException e) {
+				mIntentInProgress = false;
+				googleApiClient.connect();
+			}
+		}
+	}
 
-			} else {
-				try {
-					connectionResult.startResolutionForResult(this,
-							CONNECTION_FAILURE_REQUEST);
-				} catch (SendIntentException e) {
-					connectionResult = null;
-					plus.connect();
-				}
+	public void onConnectionFailed(ConnectionResult result) {
+		if (!mIntentInProgress) {
+			mConnectionResult = result;
+
+			if (mSignInClicked) {
+				connectGoogle();
+			}
+		}
+	}
+
+	protected void onActivityResult(int requestCode, int responseCode,
+			Intent intent) {
+		if (requestCode == REQUEST_CODE_SIGN_IN) {
+			if (responseCode != RESULT_OK) {
+				mSignInClicked = false;
+			}
+
+			mIntentInProgress = false;
+
+			if (!googleApiClient.isConnecting()) {
+				googleApiClient.connect();
 			}
 		}
 	}
@@ -131,7 +152,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	private static final int ONE_SECOND = 1;
 	private static final int ZERO_SECONDS = 0;
 
-	private void delayedStart(final Next nextActivity, int secondsDelayed) {
+	private void delayedStart(final int nextActivity, int secondsDelayed) {
 
 		if (PreferencesHelper.getInstance(this).getBoolean(
 				PreferencesHelper.SPLASH_STATUS))
@@ -144,7 +165,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 			public void run() {
 				Intent launchNextActivity;
 				switch (nextActivity) {
-				case FIRSTRUN:
+				case NEXT_FIRSTRUN:
 					launchNextActivity = new Intent(Splash.this, Firstrun.class);
 					break;
 				default:
@@ -162,63 +183,38 @@ public class Splash extends Activity implements ConnectionCallbacks,
 		}, secondsDelayed * 1000);
 	}
 
-	private ConnectionResult connectionResult;
-	private static final int CONNECTION_FAILURE_REQUEST = 9010;
-
-	@Override
-	public void onConnectionFailed(ConnectionResult result) {
-		if (progreeBar.isActivated()) {
-			if (result.hasResolution()) {
-				try {
-					result.startResolutionForResult(this,
-							CONNECTION_FAILURE_REQUEST);
-				} catch (SendIntentException e) {
-					plus.connect();
-				}
-			}
-		}
-		connectionResult = result;
-	}
-
 	@Override
 	protected void onStart() {
+		Log.w("Debug", "onStart()");
 		super.onStart();
-		appHasInitialised = preferencesHelper
+		isSetupComplete = preferencesHelper
 				.getBoolean(PreferencesHelper.APP_INITIALIZATION_STATUS);
-		if (!googleConnect) {
-			plus.connect();
-		} else if (!appHasInitialised) {
-			button.setVisibility(View.INVISIBLE);
-			delayedStart(Next.FIRSTRUN, ONE_SECOND);
+		if (!isGoogleConnected) {
+			googleApiClient.connect();
+		} else if (!isSetupComplete) {
+			signInButton.setVisibility(View.INVISIBLE);
+			delayedStart(NEXT_FIRSTRUN, ONE_SECOND);
 
 		} else {
-			button.setVisibility(View.INVISIBLE);
-			delayedStart(Next.HOME, ONE_SECOND);
-
+			signInButton.setVisibility(View.INVISIBLE);
+			delayedStart(NEXT_HOME, ONE_SECOND);
 		}
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		plus.disconnect();
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int responseCode,
-			Intent intent) {
-		if (requestCode == CONNECTION_FAILURE_REQUEST
-				& responseCode == RESULT_OK) {
-			connectionResult = null;
-			plus.connect();
+		if (googleApiClient.isConnected()) {
+			googleApiClient.disconnect();
 		}
 	}
 
 	@Override
 	public void onConnected(Bundle connectionHint) {
-		Person currentUser = plus.getCurrentPerson();
+
+		Person currentUser = Plus.PeopleApi.getCurrentPerson(googleApiClient);
 		preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_ID,
-				plus.getAccountName());
+				Plus.AccountApi.getAccountName(googleApiClient));
 		preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_NAME,
 				currentUser.getDisplayName());
 		preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_IMAGE_URL,
@@ -229,13 +225,13 @@ public class Splash extends Activity implements ConnectionCallbacks,
 		preferencesHelper.setBoolean(PreferencesHelper.GOOGLE_CONNECT_STATUS,
 				true);
 
-		if (!appHasInitialised) {
-			button.setVisibility(View.INVISIBLE);
-			delayedStart(Next.FIRSTRUN, ZERO_SECONDS);
+		if (!isSetupComplete) {
+			signInButton.setVisibility(View.INVISIBLE);
+			delayedStart(NEXT_FIRSTRUN, ZERO_SECONDS);
 		}
 	}
 
-	@Override
-	public void onDisconnected() {
+	public void onConnectionSuspended(int cause) {
+		googleApiClient.connect();
 	}
 }
