@@ -3,7 +3,6 @@ package in.ceeq.fragments;
 import in.ceeq.R;
 import in.ceeq.helpers.PhoneHelper;
 import in.ceeq.helpers.PreferencesHelper;
-import in.ceeq.helpers.PhoneHelper.Phone;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -34,24 +33,24 @@ public class MyDeviceFragment extends Fragment {
 		text.setText(preferencesHelper
 				.getString(PreferencesHelper.ACCOUNT_USER_NAME));
 		text = (TextView) view.findViewById(R.id.c_sim);
-		text.setText(phoneHelper.get(Phone.SIM_ID));
+		text.setText(phoneHelper.get(PhoneHelper.SIM_ID));
 		text = (TextView) view.findViewById(R.id.c_imsi);
-		text.setText(phoneHelper.get(Phone.IMSI));
+		text.setText(phoneHelper.get(PhoneHelper.IMSI));
 		text = (TextView) view.findViewById(R.id.c_iemi);
-		text.setText(phoneHelper.get(Phone.IEMI));
+		text.setText(phoneHelper.get(PhoneHelper.IEMI));
 		text = (TextView) view.findViewById(R.id.c_gps);
-		text.setText(booleanToString(phoneHelper.enabled(Phone.GPS)));
+		text.setText(booleanToString(phoneHelper.enabled(PhoneHelper.GPS)));
 		text = (TextView) view.findViewById(R.id.c_admin);
 		text.setText(booleanToString(preferencesHelper
 				.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS)));
 		text = (TextView) view.findViewById(R.id.c_operator);
-		text.setText(phoneHelper.get(Phone.OPERATOR));
+		text.setText(phoneHelper.get(PhoneHelper.OPERATOR));
 		text = (TextView) view.findViewById(R.id.c_size);
-		text.setText(phoneHelper.get(Phone.SIZE));
+		text.setText(phoneHelper.get(PhoneHelper.SIZE));
 		text = (TextView) view.findViewById(R.id.c_pixels);
-		text.setText(phoneHelper.get(Phone.DENSITY));
+		text.setText(phoneHelper.get(PhoneHelper.DENSITY));
 		text = (TextView) view.findViewById(R.id.c_apps);
-		text.setText(phoneHelper.get(Phone.APP_COUNT) + "");
+		text.setText(phoneHelper.get(PhoneHelper.APP_COUNT) + "");
 
 	}
 

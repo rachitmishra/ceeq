@@ -17,7 +17,6 @@ import in.ceeq.fragments.MyDeviceFragment;
 import in.ceeq.fragments.PrivacyFragment;
 import in.ceeq.fragments.SecurityFragment;
 import in.ceeq.helpers.PhoneHelper;
-import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.receivers.DeviceAdmin;
 import in.ceeq.services.Backups;
@@ -99,7 +98,7 @@ public class Home extends FragmentActivity {
 	private TextView userId, userName;
 	private ImageView userImage;
 	private RelativeLayout userLoading, userDetails;
-	
+
 	public static final int PROTECT_DIALOG = 0;
 	public static final int STEALTH_DIALOG = 1;
 	public static final int FEEDBACK_DIALOG = 2;
@@ -131,7 +130,6 @@ public class Home extends FragmentActivity {
 		this.title = drawerTitle = getTitle();
 
 		setupHelpers();
-		checkPlayServices();
 		setupFacebookConnect(savedInstanceState);
 		setupHome();
 		setupDrawer();
@@ -235,182 +233,6 @@ public class Home extends FragmentActivity {
 		drawerLayout.setDrawerListener(drawerToggle);
 
 	}
-	
-
-
-	public class DrawerManager extends BaseAdapter implements
-			ListView.OnItemClickListener {
-
-		public DrawerManager() {
-		}
-
-		@Override
-		public int getCount() {
-			return 12;
-		}
-
-		@Override
-		public Object getItem(int arg0) {
-			return null;
-		}
-
-		@Override
-		public long getItemId(int arg0) {
-			return 0;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup arg2) {
-			TextView header, innerText;
-			ImageView innerImage;
-			switch (position) {
-			case 1:
-			case 6:
-				convertView = getLayoutInflater().inflate(
-						R.layout.drawer_action_plus, null);
-				return convertView;
-			case 2:
-			case 7:
-				convertView = getLayoutInflater().inflate(
-						R.layout.drawer_action_header, null);
-				header = (TextView) convertView
-						.findViewById(R.id.drawer_list_header);
-				header.setText(getHeaderText(position));
-				return convertView;
-			default:
-				convertView = getLayoutInflater().inflate(
-						R.layout.drawer_action_inner, null);
-				innerText = (TextView) convertView
-						.findViewById(R.id.drawer_list_text);
-				innerText.setText(getInnerText(position));
-				innerImage = (ImageView) convertView
-						.findViewById(R.id.drawer_list_icon);
-				innerImage.setBackgroundResource(getInnerImage(position));
-				return convertView;
-
-			}
-
-		}
-
-		public int getInnerText(int position) {
-			switch (position) {
-			case 0:
-				return R.string.my_device;
-			case 3:
-				return R.string.tab_home;
-			case 4:
-				return R.string.tab_backup;
-			case 5:
-				return R.string.tab_security;
-			case 8:
-				return R.string.privacy;
-			case 9:
-				return R.string.menu_feedback;
-			case 10:
-				return R.string.about;
-			case 11:
-				return R.string.rate;
-			default:
-				return R.string.rate;
-			}
-		}
-
-		public int getHeaderText(int position) {
-			switch (position) {
-			case 2:
-				return R.string.navigate;
-			case 7:
-				return R.string.more;
-			default:
-				return R.string.more;
-			}
-		}
-
-		public int getInnerImage(int position) {
-			switch (position) {
-			case 0:
-				return R.drawable.ic_stat_my_device;
-			case 3:
-				return R.drawable.ic_stat_home;
-			case 4:
-				return R.drawable.ic_stat_storage;
-			case 5:
-				return R.drawable.ic_stat_security;
-			case 8:
-				return R.drawable.ic_stat_privacy;
-			case 9:
-				return R.drawable.ic_stat_content_email;
-			case 10:
-				return R.drawable.ic_stat_action_about;
-			case 11:
-				return R.drawable.ic_stat_rating_important;
-			default:
-				return R.drawable.ic_stat_rating_important;
-			}
-		}
-
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-			selectItem(position);
-			
-		}
-
-		private void selectItem(int position) {
-
-			Fragment fragment = null;
-			switch (position) {
-			case 0:
-				fragment = new MyDeviceFragment();
-				break;
-			case 3:
-				fragment = new HomeFragment();
-				break;
-			case 4:
-				fragment = new BackupFragment();
-				break;
-			case 5:
-				fragment = new SecurityFragment();
-				break;
-			case 8:
-				fragment = new PrivacyFragment();
-				break;
-			case 9:
-				Intent emailIntent = new Intent(Intent.ACTION_SEND)
-						.setType(HTTP.PLAIN_TEXT_TYPE);
-				emailIntent
-						.putExtra(
-								Intent.EXTRA_EMAIL,
-								new String[] { getString(R.string.ceeq_support_email) });
-				emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Suggestion/Bugs");
-				emailIntent.putExtra(
-						Intent.EXTRA_TEXT,
-						"[Ceeq Support \n User: "
-								+ preferencesHelper.getString("accountName")
-								+ "]");
-				startActivity(emailIntent);
-				break;
-			case 10:
-				fragment = new AboutApplicationFragment();
-				break;
-			case 11:
-				Intent rateIntent = new Intent(Intent.ACTION_VIEW).setData(Uri
-						.parse(getString(R.string.ceeq_play_link)));
-				startActivity(rateIntent);
-				break;
-			default:
-				actionList.setItemChecked(position, false);
-				return;
-			}
-
-			if (fragment != null)
-				fragmentManager.beginTransaction()
-						.replace(R.id.container, fragment).commit();
-			actionList.setItemChecked(position, true);
-			drawerLayout.closeDrawer(Gravity.START);
-		}
-
-	}
 
 	public void setupFirstrun() {
 		drawerLayout.openDrawer(Gravity.START);
@@ -431,7 +253,7 @@ public class Home extends FragmentActivity {
 						gcm = GoogleCloudMessaging.getInstance(Home.this);
 					}
 					registrationId = gcm.register(SENDER_ID);
-					phoneHelper.set(Phone.REGISTRATION_ID, registrationId);
+					phoneHelper.set(PhoneHelper.REGISTRATION_ID, registrationId);
 					return true;
 				} catch (IOException ex) {
 					return false;
@@ -506,7 +328,7 @@ public class Home extends FragmentActivity {
 	}
 
 	public void checkPlayServices() {
-		if (!phoneHelper.enabled(Phone.PLAY_SERVICES)) {
+		if (!phoneHelper.enabled(PhoneHelper.PLAY_SERVICES)) {
 			startActivity(new Intent(this, GoogleServices.class).putExtra(
 					"from", 1));
 			this.finish();
@@ -701,10 +523,9 @@ public class Home extends FragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		checkPlayServices();
+		//checkPlayServices();
 	}
 
-	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -1121,6 +942,188 @@ public class Home extends FragmentActivity {
 
 	}
 	
+	public static class ViewHolder {
+		TextView header;
+		TextView innerText;
+		ImageView innerImage;
+	}
+
+	public class DrawerManager extends BaseAdapter implements
+			ListView.OnItemClickListener {
+
+		public DrawerManager() {
+		}
+
+		@Override
+		public int getCount() {
+			return 12;
+		}
+
+		@Override
+		public Object getItem(int arg0) {
+			return null;
+		}
+
+		@Override
+		public long getItemId(int arg0) {
+			return 0;
+		}
+
+
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup arg2) {
+			TextView header, innerText;
+			ImageView innerImage;
+			switch (position) {
+			case 1:
+			case 6:
+				convertView = getLayoutInflater().inflate(
+						R.layout.drawer_action_plus, null);
+				return convertView;
+			case 2:
+			case 7:
+				convertView = getLayoutInflater().inflate(
+						R.layout.drawer_action_header, null);
+				header = (TextView) convertView
+						.findViewById(R.id.drawer_list_header);
+				header.setText(getHeaderText(position));
+				return convertView;
+			default:
+				convertView = getLayoutInflater().inflate(
+						R.layout.drawer_action_inner, null);
+				innerText = (TextView) convertView
+						.findViewById(R.id.drawer_list_text);
+				innerText.setText(getInnerText(position));
+				innerImage = (ImageView) convertView
+						.findViewById(R.id.drawer_list_icon);
+				innerImage.setBackgroundResource(getInnerImage(position));
+				return convertView;
+
+			}
+
+		}
+
+		public int getInnerText(int position) {
+			switch (position) {
+			case 0:
+				return R.string.my_device;
+			case 3:
+				return R.string.tab_home;
+			case 4:
+				return R.string.tab_backup;
+			case 5:
+				return R.string.tab_security;
+			case 8:
+				return R.string.privacy;
+			case 9:
+				return R.string.menu_feedback;
+			case 10:
+				return R.string.about;
+			case 11:
+				return R.string.rate;
+			default:
+				return R.string.rate;
+			}
+		}
+
+		public int getHeaderText(int position) {
+			switch (position) {
+			case 2:
+				return R.string.navigate;
+			case 7:
+				return R.string.more;
+			default:
+				return R.string.more;
+			}
+		}
+
+		public int getInnerImage(int position) {
+			switch (position) {
+			case 0:
+				return R.drawable.ic_stat_my_device;
+			case 3:
+				return R.drawable.ic_stat_home;
+			case 4:
+				return R.drawable.ic_stat_storage;
+			case 5:
+				return R.drawable.ic_stat_security;
+			case 8:
+				return R.drawable.ic_stat_privacy;
+			case 9:
+				return R.drawable.ic_stat_content_email;
+			case 10:
+				return R.drawable.ic_stat_action_about;
+			case 11:
+				return R.drawable.ic_stat_rating_important;
+			default:
+				return R.drawable.ic_stat_rating_important;
+			}
+		}
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			selectItem(position);
+
+		}
+
+		private void selectItem(int position) {
+
+			Fragment fragment = null;
+			switch (position) {
+			case 0:
+				fragment = new MyDeviceFragment();
+				break;
+			case 3:
+				fragment = new HomeFragment();
+				break;
+			case 4:
+				fragment = new BackupFragment();
+				break;
+			case 5:
+				fragment = new SecurityFragment();
+				break;
+			case 8:
+				fragment = new PrivacyFragment();
+				break;
+			case 9:
+				Intent emailIntent = new Intent(Intent.ACTION_SEND)
+						.setType(HTTP.PLAIN_TEXT_TYPE);
+				emailIntent
+						.putExtra(
+								Intent.EXTRA_EMAIL,
+								new String[] { getString(R.string.ceeq_support_email) });
+				emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Suggestion/Bugs");
+				emailIntent.putExtra(
+						Intent.EXTRA_TEXT,
+						"[Ceeq Support \n User: "
+								+ preferencesHelper.getString("accountName")
+								+ "]");
+				startActivity(emailIntent);
+				break;
+			case 10:
+				fragment = new AboutApplicationFragment();
+				break;
+			case 11:
+				Intent rateIntent = new Intent(Intent.ACTION_VIEW).setData(Uri
+						.parse(getString(R.string.ceeq_play_link)));
+				startActivity(rateIntent);
+				break;
+			default:
+				actionList.setItemChecked(position, false);
+				return;
+			}
+
+			if (fragment != null)
+				fragmentManager.beginTransaction()
+						.replace(R.id.container, fragment).commit();
+			actionList.setItemChecked(position, true);
+			drawerLayout.closeDrawer(Gravity.START);
+		}
+
+	}
+
 	public class FBSessionStatus implements Session.StatusCallback {
 		@Override
 		public void call(Session session, SessionState state,

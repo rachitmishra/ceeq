@@ -49,7 +49,7 @@ public class PreferencesHelper {
 	public static final String DEVICE_HAS_PASSWORD = "deviceHasPassword";
 	public static final String APP_UNINSTALL_PROTECTION = "appUninstallProtection";
 	public static final String DEVICE_ID = "deviceId";
-
+	public static final String SENDER_ADDRESS = "senderAddress";
 	public PreferencesHelper(Context context) {
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		editor = prefs.edit();

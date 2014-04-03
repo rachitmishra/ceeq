@@ -11,7 +11,6 @@ import in.ceeq.actions.Backup;
 import in.ceeq.actions.Notifications;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Commander;
-import in.ceeq.services.Commander.Command;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -52,7 +51,7 @@ public class Startup extends BroadcastReceiver {
 				try {
 					Intent commands = new Intent(context, Commander.class);
 					commands.putExtra(Commander.ACTION,
-							Command.SEND_SIM_CHANGE_MESSAGE);
+							Commander.SEND_SIM_CHANGE_MESSAGE);
 					context.startService(commands);
 				} catch (Exception e) {
 					e.printStackTrace();

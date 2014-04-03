@@ -1,7 +1,6 @@
 package in.ceeq.helpers;
 
 import hirondelle.date4j.DateTime;
-import in.ceeq.helpers.PhoneHelper.Phone;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -39,7 +38,7 @@ public class FilesHelper {
 	}
 
 	public boolean haveBackupFiles() {
-		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
+		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
 			Toast.makeText(context, "Sorry, External storage not found.",
 					Toast.LENGTH_SHORT).show();
 		}
@@ -54,7 +53,7 @@ public class FilesHelper {
 	}
 
 	public File[] getFiles(String path) {
-		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
+		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
 			Toast.makeText(context, "Sorry, External storage not found.",
 					Toast.LENGTH_SHORT).show();
 		}
@@ -95,7 +94,7 @@ public class FilesHelper {
 
 	public File createFile(String path, String type) throws IOException,
 			ExternalStorageNotFoundException {
-		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
+		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
 			throw new ExternalStorageNotFoundException();
 		}
 		storageLocation = new File(Environment.getExternalStorageDirectory(),
@@ -112,7 +111,7 @@ public class FilesHelper {
 
 	public InputStream readFile(String fileName) throws FileNotFoundException,
 			ExternalStorageNotFoundException {
-		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
+		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
 			throw new ExternalStorageNotFoundException();
 		}
 		return new FileInputStream(Environment.getExternalStorageDirectory()
@@ -133,7 +132,7 @@ public class FilesHelper {
 	public boolean deleteFile(String path, String[] fileName)
 			throws ExternalStorageNotFoundException {
 		boolean deleted = false;
-		if (!phoneHelper.enabled(Phone.EXTERNAL_STORAGE)) {
+		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
 			throw new ExternalStorageNotFoundException();
 		} else {
 

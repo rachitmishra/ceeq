@@ -40,14 +40,32 @@ public class Commander extends IntentService {
 
 	public static final int NOTIFICATION_ID = 1;
 	public static final String ACTION = "action";
-	private static final String SENDER_ADDRESS = "senderAddress";
-
-	public enum Command {
-		SIREN_ON, SIREN_OFF, RINGER_ON, BACKUP, WIPE, LOCK, SEND_CALLS_DETAILS_MESSAGE, ENABLE_TRACKER, SEND_CURRENT_DETAILS_MESSAGE, SEND_PIN_FAIL_MESSAGE, GET_LOCATION_FOR_MESSAGE, GET_LOCATION_FOR_BLIP, GET_LOCATION_FOR_PROTECT, SEND_SIM_CHANGE_MESSAGE, SEND_PROTECT_MESSAGE, SEND_CURRENT_LOCATION_MESSAGE, SEND_NEW_LOCATION_MESSAGE, SEND_BLIP_TO_SERVER, SEND_LOCATION_TO_SERVER, GET_LOCATION_FOR_CURRENT_DETAILS_MESSAGE, RINGER_OFF
-	}
+	public static final String SENDER_ADDRESS = "senderAddress";
+	public static final int NONE = 0;
+	public static final int SIREN_ON = 1;
+	public static final int SIREN_OFF = 2;
+	public static final int RINGER_ON = 3;
+	public static final int BACKUP = 4;
+	public static final int WIPE = 5;
+	public static final int LOCK = 6;
+	public static final int SEND_CALLS_DETAILS_MESSAGE = 7;
+	public static final int ENABLE_TRACKER = 8;
+	public static final int SEND_CURRENT_DETAILS_MESSAGE = 9;
+	public static final int SEND_PIN_FAIL_MESSAGE = 10;
+	public static final int GET_LOCATION_FOR_MESSAGE = 11;
+	public static final int GET_LOCATION_FOR_BLIP = 12;
+	public static final int GET_LOCATION_FOR_PROTECT = 13;
+	public static final int SEND_SIM_CHANGE_MESSAGE = 14;
+	public static final int SEND_PROTECT_MESSAGE = 15;
+	public static final int SEND_CURRENT_LOCATION_MESSAGE = 16;
+	public static final int SEND_NEW_LOCATION_MESSAGE = 17;
+	public static final int SEND_BLIP_TO_SERVER = 18;
+	public static final int SEND_LOCATION_TO_SERVER = 19;
+	public static final int GET_LOCATION_FOR_CURRENT_DETAILS_MESSAGE = 20;
+	public static final int RINGER_OFF = 21;
 
 	private NotificationManager mNotificationManager;
-	private Command commandType;
+	private int commandType;
 	private GoogleCloudMessaging gcm;
 
 	@Override
@@ -57,8 +75,8 @@ public class Commander extends IntentService {
 		gcm = GoogleCloudMessaging.getInstance(this);
 		String messageType = gcm.getMessageType(intent);
 		String senderAddress = extras.getString(SENDER_ADDRESS);
-		commandType = (Command) extras.get(ACTION);
-		Logger.d("Type... " + commandType.toString());
+		commandType = extras.getInt(ACTION);
+		Logger.d("Command Type... " + commandType);
 
 		switch (commandType) {
 		case SIREN_ON:

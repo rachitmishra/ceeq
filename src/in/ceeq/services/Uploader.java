@@ -8,7 +8,6 @@
 package in.ceeq.services;
 
 import in.ceeq.helpers.PhoneHelper;
-import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 
 import java.util.ArrayList;
@@ -174,11 +173,11 @@ public class Uploader extends IntentService {
 		nameValuePairs.add(new BasicNameValuePair(SIM_NUMBER, preferencesHelper
 				.getString(PreferencesHelper.SIM_NUMBER)));
 		nameValuePairs.add(new BasicNameValuePair(MANUFACTURER, phoneHelper
-				.get(Phone.MANUFACTURER)));
+				.get(PhoneHelper.MANUFACTURER)));
 		nameValuePairs.add(new BasicNameValuePair(MODEL, phoneHelper
-				.get(Phone.MODEL)));
+				.get(PhoneHelper.MODEL)));
 		nameValuePairs.add(new BasicNameValuePair(IEMI_NUMBER, phoneHelper
-				.get(Phone.IEMI)));
+				.get(PhoneHelper.IEMI)));
 		nameValuePairs.add(new BasicNameValuePair(GCM_ID, preferencesHelper
 				.getString(PreferencesHelper.GCM_REGISTRATION_ID)));
 		nameValuePairs
@@ -214,7 +213,7 @@ public class Uploader extends IntentService {
 		nameValuePairs.add(new BasicNameValuePair(LONGITUDE, preferencesHelper
 				.getString(PreferencesHelper.LAST_LOCATION_LONGITUDE)));
 		nameValuePairs.add(new BasicNameValuePair(BATTERY, phoneHelper
-				.get(Phone.BATTERY_LEVEL)));
+				.get(PhoneHelper.BATTERY_LEVEL)));
 		return nameValuePairs;
 	}
 

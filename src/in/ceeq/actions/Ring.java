@@ -8,8 +8,6 @@
 package in.ceeq.actions;
 
 import in.ceeq.services.Ringer;
-import in.ceeq.services.Ringer.SoundState;
-import in.ceeq.services.Ringer.SoundType;
 import android.content.Context;
 import android.content.Intent;
 
@@ -29,13 +27,13 @@ public class Ring {
 
 	public void stop() {
 		Intent stopSiren = new Intent(context, Ringer.class).putExtra(
-				ACTION_TYPE, SoundType.RING).putExtra(ACTION, SoundState.OFF);
+				ACTION_TYPE, Ringer.RING).putExtra(ACTION, Ringer.OFF);
 		context.stopService(stopSiren);
 	}
 
 	public void start() {
 		Intent startSiren = new Intent(context, Ringer.class).putExtra(
-				ACTION_TYPE, SoundType.RING).putExtra(ACTION, SoundState.ON);
+				ACTION_TYPE, Ringer.RING).putExtra(ACTION, Ringer.ON);
 		context.startService(startSiren);
 	}
 }

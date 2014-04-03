@@ -7,17 +7,19 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 
-import com.google.android.gms.plus.PlusClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.plus.Plus;
 
 public class Reset {
 	private PreferencesHelper preferencesHelper;
 	private Context context;
-	private PlusClient googlePlusClient;
+	private GoogleApiClient googleApiClient;
 
-	public Reset(Context context, PlusClient googlePlusClient) {
+	public Reset(Context context, GoogleApiClient googleApiClient) {
 		this.context = context;
-		this.googlePlusClient = googlePlusClient;
+		this.googleApiClient = googleApiClient;
 		preferencesHelper = PreferencesHelper.getInstance(context);
 	}
 
@@ -26,8 +28,8 @@ public class Reset {
 		preferencesHelper = PreferencesHelper.getInstance(context);
 	}
 
-	public static Reset getInstance(Context context, PlusClient googlePlusClient) {
-		return new Reset(context, googlePlusClient);
+	public static Reset getInstance(Context context, GoogleApiClient googleApiClient) {
+		return new Reset(context, googleApiClient);
 	}
 
 	public static Reset getInstance(Context context) {
@@ -95,12 +97,16 @@ public class Reset {
 			@Override
 			protected Void doInBackground(Void... arg0) {
 				try {
-					googlePlusClient.clearDefaultAccount();
-					googlePlusClient.revokeAccessAndDisconnect(null);
-					preferencesHelper.clear();
+					if (googleApiClient.isConnected()) {
+						Plus.AccountApi.clearDefaultAccount(googleApiClient);
+						Plus.AccountApi.revokeAccessAndDisconnect(googleApiClient);
+						PreferenceManager.getDefaultSharedPreferences(context).edit().clear();
+						PreferenceManager.getDefaultSharedPreferences(context).edit().commit();
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				
 				return null;
 			}
 
@@ -108,7 +114,7 @@ public class Reset {
 			protected void onPostExecute(Void arg0) {
 				progressDialog.dismiss();
 				Notifications.getInstance(context).remove();
-				Intent launchSplash = new Intent(context, Splash.class);
+				Intent launchSplash = new Intent(context,Splash.class);
 				launchSplash.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				launchSplash.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				launchSplash.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -118,5 +124,4 @@ public class Reset {
 
 		}.execute();
 	}
-
 }

@@ -6,7 +6,6 @@ import in.ceeq.actions.Backup;
 import in.ceeq.actions.Notifications;
 import in.ceeq.activities.Home;
 import in.ceeq.helpers.PhoneHelper;
-import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.receivers.DeviceAdmin;
 
@@ -19,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -44,8 +44,7 @@ public class HomeFragment extends Fragment {
 	public static final int STATUS_SYNC = 6;
 
 	private static final int PLUS_ONE_REQUEST_CODE = 9025;
-	
-	
+
 	private PhoneHelper phoneHelper;
 	private PreferencesHelper preferencesHelper;
 	private View view;
@@ -57,7 +56,7 @@ public class HomeFragment extends Fragment {
 	private ArrayList<Integer> notificationList;
 	private ToggleButton toggleButton;
 	private PlusOneButton plusOneButton;
-	
+	private Button backupButton, securityButton;
 
 	public HomeFragment() {
 	}
@@ -67,12 +66,15 @@ public class HomeFragment extends Fragment {
 			Bundle savedInstanceState) {
 		view = inflater.inflate(R.layout.fragment_main, container, false);
 		setupHelpers();
-
 		notificationListView = (ExpandableListView) view
 				.findViewById(R.id.notifications);
 		notificationList = new ArrayList<Integer>();
 		statusText = (TextView) view.findViewById(R.id.statusText);
 		statusBox = (LinearLayout) view.findViewById(R.id.statusBox);
+		backupButton = (Button) view.findViewById(R.id.backupButton);
+		securityButton = (Button) view.findViewById(R.id.securityButton);
+
+		setupListeners();
 		restoreToggleStates(view);
 		if (setStatus() > 0) {
 			statusText.setText(getString(R.string.app_status_bad));
@@ -83,24 +85,51 @@ public class HomeFragment extends Fragment {
 			showNotification();
 		}
 
-		notificationListAdapter = new ListAdapter(this.getActivity(),
-				counter,
+		notificationListAdapter = new ListAdapter(this.getActivity(), counter,
 				preferencesHelper.getBoolean(PreferencesHelper.APP_STATUS),
 				notificationList);
 		notificationListView.setAdapter(notificationListAdapter);
 
-		plusOneButton = (PlusOneButton) view
-				.findViewById(R.id.plus_one_button);
+		plusOneButton = (PlusOneButton) view.findViewById(R.id.plus_one_button);
 		plusOneButton.initialize(
 				"http://plus.google.com/116561373543243917689",
 				PLUS_ONE_REQUEST_CODE);
+
 		return view;
+
 	}
 
 	public void setupHelpers() {
 		phoneHelper = PhoneHelper.getInstance(getActivity());
-		preferencesHelper = PreferencesHelper.getInstance(this
-				.getActivity());
+		preferencesHelper = PreferencesHelper.getInstance(this.getActivity());
+	}
+
+	public FragmentManager fragmentManager;
+
+	public void setupListeners() {
+		fragmentManager = getActivity().getSupportFragmentManager();
+
+		backupButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Fragment backupFragment = new BackupFragment();
+				fragmentManager.beginTransaction()
+						.replace(R.id.container, backupFragment).commit();
+
+			}
+		});
+
+		securityButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Fragment securityFragment = new SecurityFragment();
+				fragmentManager.beginTransaction()
+						.replace(R.id.container, securityFragment).commit();
+
+			}
+		});
 	}
 
 	public void showNotification() {
@@ -123,18 +152,15 @@ public class HomeFragment extends Fragment {
 		boolean backupStatus = setBackupStatus();
 		boolean securityStatus = setSecurityStatus();
 		if (backupStatus & securityStatus) {
-			preferencesHelper
-					.setBoolean(PreferencesHelper.APP_STATUS, true);
+			preferencesHelper.setBoolean(PreferencesHelper.APP_STATUS, true);
 		} else {
-			preferencesHelper.setBoolean(PreferencesHelper.APP_STATUS,
-					false);
+			preferencesHelper.setBoolean(PreferencesHelper.APP_STATUS, false);
 		}
 		return counter;
 	}
 
 	public boolean setBackupStatus() {
-		if (preferencesHelper
-				.getBoolean(PreferencesHelper.AUTO_BACKUP_STATUS)
+		if (preferencesHelper.getBoolean(PreferencesHelper.AUTO_BACKUP_STATUS)
 				& isBackupDelayed()) {
 			return true;
 		} else if (!preferencesHelper
@@ -174,7 +200,7 @@ public class HomeFragment extends Fragment {
 	public boolean setSecurityStatus() {
 		boolean deviceAdminEnabled = preferencesHelper
 				.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS);
-		boolean gpsEnabled = phoneHelper.enabled(Phone.GPS);
+		boolean gpsEnabled = phoneHelper.enabled(PhoneHelper.GPS);
 		if (gpsEnabled & deviceAdminEnabled) {
 			return true;
 		} else if (gpsEnabled & !deviceAdminEnabled) {
@@ -227,14 +253,13 @@ public class HomeFragment extends Fragment {
 		}
 
 		@Override
-		public View getChildView(int groupPosition,
-				final int childPosition, boolean isLastChild,
-				View convertView, ViewGroup parent) {
+		public View getChildView(int groupPosition, final int childPosition,
+				boolean isLastChild, View convertView, ViewGroup parent) {
 			TextView text;
 			Button button;
 			if (convertView == null) {
-				convertView = inflater.inflate(R.layout.list_status_inner,
-						null);
+				convertView = inflater
+						.inflate(R.layout.list_status_inner, null);
 			}
 
 			text = (TextView) convertView.findViewById(R.id.n_text);
@@ -246,8 +271,7 @@ public class HomeFragment extends Fragment {
 				text.setTag(R.string.intent_type,
 						(notifications.get(childPosition)));
 				button = (Button) convertView.findViewById(R.id.activate);
-				button.setText(getButtonLabel((notifications
-						.get(childPosition))));
+				button.setText(getButtonLabel((notifications.get(childPosition))));
 				button.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -302,8 +326,7 @@ public class HomeFragment extends Fragment {
 				break;
 			case STATUS_DEVICE_ADMIN_DISABLED:
 				startActivityForResult(
-						new Intent(
-								DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+						new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
 								.putExtra(
 										DevicePolicyManager.EXTRA_DEVICE_ADMIN,
 										deviceAdminComponentName)
@@ -355,8 +378,8 @@ public class HomeFragment extends Fragment {
 		public View getGroupView(int groupPosition, boolean isExpanded,
 				View convertView, ViewGroup parent) {
 			if (convertView == null) {
-				convertView = inflater.inflate(R.layout.list_status_outer,
-						null);
+				convertView = inflater
+						.inflate(R.layout.list_status_outer, null);
 			}
 
 			TextView totalCounter = (TextView) convertView
@@ -378,11 +401,9 @@ public class HomeFragment extends Fragment {
 		}
 
 		@Override
-		public boolean isChildSelectable(int groupPosition,
-				int childPosition) {
+		public boolean isChildSelectable(int groupPosition, int childPosition) {
 			return false;
 		}
 
 	}
 }
-

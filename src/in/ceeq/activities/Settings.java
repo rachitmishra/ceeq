@@ -48,9 +48,10 @@ import com.facebook.LoggingBehavior;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.plus.PlusClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.plus.Plus;
 
 public class Settings extends Activity {
 
@@ -82,7 +83,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	private PreferencesHelper preferencesHelper;
 	private Preference changePrimaryContact, facebookConnect, googleConnect,
 			notifications;
-	private PlusClient googlePlusClient;
+	private GoogleApiClient googleApiClient;
 	public Session.StatusCallback statusCallback = new FBSessionStatus();
 
 	@Override
@@ -108,7 +109,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 
 		googleConnect = (Preference) findPreference("googleConnected");
 		googleConnect.setOnPreferenceChangeListener(new GoogleConnectListener(
-				getActivity(), googlePlusClient));
+				getActivity(), googleApiClient));
 
 		googleConnect = (Preference) findPreference("uninstallProtection");
 		googleConnect
@@ -126,8 +127,10 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	}
 
 	public void setupGoogle() {
-		googlePlusClient = new PlusClient.Builder(getActivity(), this, this)
-				.setActions("http://schemas.google.com/AddActivity").build();
+		googleApiClient = new GoogleApiClient.Builder(getActivity())
+		.addConnectionCallbacks(this)
+		.addOnConnectionFailedListener(this).addApi(Plus.API, null)
+		.addScope(Plus.SCOPE_PLUS_PROFILE).build();
 	}
 
 	public void setupFacebook(Bundle savedInstanceState) {
@@ -154,7 +157,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	@Override
 	public void onConnected(Bundle connectionHint) {
 		/**
-		 * we have nothing to do on google + connected
+		 * we have nothing to do on google+ connected
 		 */
 	}
 
@@ -165,7 +168,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 				result.startResolutionForResult(getActivity(),
 						CONNECTION_FAILURE_REQUEST);
 			} catch (SendIntentException e) {
-				googlePlusClient.connect();
+				googleApiClient.connect();
 			}
 		}
 	}
@@ -174,19 +177,14 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	public void onStart() {
 		super.onStart();
 		Session.getActiveSession().addCallback(statusCallback);
-		googlePlusClient.connect();
+		googleApiClient.connect();
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 		Session.getActiveSession().removeCallback(statusCallback);
-		googlePlusClient.disconnect();
-	}
-
-	@Override
-	public void onDisconnected() {
-
+		googleApiClient.disconnect();
 	}
 
 	public class FBSessionStatus implements Session.StatusCallback {
@@ -320,12 +318,12 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	class GoogleConnectListener implements OnPreferenceChangeListener {
 
 		private Context context;
-		private PlusClient googlePlusClient;
+		private GoogleApiClient googleApiClient;
 
 		public GoogleConnectListener(Context context,
-				PlusClient googlePlusClient) {
+				GoogleApiClient googleApiClient) {
 			this.context = context;
-			this.googlePlusClient = googlePlusClient;
+			this.googleApiClient = googleApiClient;
 		}
 
 		@Override
@@ -338,9 +336,9 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int id) {
-									if (googlePlusClient.isConnected()) {
+									if (googleApiClient.isConnected()) {
 										Reset.getInstance(context,
-												googlePlusClient).reset();
+												googleApiClient).reset();
 									}
 								}
 							})
@@ -365,6 +363,11 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 			return true;
 		}
 
+	}
+
+	@Override
+	public void onConnectionSuspended(int cause) {
+		googleApiClient.connect();
 	}
 
 }

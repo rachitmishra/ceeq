@@ -2,6 +2,7 @@ package in.ceeq.fragments;
 
 import in.ceeq.R;
 import in.ceeq.helpers.PreferencesHelper;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,12 +13,13 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-
-
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.ui.IconGenerator;
 
 public class SecurityFragment extends Fragment implements
 		OnMyLocationChangeListener {
@@ -75,5 +77,16 @@ public class SecurityFragment extends Fragment implements
 	public void onMyLocationChange(Location newLocation) {
 		map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(
 				newLocation.getLatitude(), newLocation.getLongitude()), 15));
+		try {
+			IconGenerator iconGenerator = new IconGenerator(getActivity());
+			Bitmap bitmap = iconGenerator.makeIcon("You");
+			map.clear();
+			map.addMarker(new MarkerOptions().position(
+					new LatLng(newLocation.getLatitude(), newLocation
+							.getLongitude())).icon(
+					BitmapDescriptorFactory.fromBitmap(bitmap)));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -2,7 +2,6 @@ package in.ceeq.receivers;
 
 import in.ceeq.helpers.Logger;
 import in.ceeq.services.Commander;
-import in.ceeq.services.Commander.Command;
 import in.ceeq.services.Locater.RequestType;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,25 +25,25 @@ public class Locations extends BroadcastReceiver {
 		Intent commands = new Intent(context, Commander.class);
 		switch (requestType) {
 		case BLIP:
-			commands.putExtra(Commander.ACTION, Command.SEND_BLIP_TO_SERVER);
+			commands.putExtra(Commander.ACTION, Commander.SEND_BLIP_TO_SERVER);
 			break;
 		case MESSAGE:
 			commands.putExtra(Commander.ACTION,
-					Command.SEND_CURRENT_LOCATION_MESSAGE);
+					Commander.SEND_CURRENT_LOCATION_MESSAGE);
 			commands.putExtra(SENDER_ADDRESS,
 					intent.getExtras().getString(SENDER_ADDRESS));
 			break;
 		case SERVER:
-			commands.putExtra(Commander.ACTION, Command.SEND_LOCATION_TO_SERVER);
+			commands.putExtra(Commander.ACTION, Commander.SEND_LOCATION_TO_SERVER);
 			break;
 		case PROTECT:
-			commands.putExtra(Commander.ACTION, Command.SEND_PROTECT_MESSAGE);
+			commands.putExtra(Commander.ACTION, Commander.SEND_PROTECT_MESSAGE);
 			commands.putExtra(SENDER_ADDRESS,
 					intent.getExtras().getString(SENDER_ADDRESS));
 			break;
 		case NOW:
 			commands.putExtra(Commander.ACTION,
-					Command.SEND_CURRENT_DETAILS_MESSAGE);
+					Commander.SEND_CURRENT_DETAILS_MESSAGE);
 			commands.putExtra(SENDER_ADDRESS,
 					intent.getExtras().getString(SENDER_ADDRESS));
 			break;

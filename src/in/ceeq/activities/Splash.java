@@ -9,8 +9,8 @@ package in.ceeq.activities;
 
 import hirondelle.date4j.DateTime;
 import in.ceeq.R;
+import in.ceeq.helpers.Logger;
 import in.ceeq.helpers.PhoneHelper;
-import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 
 import java.util.TimeZone;
@@ -20,7 +20,6 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
@@ -55,10 +54,16 @@ public class Splash extends Activity implements ConnectionCallbacks,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
 		setupHelpers();
+		setupGoogleConnect();
+		
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
 		checkPlayServices();
 		checkConnectivity();
 		checkGoogleConnect();
-		setupGoogleConnect();
 	}
 
 	private PreferencesHelper preferencesHelper;
@@ -69,7 +74,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	}
 
 	private void checkConnectivity() {
-		if (!phoneHelper.enabled(Phone.INTERNET)) {
+		if (!phoneHelper.enabled(PhoneHelper.INTERNET)) {
 			Toast.makeText(this, R.string.toast_string_0, Toast.LENGTH_SHORT)
 					.show();
 		}
@@ -77,7 +82,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	}
 
 	private void checkPlayServices() {
-		if (!phoneHelper.enabled(Phone.PLAY_SERVICES)) {
+		if (!phoneHelper.enabled(PhoneHelper.PLAY_SERVICES)) {
 			startActivity(new Intent(this, GoogleServices.class).putExtra(
 					"from", 1));
 			this.finish();
@@ -114,6 +119,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	private void connectGoogle() {
 		if (mConnectionResult.hasResolution()) {
 			try {
+				progressBar.setVisibility(View.VISIBLE);
 				mIntentInProgress = true;
 				mConnectionResult.startResolutionForResult(this,
 						REQUEST_CODE_SIGN_IN);
@@ -127,7 +133,6 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	public void onConnectionFailed(ConnectionResult result) {
 		if (!mIntentInProgress) {
 			mConnectionResult = result;
-
 			if (mSignInClicked) {
 				connectGoogle();
 			}
@@ -185,7 +190,6 @@ public class Splash extends Activity implements ConnectionCallbacks,
 
 	@Override
 	protected void onStart() {
-		Log.w("Debug", "onStart()");
 		super.onStart();
 		isSetupComplete = preferencesHelper
 				.getBoolean(PreferencesHelper.APP_INITIALIZATION_STATUS);
@@ -212,6 +216,8 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	@Override
 	public void onConnected(Bundle connectionHint) {
 
+		progressBar.setVisibility(View.GONE);
+		try {
 		Person currentUser = Plus.PeopleApi.getCurrentPerson(googleApiClient);
 		preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_ID,
 				Plus.AccountApi.getAccountName(googleApiClient));
@@ -226,8 +232,17 @@ public class Splash extends Activity implements ConnectionCallbacks,
 				true);
 
 		if (!isSetupComplete) {
+
+			Logger.d("setup yet not completed");
 			signInButton.setVisibility(View.INVISIBLE);
 			delayedStart(NEXT_FIRSTRUN, ZERO_SECONDS);
+		}
+		
+		}catch(Exception e ) {
+			Logger.d("Exception in onConnected()");
+			if (mSignInClicked) {
+				connectGoogle();
+			}
 		}
 	}
 

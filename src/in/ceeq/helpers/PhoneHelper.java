@@ -24,9 +24,25 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 
 public class PhoneHelper {
 
-	public enum Phone {
-		SIM_ID, NUMBER, IEMI, IMSI, OPERATOR, MANUFACTURER, MODEL, ANDROID_VERSION, SIZE, DENSITY, UNIQUE_ID, APP_COUNT, GPS, INTERNET, PLAY_SERVICES, EXTERNAL_STORAGE, BATTERY_LEVEL, REGISTRATION_ID, APP_VERSION
-	}
+	public static final int SIM_ID = 0;
+	public static final int NUMBER = 1;
+	public static final int IEMI = 3;
+	public static final int IMSI = 4;
+	public static final int OPERATOR = 5;
+	public static final int MANUFACTURER = 6;
+	public static final int MODEL = 7;
+	public static final int ANDROID_VERSION = 8;
+	public static final int SIZE = 9;
+	public static final int DENSITY = 10;
+	public static final int UNIQUE_ID = 11;
+	public static final int APP_COUNT = 12;
+	public static final int GPS = 13;
+	public static final int INTERNET = 14;
+	public static final int PLAY_SERVICES = 15;
+	public static final int EXTERNAL_STORAGE = 16;
+	public static final int BATTERY_LEVEL = 17;
+	public static final int REGISTRATION_ID = 18;
+	public static final int APP_VERSION = 19;
 
 	private Context context;
 	private TelephonyManager telephonyManager;
@@ -41,7 +57,7 @@ public class PhoneHelper {
 		return new PhoneHelper(context);
 	}
 
-	public String get(Phone dataType) {
+	public String get(int dataType) {
 		telephonyManager = (TelephonyManager) context
 				.getSystemService(Context.TELEPHONY_SERVICE);
 		String data = "Not Available.";
@@ -102,7 +118,7 @@ public class PhoneHelper {
 		return data;
 	}
 
-	public void set(Phone dataType, String data) {
+	public void set(int dataType, String data) {
 
 		switch (dataType) {
 		case REGISTRATION_ID:
@@ -116,7 +132,7 @@ public class PhoneHelper {
 		}
 	}
 
-	public boolean enabled(Phone featureType) {
+	public boolean enabled(int featureType) {
 		boolean data = false;
 		switch (featureType) {
 		case GPS:
@@ -184,7 +200,7 @@ public class PhoneHelper {
 	private String getUniqueDeviceId() {
 		return android.os.Build.MANUFACTURER.substring(0, 3).toUpperCase(
 				Locale.getDefault())
-				+ "-" + randomString().substring(0, 6) + get(Phone.IEMI);
+				+ "-" + randomString().substring(0, 6) + get(IEMI);
 	}
 
 	private String randomString() {

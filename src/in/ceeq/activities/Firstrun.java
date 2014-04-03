@@ -12,7 +12,6 @@ import in.ceeq.actions.Choose;
 import in.ceeq.actions.Reset;
 import in.ceeq.helpers.Logger;
 import in.ceeq.helpers.PhoneHelper;
-import in.ceeq.helpers.PhoneHelper.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.receivers.DeviceAdmin;
 
@@ -53,9 +52,10 @@ import android.widget.ToggleButton;
 
 import com.bugsense.trace.BugSenseHandler;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.plus.PlusClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.plus.Plus;
 
 public class Firstrun extends Activity implements ConnectionCallbacks,
 		OnConnectionFailedListener {
@@ -83,11 +83,11 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 
 	public void setupDevice() {
 		preferencesHelper.setString(PreferencesHelper.SIM_NUMBER,
-				phoneHelper.get(Phone.SIM_ID));
+				phoneHelper.get(PhoneHelper.SIM_ID));
 		preferencesHelper.setString(PreferencesHelper.IEMI_NUMBER,
-				phoneHelper.get(Phone.IEMI));
+				phoneHelper.get(PhoneHelper.IEMI));
 		preferencesHelper.setString(PreferencesHelper.DEVICE_ID,
-				phoneHelper.get(Phone.UNIQUE_ID));
+				phoneHelper.get(PhoneHelper.UNIQUE_ID));
 	}
 
 	private PreferencesHelper preferencesHelper;
@@ -102,11 +102,13 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 		BugSenseHandler.initAndStartSession(Firstrun.this, "5996b3d9");
 	}
 
-	private PlusClient plus;
+	private GoogleApiClient googleApiClient;
 
 	public void setupGoogleConnect() {
-		plus = new PlusClient.Builder(this, this, this).setActions(
-				"http://schemas.google.com/AddActivity").build();
+		googleApiClient = new GoogleApiClient.Builder(this)
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this).addApi(Plus.API, null)
+				.addScope(Plus.SCOPE_PLUS_PROFILE).build();
 	}
 
 	private ExpandableListView helpList;
@@ -207,13 +209,13 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 	@Override
 	protected void onStart() {
 		super.onStart();
-		plus.connect();
+		googleApiClient.connect();
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		plus.disconnect();
+		googleApiClient.disconnect();
 	}
 
 	@Override
@@ -392,7 +394,7 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 		userName = (TextView) findViewById(R.id.user_name);
 		userImage = (ImageView) findViewById(R.id.user_image);
 		try {
-			userName.setText(plus.getCurrentPerson().getDisplayName());
+			userName.setText(Plus.PeopleApi.getCurrentPerson(googleApiClient).getDisplayName());
 			new AsyncTask<String, String, Bitmap>() {
 
 				@Override
@@ -418,7 +420,7 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 					userImage.setImageBitmap(bitmap);
 				}
 
-			}.execute(plus.getCurrentPerson().getImage().getUrl());
+			}.execute(Plus.PeopleApi.getCurrentPerson(googleApiClient).getImage().getUrl());
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
@@ -426,7 +428,7 @@ public class Firstrun extends Activity implements ConnectionCallbacks,
 	}
 
 	@Override
-	public void onDisconnected() {
-
+	public void onConnectionSuspended(int cause) {
+		googleApiClient.connect();
 	}
 }

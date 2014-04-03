@@ -9,7 +9,6 @@ package in.ceeq.receivers;
 
 import in.ceeq.helpers.Logger;
 import in.ceeq.services.Commander;
-import in.ceeq.services.Commander.Command;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +25,7 @@ public class PowerButton extends BroadcastReceiver {
 		pressure++;
 		if (pressure == 10) {
 			Intent commands = new Intent(context, Commander.class);
-			commands.putExtra(Commander.ACTION, Command.SEND_PROTECT_MESSAGE);
+			commands.putExtra(Commander.ACTION, Commander.SEND_PROTECT_MESSAGE);
 			context.startService(commands);
 		}
 

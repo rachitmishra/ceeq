@@ -1,6 +1,5 @@
 package in.ceeq.helpers;
 
-import in.ceeq.helpers.PhoneHelper.Phone;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -79,8 +78,15 @@ public class MessagesHelper {
 		default:
 			break;
 		}
-		if (!message.isEmpty())
-			smsManager.sendTextMessage(deliverTo, null, message, null, null);
+
+		try {
+			String senderAddress = preferencesHelper.getString(PreferencesHelper.SENDER_ADDRESS);
+			if (!message.isEmpty())
+				smsManager
+						.sendTextMessage(senderAddress, null, message, null, null);
+		} catch (Exception exception) {
+			Logger.d("Either the mobile number empty or not correct.");
+		}
 	}
 
 	private String getFailedChangeMessage() {
@@ -171,11 +177,13 @@ public class MessagesHelper {
 	 */
 	public String getSimChangeMessage() {
 		return preferencesHelper.getString("emergencyMessage") + "\n"
-				+ "New Sim Number : " + phoneHelper.get(Phone.SIM_ID) + "\n"
-				+ "New Sim Operator : " + phoneHelper.get(Phone.OPERATOR)
-				+ "\n" + "New Sim Subscriber Id : "
-				+ phoneHelper.get(Phone.IMSI) + "\n" + "Your Device IEMI: "
-				+ phoneHelper.get(Phone.IEMI) + "\n";
+				+ "New Sim Number : " + phoneHelper.get(PhoneHelper.SIM_ID)
+				+ "\n" + "New Sim Operator : "
+				+ phoneHelper.get(PhoneHelper.OPERATOR) + "\n"
+				+ "New Sim Subscriber Id : "
+				+ phoneHelper.get(PhoneHelper.IMSI) + "\n"
+				+ "Your Device IEMI: " + phoneHelper.get(PhoneHelper.IEMI)
+				+ "\n";
 	}
 
 	/**
@@ -194,7 +202,7 @@ public class MessagesHelper {
 				+ getLocationMessage()
 				+ "\n"
 				+ "Battery Status : "
-				+ phoneHelper.get(Phone.BATTERY_LEVEL)
+				+ phoneHelper.get(PhoneHelper.BATTERY_LEVEL)
 				+ "\nCeeq will send you regular location updates every 10 minutes.\n";
 	}
 
@@ -204,9 +212,11 @@ public class MessagesHelper {
 	 * @return
 	 */
 	public String getDetailsMessage() {
-		return "Current \n" + "Sim Number : " + phoneHelper.get(Phone.SIM_ID)
-				+ "\n" + "Sim Operator : " + phoneHelper.get(Phone.OPERATOR)
-				+ "\n" + "Sim Subscriber Id : " + phoneHelper.get(Phone.IMSI)
-				+ "\n" + "Location :" + getLocationMessage() + "\n";
+		return "Current \n" + "Sim Number : "
+				+ phoneHelper.get(PhoneHelper.SIM_ID) + "\n"
+				+ "Sim Operator : " + phoneHelper.get(PhoneHelper.OPERATOR)
+				+ "\n" + "Sim Subscriber Id : "
+				+ phoneHelper.get(PhoneHelper.IMSI) + "\n" + "Location :"
+				+ getLocationMessage() + "\n";
 	}
 }
