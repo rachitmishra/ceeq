@@ -1,4 +1,4 @@
-ceeq
+Project Ceeq
 ====
 
 Ceeq Android Application
