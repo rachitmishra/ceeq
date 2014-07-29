@@ -44,9 +44,6 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.bugsense.trace.BugSenseHandler;
-import com.facebook.LoggingBehavior;
-import com.facebook.Session;
-import com.facebook.SessionState;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -84,7 +81,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	private Preference changePrimaryContact, facebookConnect, googleConnect,
 			notifications;
 	private GoogleApiClient googleApiClient;
-	public Session.StatusCallback statusCallback = new FBSessionStatus();
+//	public Session.StatusCallback statusCallback = new FBSessionStatus();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -95,7 +92,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 		setupGoogle();
 		setupBugsense();
 
-		setupFacebook(savedInstanceState);
+		//setupFacebook(savedInstanceState);
 
 		changePrimaryContact = (Preference) findPreference("changePrimaryContact");
 		changePrimaryContact
@@ -133,26 +130,26 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 		.addScope(Plus.SCOPE_PLUS_PROFILE).build();
 	}
 
-	public void setupFacebook(Bundle savedInstanceState) {
-		com.facebook.Settings
-				.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
-
-		Session session = Session.getActiveSession();
-		if (session == null) {
-			if (savedInstanceState != null) {
-				session = Session.restoreSession(getActivity(), null,
-						statusCallback, savedInstanceState);
-			}
-			if (session == null) {
-				session = new Session(getActivity());
-			}
-			Session.setActiveSession(session);
-			if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
-				session.openForRead(new Session.OpenRequest(getActivity())
-						.setCallback(statusCallback));
-			}
-		}
-	}
+//	public void setupFacebook(Bundle savedInstanceState) {
+//		com.facebook.Settings
+//				.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
+//
+//		Session session = Session.getActiveSession();
+//		if (session == null) {
+//			if (savedInstanceState != null) {
+//				session = Session.restoreSession(getActivity(), null,
+//						statusCallback, savedInstanceState);
+//			}
+//			if (session == null) {
+//				session = new Session(getActivity());
+//			}
+//			Session.setActiveSession(session);
+//			if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
+//				session.openForRead(new Session.OpenRequest(getActivity())
+//						.setCallback(statusCallback));
+//			}
+//		}
+//	}
 
 	@Override
 	public void onConnected(Bundle connectionHint) {
@@ -176,31 +173,31 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 	@Override
 	public void onStart() {
 		super.onStart();
-		Session.getActiveSession().addCallback(statusCallback);
+		//Session.getActiveSession().addCallback(statusCallback);
 		googleApiClient.connect();
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		Session.getActiveSession().removeCallback(statusCallback);
+		//Session.getActiveSession().removeCallback(statusCallback);
 		googleApiClient.disconnect();
 	}
 
-	public class FBSessionStatus implements Session.StatusCallback {
-
-		@Override
-		public void call(Session session, SessionState state,
-				Exception exception) {
-
-		}
-	}
+//	public class FBSessionStatus implements Session.StatusCallback {
+//
+//		@Override
+//		public void call(Session session, SessionState state,
+//				Exception exception) {
+//
+//		}
+//	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		Session.getActiveSession().onActivityResult(getActivity(), requestCode,
-				resultCode, data);
+		//Session.getActiveSession().onActivityResult(getActivity(), requestCode,
+		//		resultCode, data);
 		switch (requestCode) {
 		case Choose.CONTACT_ACTIVATION_REQUEST:
 			if (resultCode == Activity.RESULT_OK) {
@@ -258,7 +255,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 		@Override
 		public boolean onPreferenceChange(Preference arg0, Object obj) {
 			if (Boolean.parseBoolean(obj.toString())) {
-				connectFacebook();
+				//connectFacebook();
 			} else {
 				new AlertDialog.Builder(context)
 						.setTitle("Warning")
@@ -268,7 +265,7 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int id) {
-										disConnectFacebook();
+									//	disConnectFacebook();
 									}
 								})
 						.setNegativeButton(R.string.cancel,
@@ -294,25 +291,25 @@ class Preferences extends PreferenceFragment implements ConnectionCallbacks,
 			return true;
 		}
 
-		public void connectFacebook() {
-			Session session = Session.getActiveSession();
-			if (!session.isOpened() && !session.isClosed()) {
-				session.openForRead(new Session.OpenRequest((Activity) context)
-						.setCallback(statusCallback));
-			} else {
-				Session.openActiveSession((Activity) context, true,
-						statusCallback);
-			}
-		}
+		//public void connectFacebook() {
+		//	Session session = Session.getActiveSession();
+		//	if (!session.isOpened() && !session.isClosed()) {
+		//		session.openForRead(new Session.OpenRequest((Activity) context)
+		//				.setCallback(statusCallback));
+		//	} else {
+		//		Session.openActiveSession((Activity) context, true,
+		//				statusCallback);
+		//	}
+		//}
 
-		public void disConnectFacebook() {
-			preferencesHelper.setBoolean(
-					PreferencesHelper.FACEBOOK_CONNECT_STATUS, false);
-			Session session = Session.getActiveSession();
-			if (!session.isClosed()) {
-				session.closeAndClearTokenInformation();
-			}
-		}
+		//public void disConnectFacebook() {
+		//	preferencesHelper.setBoolean(
+		//			PreferencesHelper.FACEBOOK_CONNECT_STATUS, false);
+		//	Session session = Session.getActiveSession();
+		///	if (!session.isClosed()) {
+		//		session.closeAndClearTokenInformation();
+		//	}
+		//}
 	}
 
 	class GoogleConnectListener implements OnPreferenceChangeListener {

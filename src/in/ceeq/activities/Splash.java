@@ -9,8 +9,8 @@ package in.ceeq.activities;
 
 import hirondelle.date4j.DateTime;
 import in.ceeq.R;
+import in.ceeq.actions.Phone;
 import in.ceeq.helpers.Logger;
-import in.ceeq.helpers.PhoneHelper;
 import in.ceeq.helpers.PreferencesHelper;
 
 import java.util.TimeZone;
@@ -36,14 +36,14 @@ import com.google.android.gms.plus.model.people.Person;
 public class Splash extends Activity implements ConnectionCallbacks,
 		OnConnectionFailedListener {
 
-	private static final int NEXT_FIRSTRUN = 1;
+	private static final int NEXT_SETUP = 1;
 	private static final int NEXT_HOME = 2;
 	private static final int REQUEST_CODE_SIGN_IN = 9010;
 
 	private ProgressBar progressBar;
 	private GoogleApiClient googleApiClient;
 	private SignInButton signInButton;
-	private PhoneHelper phoneHelper;
+	private Phone phoneHelper;
 	private boolean isSetupComplete, isGoogleConnected, mSignInClicked,
 			mIntentInProgress;
 	private ConnectionResult mConnectionResult;
@@ -55,9 +55,8 @@ public class Splash extends Activity implements ConnectionCallbacks,
 		setContentView(R.layout.activity_splash);
 		setupHelpers();
 		setupGoogleConnect();
-		
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -70,11 +69,10 @@ public class Splash extends Activity implements ConnectionCallbacks,
 
 	private void setupHelpers() {
 		preferencesHelper = PreferencesHelper.getInstance(this);
-		phoneHelper = PhoneHelper.getInstance(this);
 	}
 
 	private void checkConnectivity() {
-		if (!phoneHelper.enabled(PhoneHelper.INTERNET)) {
+		if (!Phone.enabled(Phone.INTERNET, this)) {
 			Toast.makeText(this, R.string.toast_string_0, Toast.LENGTH_SHORT)
 					.show();
 		}
@@ -82,9 +80,9 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	}
 
 	private void checkPlayServices() {
-		if (!phoneHelper.enabled(PhoneHelper.PLAY_SERVICES)) {
-			startActivity(new Intent(this, GoogleServices.class).putExtra(
-					"from", 1));
+		if (!Phone.enabled(Phone.PLAY_SERVICES, this)) {
+			startActivity(new Intent(this, GooglePlus.class).putExtra(
+					GooglePlus.FROM, GooglePlus.SPLASH));
 			this.finish();
 		}
 	}
@@ -112,8 +110,8 @@ public class Splash extends Activity implements ConnectionCallbacks,
 		progressBar = (ProgressBar) findViewById(R.id.connectProgress);
 		googleApiClient = new GoogleApiClient.Builder(this)
 				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this).addApi(Plus.API, null)
-				.addScope(Plus.SCOPE_PLUS_PROFILE).build();
+				.addOnConnectionFailedListener(this).addApi(Plus.API)
+				.addScope(Plus.SCOPE_PLUS_LOGIN).build();
 	}
 
 	private void connectGoogle() {
@@ -170,8 +168,8 @@ public class Splash extends Activity implements ConnectionCallbacks,
 			public void run() {
 				Intent launchNextActivity;
 				switch (nextActivity) {
-				case NEXT_FIRSTRUN:
-					launchNextActivity = new Intent(Splash.this, Firstrun.class);
+				case NEXT_SETUP:
+					launchNextActivity = new Intent(Splash.this, Startup.class);
 					break;
 				default:
 					launchNextActivity = new Intent(Splash.this, Home.class);
@@ -197,7 +195,7 @@ public class Splash extends Activity implements ConnectionCallbacks,
 			googleApiClient.connect();
 		} else if (!isSetupComplete) {
 			signInButton.setVisibility(View.INVISIBLE);
-			delayedStart(NEXT_FIRSTRUN, ONE_SECOND);
+			delayedStart(NEXT_SETUP, ONE_SECOND);
 
 		} else {
 			signInButton.setVisibility(View.INVISIBLE);
@@ -218,27 +216,29 @@ public class Splash extends Activity implements ConnectionCallbacks,
 
 		progressBar.setVisibility(View.GONE);
 		try {
-		Person currentUser = Plus.PeopleApi.getCurrentPerson(googleApiClient);
-		preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_ID,
-				Plus.AccountApi.getAccountName(googleApiClient));
-		preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_NAME,
-				currentUser.getDisplayName());
-		preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_IMAGE_URL,
-				currentUser.getImage().getUrl());
-		preferencesHelper.setString(
-				PreferencesHelper.ACCOUNT_REGISTRATION_DATE,
-				DateTime.today(TimeZone.getDefault()).toString());
-		preferencesHelper.setBoolean(PreferencesHelper.GOOGLE_CONNECT_STATUS,
-				true);
+			Person currentUser = Plus.PeopleApi
+					.getCurrentPerson(googleApiClient);
+			preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_ID,
+					Plus.AccountApi.getAccountName(googleApiClient));
+			preferencesHelper.setString(PreferencesHelper.ACCOUNT_USER_NAME,
+					currentUser.getDisplayName());
+			preferencesHelper.setString(
+					PreferencesHelper.ACCOUNT_USER_IMAGE_URL, currentUser
+							.getImage().getUrl());
+			preferencesHelper.setString(
+					PreferencesHelper.ACCOUNT_REGISTRATION_DATE, DateTime
+							.today(TimeZone.getDefault()).toString());
+			preferencesHelper.setBoolean(
+					PreferencesHelper.GOOGLE_CONNECT_STATUS, true);
 
-		if (!isSetupComplete) {
+			if (!isSetupComplete) {
 
-			Logger.d("setup yet not completed");
-			signInButton.setVisibility(View.INVISIBLE);
-			delayedStart(NEXT_FIRSTRUN, ZERO_SECONDS);
-		}
-		
-		}catch(Exception e ) {
+				Logger.d("setup yet not completed");
+				signInButton.setVisibility(View.INVISIBLE);
+				delayedStart(NEXT_SETUP, ZERO_SECONDS);
+			}
+
+		} catch (Exception e) {
 			Logger.d("Exception in onConnected()");
 			if (mSignInClicked) {
 				connectGoogle();

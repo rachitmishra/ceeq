@@ -29,7 +29,7 @@
                 android:textColor="@color/text_dark"
                 android:textSize="14sp"
                 android:textStyle="bold" />
-
+<!--  
             <com.facebook.widget.LoginButton
                 android:id="@+id/facebook_login"
                 android:layout_width="wrap_content"
@@ -37,7 +37,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="4dp"
                 android:layout_marginTop="10dp"
-                fb:login_text="Connect Facebook" />
+                fb:login_text="Connect Facebook" />-->
 
             <TextView
                 android:layout_width="wrap_content"

@@ -1,6 +1,7 @@
 package in.ceeq.helpers;
 
 import hirondelle.date4j.DateTime;
+import in.ceeq.actions.Phone;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -23,14 +24,13 @@ public class FilesHelper {
 	private Context context;
 	private DataOutputStream out;
 	private File storageLocation;
-	private PhoneHelper phoneHelper;
+	private Phone phoneHelper;
 	public static final String APP_PATH = "/data/ceeq";
 	public static final String BACKUP_PATH = "/data/ceeq/backups";
 	public static final String CAM_PATH = "/data/ceeq/camera";
 
 	public FilesHelper(Context context) {
 		this.context = context.getApplicationContext();
-		phoneHelper = PhoneHelper.getInstance(context);
 	}
 
 	public static FilesHelper getInstance(Context context) {
@@ -38,7 +38,7 @@ public class FilesHelper {
 	}
 
 	public boolean haveBackupFiles() {
-		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
+		if (!Phone.enabled(Phone.EXTERNAL_STORAGE, context)) {
 			Toast.makeText(context, "Sorry, External storage not found.",
 					Toast.LENGTH_SHORT).show();
 		}
@@ -53,7 +53,7 @@ public class FilesHelper {
 	}
 
 	public File[] getFiles(String path) {
-		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
+		if (!Phone.enabled(Phone.EXTERNAL_STORAGE, context)) {
 			Toast.makeText(context, "Sorry, External storage not found.",
 					Toast.LENGTH_SHORT).show();
 		}
@@ -94,7 +94,7 @@ public class FilesHelper {
 
 	public File createFile(String path, String type) throws IOException,
 			ExternalStorageNotFoundException {
-		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
+		if (!Phone.enabled(Phone.EXTERNAL_STORAGE, context)) {
 			throw new ExternalStorageNotFoundException();
 		}
 		storageLocation = new File(Environment.getExternalStorageDirectory(),
@@ -111,7 +111,7 @@ public class FilesHelper {
 
 	public InputStream readFile(String fileName) throws FileNotFoundException,
 			ExternalStorageNotFoundException {
-		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
+		if (!Phone.enabled(Phone.EXTERNAL_STORAGE, context)) {
 			throw new ExternalStorageNotFoundException();
 		}
 		return new FileInputStream(Environment.getExternalStorageDirectory()
@@ -132,7 +132,7 @@ public class FilesHelper {
 	public boolean deleteFile(String path, String[] fileName)
 			throws ExternalStorageNotFoundException {
 		boolean deleted = false;
-		if (!phoneHelper.enabled(PhoneHelper.EXTERNAL_STORAGE)) {
+		if (!Phone.enabled(Phone.EXTERNAL_STORAGE, context)) {
 			throw new ExternalStorageNotFoundException();
 		} else {
 

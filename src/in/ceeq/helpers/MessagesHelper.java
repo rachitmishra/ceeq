@@ -1,5 +1,6 @@
 package in.ceeq.helpers;
 
+import in.ceeq.actions.Phone;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,7 +12,6 @@ public class MessagesHelper {
 
 	private SmsManager smsManager;
 	private PreferencesHelper preferencesHelper;
-	private PhoneHelper phoneHelper;
 	private ContentResolver resolver;
 	private Context context;
 
@@ -27,7 +27,6 @@ public class MessagesHelper {
 	public MessagesHelper(Context context) {
 		this.context = context;
 		preferencesHelper = PreferencesHelper.getInstance(context);
-		phoneHelper = PhoneHelper.getInstance(context);
 		smsManager = SmsManager.getDefault();
 	}
 
@@ -177,12 +176,12 @@ public class MessagesHelper {
 	 */
 	public String getSimChangeMessage() {
 		return preferencesHelper.getString("emergencyMessage") + "\n"
-				+ "New Sim Number : " + phoneHelper.get(PhoneHelper.SIM_ID)
+				+ "New Sim Number : " + Phone.get(Phone.SIM_ID, context)
 				+ "\n" + "New Sim Operator : "
-				+ phoneHelper.get(PhoneHelper.OPERATOR) + "\n"
+				+ Phone.get(Phone.OPERATOR, context) + "\n"
 				+ "New Sim Subscriber Id : "
-				+ phoneHelper.get(PhoneHelper.IMSI) + "\n"
-				+ "Your Device IEMI: " + phoneHelper.get(PhoneHelper.IEMI)
+				+ Phone.get(Phone.IMSI, context) + "\n"
+				+ "Your Device IEMI: " + Phone.get(Phone.IEMI, context)
 				+ "\n";
 	}
 
@@ -202,7 +201,7 @@ public class MessagesHelper {
 				+ getLocationMessage()
 				+ "\n"
 				+ "Battery Status : "
-				+ phoneHelper.get(PhoneHelper.BATTERY_LEVEL)
+				+ Phone.get(Phone.BATTERY_LEVEL, context)
 				+ "\nCeeq will send you regular location updates every 10 minutes.\n";
 	}
 
@@ -213,10 +212,10 @@ public class MessagesHelper {
 	 */
 	public String getDetailsMessage() {
 		return "Current \n" + "Sim Number : "
-				+ phoneHelper.get(PhoneHelper.SIM_ID) + "\n"
-				+ "Sim Operator : " + phoneHelper.get(PhoneHelper.OPERATOR)
+				+ Phone.get(Phone.SIM_ID, context) + "\n"
+				+ "Sim Operator : " + Phone.get(Phone.OPERATOR, context)
 				+ "\n" + "Sim Subscriber Id : "
-				+ phoneHelper.get(PhoneHelper.IMSI) + "\n" + "Location :"
+				+ Phone.get(Phone.IMSI, context) + "\n" + "Location :"
 				+ getLocationMessage() + "\n";
 	}
 }

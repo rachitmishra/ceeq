@@ -4,8 +4,8 @@ import hirondelle.date4j.DateTime;
 import in.ceeq.R;
 import in.ceeq.actions.Backup;
 import in.ceeq.actions.Notifications;
+import in.ceeq.actions.Phone;
 import in.ceeq.activities.Home;
-import in.ceeq.helpers.PhoneHelper;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.receivers.DeviceAdmin;
 
@@ -45,7 +45,7 @@ public class HomeFragment extends Fragment {
 
 	private static final int PLUS_ONE_REQUEST_CODE = 9025;
 
-	private PhoneHelper phoneHelper;
+	private Phone phoneHelper;
 	private PreferencesHelper preferencesHelper;
 	private View view;
 	private int counter;
@@ -100,7 +100,6 @@ public class HomeFragment extends Fragment {
 	}
 
 	public void setupHelpers() {
-		phoneHelper = PhoneHelper.getInstance(getActivity());
 		preferencesHelper = PreferencesHelper.getInstance(this.getActivity());
 	}
 
@@ -200,7 +199,7 @@ public class HomeFragment extends Fragment {
 	public boolean setSecurityStatus() {
 		boolean deviceAdminEnabled = preferencesHelper
 				.getBoolean(PreferencesHelper.DEVICE_ADMIN_STATUS);
-		boolean gpsEnabled = phoneHelper.enabled(PhoneHelper.GPS);
+		boolean gpsEnabled = Phone.enabled(Phone.GPS, getActivity());
 		if (gpsEnabled & deviceAdminEnabled) {
 			return true;
 		} else if (gpsEnabled & !deviceAdminEnabled) {

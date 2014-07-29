@@ -3,7 +3,7 @@
     android:layout_height="match_parent"
     android:background="#f2f2f2"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="@dimen/c_padding_x_large" >
 
     <GridView
         android:id="@+id/gridView"
@@ -14,39 +14,5 @@
         android:numColumns="4"
         android:verticalSpacing="2dp" >
     </GridView>
-
-    <LinearLayout
-        android:id="@+id/help01"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_bg_shadow"
-        android:orientation="vertical" >
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ic_bg_white"
-            android:gravity="center_horizontal"
-            android:text="@string/help_note_6"
-            android:textSize="14sp"
-            android:typeface="normal" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/help02"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_bg_shadow"
-        android:orientation="vertical" >
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ic_bg_white"
-            android:gravity="center_horizontal"
-            android:text="@string/help_note_5"
-            android:textSize="14sp"
-            android:typeface="normal" />
-    </LinearLayout>
 
 </LinearLayout>

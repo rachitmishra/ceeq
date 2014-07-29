@@ -79,23 +79,25 @@
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
-            android:name="in.ceeq.activities.Firstrun"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
+            android:name="in.ceeq.activities.Startup"
+            android:screenOrientation="portrait" 
+            android:theme="@style/Theme.Ceeq"
+            android:label="@string/title_activity_startup"
+            >
         </activity>
         <activity
             android:name="in.ceeq.activities.Home"
             android:excludeFromRecents="true"
             android:logo="@drawable/ic_app_action_logo"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Actionbar"
+            android:theme="@style/Theme.Ceeq"
             android:label="" >
         </activity>
         <activity
             android:name="in.ceeq.activities.Help"
             android:label="@string/help"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Actionbar" >
+            android:theme="@style/Theme.Ceeq" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.ceeq.activities.Home" />
@@ -103,13 +105,13 @@
         <activity
             android:name="in.ceeq.activities.Settings"
             android:label="@string/settings"
-            android:theme="@style/Theme.Actionbar" >
+            android:theme="@style/Theme.Ceeq" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.ceeq.activities.Home" />
         </activity>
         <activity
-            android:name="in.ceeq.activities.GoogleServices"
+            android:name="in.ceeq.activities.GooglePlus"
             android:label="@string/title_activity_playservice"
             android:noHistory="true"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
@@ -117,9 +119,9 @@
         <activity android:name="com.facebook.LoginActivity" >
         </activity>
         <activity
-            android:name="in.ceeq.activities.ViewBackups"
+            android:name="in.ceeq.activities.Explorer"
             android:label="@string/title_activity_display_backups"
-            android:theme="@style/Theme.Actionbar" >
+            android:theme="@style/Theme.Ceeq" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.ceeq.activities.Home" />

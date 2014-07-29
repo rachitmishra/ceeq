@@ -1,0 +1,9 @@
+[submodule "VolleyPlus"]
+	path = VolleyPlus
+	url = git@github.com:DWorkS/VolleyPlus.git
+[submodule "android-maps-utils"]
+	path = android-maps-utils
+	url = git@github.com:googlemaps/android-maps-utils.git
+[submodule "SuperToasts"]
+	path = SuperToasts
+	url = git@github.com:JohnPersano/SuperToasts.git

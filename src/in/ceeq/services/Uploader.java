@@ -7,7 +7,7 @@
 
 package in.ceeq.services;
 
-import in.ceeq.helpers.PhoneHelper;
+import in.ceeq.actions.Phone;
 import in.ceeq.helpers.PreferencesHelper;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class Uploader extends IntentService {
 	public static final boolean UPLOAD_FAILURE = false;
 
 	private PreferencesHelper preferencesHelper;
-	private PhoneHelper phoneHelper;
+	private Phone phoneHelper;
 	private boolean userData, newAccount, newFeedback, newBlip, newLocation;
 	private UploadType uploadType;
 
@@ -76,7 +76,6 @@ public class Uploader extends IntentService {
 
 	public void setupHelpers() {
 		preferencesHelper = PreferencesHelper.getInstance(this);
-		phoneHelper = PhoneHelper.getInstance(this);
 	}
 
 	private void clearPendingUploads() {
@@ -172,12 +171,12 @@ public class Uploader extends IntentService {
 								.getString(PreferencesHelper.ACCOUNT_REGISTRATION_DATE)));
 		nameValuePairs.add(new BasicNameValuePair(SIM_NUMBER, preferencesHelper
 				.getString(PreferencesHelper.SIM_NUMBER)));
-		nameValuePairs.add(new BasicNameValuePair(MANUFACTURER, phoneHelper
-				.get(PhoneHelper.MANUFACTURER)));
-		nameValuePairs.add(new BasicNameValuePair(MODEL, phoneHelper
-				.get(PhoneHelper.MODEL)));
-		nameValuePairs.add(new BasicNameValuePair(IEMI_NUMBER, phoneHelper
-				.get(PhoneHelper.IEMI)));
+		nameValuePairs.add(new BasicNameValuePair(MANUFACTURER, Phone
+				.get(Phone.MANUFACTURER, this)));
+		nameValuePairs.add(new BasicNameValuePair(MODEL, Phone
+				.get(Phone.MODEL, this)));
+		nameValuePairs.add(new BasicNameValuePair(IEMI_NUMBER, Phone
+				.get(Phone.IEMI, this)));
 		nameValuePairs.add(new BasicNameValuePair(GCM_ID, preferencesHelper
 				.getString(PreferencesHelper.GCM_REGISTRATION_ID)));
 		nameValuePairs
@@ -212,8 +211,8 @@ public class Uploader extends IntentService {
 				.getString(PreferencesHelper.LAST_LOCATION_LATITUDE)));
 		nameValuePairs.add(new BasicNameValuePair(LONGITUDE, preferencesHelper
 				.getString(PreferencesHelper.LAST_LOCATION_LONGITUDE)));
-		nameValuePairs.add(new BasicNameValuePair(BATTERY, phoneHelper
-				.get(PhoneHelper.BATTERY_LEVEL)));
+		nameValuePairs.add(new BasicNameValuePair(BATTERY, Phone
+				.get(Phone.BATTERY_LEVEL, this)));
 		return nameValuePairs;
 	}
 

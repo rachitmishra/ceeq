@@ -4,7 +4,7 @@
     <!-- App -->
     <string name="app_name">Ceeq</string>
     <string name="app_id">413219985467370</string>
-    <string name="app_welcome">Hi.</string>
+    <string name="app_welcome">Hi,  </string>
     <string name="app_version">1.0.5 Beta</string>
     <string name="blank"></string>
     <string name="coming_soon">Coming Soon &#8230;</string>
@@ -144,7 +144,8 @@
 
     <!-- Activity Titles -->
     <string name="title_activity_playservice">Google Play</string>
-    <string name="title_activity_display_backups">Display Backups</string>
+    <string name="title_activity_display_backups">Explorer</string>
+    <string name="title_activity_startup">Setup</string>
 
     <!-- About Page -->
     <string name="connected_account">Connected Account</string>
@@ -171,6 +172,7 @@
     <string name="next_backup_in">Next backup in</string>
     <string name="last_backup">Last backup</string>
     <string name="choose_a_contact">Choose an emergency contact</string>
+    
 
     <!-- User Help Notes -->
     <string name="help_note_1">Please Enable Device Administration to access all features of the application, such as Device Wipe, Locking, Encryption etc.</string>
