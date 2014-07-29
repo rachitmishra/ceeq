@@ -43,7 +43,6 @@ public class Splash extends Activity implements ConnectionCallbacks,
 	private ProgressBar progressBar;
 	private GoogleApiClient googleApiClient;
 	private SignInButton signInButton;
-	private Phone phoneHelper;
 	private boolean isSetupComplete, isGoogleConnected, mSignInClicked,
 			mIntentInProgress;
 	private ConnectionResult mConnectionResult;
