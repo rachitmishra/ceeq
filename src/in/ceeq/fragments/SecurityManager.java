@@ -21,7 +21,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.ui.IconGenerator;
 
-public class SecurityFragment extends Fragment implements
+public class SecurityManager extends Fragment implements
 		OnMyLocationChangeListener {
 
 	private GoogleMap map;
@@ -29,7 +29,7 @@ public class SecurityFragment extends Fragment implements
 	private ToggleButton toggleButton;
 	private PreferencesHelper preferencesHelper;
 
-	public SecurityFragment() {
+	public SecurityManager() {
 	}
 
 	@Override

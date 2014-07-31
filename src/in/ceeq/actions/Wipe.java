@@ -1,14 +1,14 @@
 package in.ceeq.actions;
 
+import java.io.File;
+import java.lang.reflect.Method;
+
 import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Environment;
-
-import java.io.File;
-import java.lang.reflect.Method;
 
 public class Wipe {
 

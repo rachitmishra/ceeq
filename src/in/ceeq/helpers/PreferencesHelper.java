@@ -23,7 +23,10 @@ public class PreferencesHelper {
 	public static final String BACKUP_STATUS = "backup";
 	public static final String SECURITY_STATUS = "security";
 	public static final String REMOTE_STATUS = "remoteAccess";
-	public static final String APP_INITIALIZATION_STATUS = "applicationHaInitialised";
+	/**
+	 * Application initial setup status
+	 */
+	public static final String APP_INITIALIZATION_STATUS = "applicationHasInitialised";
 	public static final String SYNC_STATUS = "dataSync";
 	public static final String AUTO_TRACK_STATUS = "autoTrack";
 	public static final String AUTO_BACKUP_STATUS = "autoBackup";
@@ -40,8 +43,8 @@ public class PreferencesHelper {
 	public static final String GCM_REGISTRATION_ID = "gcmRegistrationId";
 	public static final String APP_VERSION = "appVersion";
 	public static final String FEEDBACK_MESSAGE = "feedbackMessage";
-	public static final String EMERGENCY_CONTACT_NAME = "emergencyNumber";
-	public static final String EMERGENCY_CONTACT_NUMBER = "emergencyName";
+	public static final String EMERGENCY_CONTACT_NAME = "emergencyName";
+	public static final String EMERGENCY_CONTACT_NUMBER = "emergencyNumber";
 	public static final String EMERGENCY_MESSAGE = "emergencyMessage";
 	public static final String DISTRESS_MESSAGE = "distressMessage";
 	public static final String LAST_LOCATION_LATITUDE = "lastLatitude";

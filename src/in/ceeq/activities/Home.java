@@ -11,8 +11,8 @@ import in.ceeq.actions.Receiver.ReceiverType;
 import in.ceeq.actions.Wipe;
 import in.ceeq.commons.DialogHelper;
 import in.ceeq.commons.DrawerManager;
-import in.ceeq.fragments.BackupFragment;
-import in.ceeq.fragments.HomeFragment;
+import in.ceeq.fragments.BackupManager;
+import in.ceeq.fragments.DashboardManager;
 import in.ceeq.helpers.PreferencesHelper;
 import in.ceeq.services.Backups;
 import in.ceeq.services.Locater.RequestType;
@@ -106,7 +106,7 @@ public class Home extends FragmentActivity {
 
 	public void setupHome() {
 		fragmentManager = getSupportFragmentManager();
-		Fragment fragment = new HomeFragment();
+		Fragment fragment = new DashboardManager();
 		fragmentManager.beginTransaction().replace(R.id.container, fragment)
 				.commit();
 
@@ -167,9 +167,9 @@ public class Home extends FragmentActivity {
 		}.execute(preferencesHelper
 				.getString(PreferencesHelper.ACCOUNT_USER_IMAGE_URL));
 		actionList = (ListView) findViewById(R.id.drawer_action_list);
+		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		actionList.setAdapter(DrawerManager.getInstance(this, fragmentManager, drawerLayout, actionList));
 		actionList.setOnItemClickListener(DrawerManager.getInstance(this, fragmentManager, drawerLayout, actionList));
-		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
 				R.drawable.ic_drawer, R.string.open_drawer,
 				R.string.close_drawer) {
@@ -372,13 +372,13 @@ public class Home extends FragmentActivity {
 	}
 
 	public void resetHome() {
-		Fragment fragment = new HomeFragment();
+		Fragment fragment = new DashboardManager();
 		fragmentManager.beginTransaction().replace(R.id.container, fragment)
 				.commit();
 	}
 
 	public void resetBackup() {
-		Fragment fragment = new BackupFragment();
+		Fragment fragment = new BackupManager();
 		fragmentManager.beginTransaction().replace(R.id.container, fragment)
 				.commit();
 	}

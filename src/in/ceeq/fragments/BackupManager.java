@@ -22,7 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class AppLockerFragment extends Fragment {
+public class BackupManager extends Fragment {
 
 
 	public static final String INTENT_ACTION_MESSAGE = "in.ceeq.action.MESSAGE";
@@ -38,7 +38,7 @@ public class AppLockerFragment extends Fragment {
 	private LocalBroadcastManager localBroadcastManager;
 	private BroadcastReceiver backupMessageReceiver;
 
-	public AppLockerFragment() {
+	public BackupManager() {
 
 	}
 

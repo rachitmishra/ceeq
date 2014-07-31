@@ -7,7 +7,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
@@ -40,9 +39,6 @@ public class Reset {
 		try {
 			preferencesHelper.setString(PreferencesHelper.SIM_NUMBER, "");
 			preferencesHelper.setString(PreferencesHelper.LAST_BACKUP_DATE, "");
-
-			preferencesHelper.setBoolean(
-					PreferencesHelper.APP_INITIALIZATION_STATUS, false);
 			preferencesHelper
 					.setBoolean(PreferencesHelper.DEVICE_STATUS, false);
 			preferencesHelper.setBoolean(PreferencesHelper.APP_STATUS, false);
@@ -100,8 +96,7 @@ public class Reset {
 					if (googleApiClient.isConnected()) {
 						Plus.AccountApi.clearDefaultAccount(googleApiClient);
 						Plus.AccountApi.revokeAccessAndDisconnect(googleApiClient);
-						PreferenceManager.getDefaultSharedPreferences(context).edit().clear();
-						PreferenceManager.getDefaultSharedPreferences(context).edit().commit();
+						PreferencesHelper.getInstance(context).clear();
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

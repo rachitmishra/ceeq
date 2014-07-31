@@ -2,11 +2,11 @@ package in.ceeq.commons;
 
 import in.ceeq.R;
 import in.ceeq.fragments.AboutApplicationFragment;
-import in.ceeq.fragments.BackupFragment;
-import in.ceeq.fragments.HomeFragment;
-import in.ceeq.fragments.MyDeviceFragment;
-import in.ceeq.fragments.PrivacyFragment;
-import in.ceeq.fragments.SecurityFragment;
+import in.ceeq.fragments.AboutDeviceManager;
+import in.ceeq.fragments.BackupManager;
+import in.ceeq.fragments.DashboardManager;
+import in.ceeq.fragments.PrivacyManager;
+import in.ceeq.fragments.SecurityManager;
 import in.ceeq.helpers.PreferencesHelper;
 
 import org.apache.http.protocol.HTTP;
@@ -185,19 +185,19 @@ public class DrawerManager extends BaseAdapter implements
 		Fragment fragment = null;
 		switch (position) {
 		case 0:
-			fragment = new MyDeviceFragment();
+			fragment = new AboutDeviceManager();
 			break;
 		case 3:
-			fragment = new HomeFragment();
+			fragment = new DashboardManager();
 			break;
 		case 4:
-			fragment = new BackupFragment();
+			fragment = new BackupManager();
 			break;
 		case 5:
-			fragment = new SecurityFragment();
+			fragment = new SecurityManager();
 			break;
 		case 8:
-			fragment = new PrivacyFragment();
+			fragment = new PrivacyManager();
 			break;
 		case 9:
 			sendSupportMail();

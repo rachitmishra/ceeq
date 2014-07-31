@@ -1,4 +1,4 @@
-package in.ceeq.helpers;
+package in.ceeq.exceptions;
 
 import java.io.IOException;
 

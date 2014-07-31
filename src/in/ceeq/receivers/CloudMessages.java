@@ -7,13 +7,12 @@
 
 package in.ceeq.receivers;
 
+import in.ceeq.services.Commander;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
-
-import in.ceeq.services.Commander;
 
 public class CloudMessages extends WakefulBroadcastReceiver {
 	public CloudMessages() {

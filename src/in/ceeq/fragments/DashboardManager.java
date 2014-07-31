@@ -33,7 +33,7 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.plus.PlusOneButton;
 
-public class HomeFragment extends Fragment {
+public class DashboardManager extends Fragment {
 
 	public static final int STATUS_ALL = 0;
 	public static final int STATUS_AUTO_BACKUP_DISABLED = 1;
@@ -58,7 +58,7 @@ public class HomeFragment extends Fragment {
 	private PlusOneButton plusOneButton;
 	private Button backupButton, securityButton;
 
-	public HomeFragment() {
+	public DashboardManager() {
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class HomeFragment extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				Fragment backupFragment = new BackupFragment();
+				Fragment backupFragment = new BackupManager();
 				fragmentManager.beginTransaction()
 						.replace(R.id.container, backupFragment).commit();
 
@@ -123,7 +123,7 @@ public class HomeFragment extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				Fragment securityFragment = new SecurityFragment();
+				Fragment securityFragment = new SecurityManager();
 				fragmentManager.beginTransaction()
 						.replace(R.id.container, securityFragment).commit();
 

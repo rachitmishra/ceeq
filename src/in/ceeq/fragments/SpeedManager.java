@@ -22,7 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class AppManagerFragment extends Fragment {
+public class SpeedManager extends Fragment {
 
 
 	public static final String INTENT_ACTION_MESSAGE = "in.ceeq.action.MESSAGE";
@@ -38,7 +38,7 @@ public class AppManagerFragment extends Fragment {
 	private LocalBroadcastManager localBroadcastManager;
 	private BroadcastReceiver backupMessageReceiver;
 
-	public AppManagerFragment() {
+	public SpeedManager() {
 
 	}
 

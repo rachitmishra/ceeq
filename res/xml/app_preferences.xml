@@ -4,20 +4,20 @@
     <PreferenceCategory
         android:summary="General Settings"
         android:title="General" >
-        <in.ceeq.activities.SwitchPreference_
+        <in.ceeq.views.SwitchPreference_
             android:key="splash"
             android:title="Show Splash Screen" />
-        <in.ceeq.activities.SwitchPreference_
+        <in.ceeq.views.SwitchPreference_
             android:key="notifications"
             android:title="Show Notifications" />
     </PreferenceCategory>
     <PreferenceCategory
         android:summary="All the connected accounts for web services"
         android:title="Connected Accounts" >
-        <in.ceeq.activities.SwitchPreference_
+        <in.ceeq.views.SwitchPreference_
             android:key="facebookConnected"
             android:title="Facebook" />
-        <in.ceeq.activities.SwitchPreference_
+        <in.ceeq.views.SwitchPreference_
             android:key="googleConnected"
             android:title="Google" />
     </PreferenceCategory>
@@ -52,7 +52,7 @@
     <PreferenceCategory
         android:summary="Advance Settings"
         android:title="Advance" >
-        <in.ceeq.activities.SwitchPreference_
+        <in.ceeq.views.SwitchPreference_
             android:key="uninstallProtection"
             android:title="Prevent Uninstall" />
     </PreferenceCategory>
@@ -91,7 +91,7 @@
                 android:summary="Donate to keep this application on." />
         </Preference>
 
-        <in.ceeq.activities.SwitchPreference_
+        <in.ceeq.views.SwitchPreference_
             android:key="advertiseState"
             android:title="Hide Ads" />
 

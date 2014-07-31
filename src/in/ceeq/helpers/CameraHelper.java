@@ -1,5 +1,10 @@
 package in.ceeq.helpers;
 
+import in.ceeq.exceptions.ExternalStorageNotFoundException;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
@@ -8,9 +13,6 @@ import android.hardware.Camera.PictureCallback;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class CameraHelper {
 	private SurfaceHolder sHolder;

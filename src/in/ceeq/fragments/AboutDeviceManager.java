@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class MyDeviceFragment extends Fragment {
+public class AboutDeviceManager extends Fragment {
 	private Phone phoneHelper;
 	private PreferencesHelper preferencesHelper;
 	private Context context;

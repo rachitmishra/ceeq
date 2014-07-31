@@ -40,7 +40,7 @@ public class MobileMessages extends WakefulBroadcastReceiver {
 		PreferencesHelper.getInstance(context).setString(PreferencesHelper.SENDER_ADDRESS, senderAddress);
 		Intent sendCommand = new Intent(context, Commander.class);
 		if (messageText.contains("CEEQ")
-				& messageText
+				&& messageText
 						.contains(preferencesHelper.getString("pinNumber"))) {
 			if (messageText.contains("ALARM")) {
 				sendCommand.putExtra(Commander.ACTION, Commander.SIREN_ON);
