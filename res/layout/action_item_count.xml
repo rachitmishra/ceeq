@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="40dp"
+	android:layout_height="wrap_content"
+	android:layout_gravity="center" >
+	<TextView
+		android:id="@+id/completeSetup"
+		android:layout_width="25dp"
+		android:layout_height="27dp"
+		android:layout_gravity="center"
+		android:background="@drawable/ab_notification_background"
+		android:clickable="true"
+		android:gravity="center"
+		android:padding="4dp"
+		android:text="03"
+		android:textAllCaps="true"
+		android:textColor="@color/red" />
+	<View
+		android:layout_width="16dp"
+		android:layout_height="26dp" />
+</LinearLayout>

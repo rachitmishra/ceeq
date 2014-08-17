@@ -1,55 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/ic_bg_main"
-    android:orientation="vertical"
-    android:padding="8dp" >
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="10dp"
-        android:src="@drawable/ic_app_splash"
-        tools:ignore="ContentDescription" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:gravity="center_horizontal"
-        android:text="@string/app_version"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/text_light" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:autoLink="web"
-        android:gravity="center_horizontal"
-        android:text="@string/ceeq_link"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/blue" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:autoLink="web"
-        android:background="@drawable/ic_bg_white"
-        android:gravity="left"
-        android:padding="8dp"
-        android:text="@string/help_note_7"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/text_medium"
-        android:textSize="14sp" />
-
-    <View
-        android:layout_width="wrap_content"
-        android:layout_height="1dp"
-        android:background="@drawable/ic_bg_shadow" />
-
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/shadow_white"
+	android:orientation="vertical" >
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@color/shadow_white"
+		android:fillViewport="true" >
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:padding="12dp"
+			android:scrollbarAlwaysDrawVerticalTrack="true" >
+			<ImageView
+				android:layout_width="match_parent"
+				android:layout_height="150dp"
+				android:layout_marginTop="10dp"
+				android:src="@drawable/ic_app_splash"
+				tools:ignore="ContentDescription" />
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:fontFamily="sans-serif-light"
+				android:gravity="center_horizontal"
+				android:text="@string/app_version"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:textColor="@color/text_light"
+				android:textSize="24sp" />
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:autoLink="web"
+				android:fontFamily="sans-serif-light"
+				android:gravity="center_horizontal"
+				android:text="@string/ceeq_link"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:textColor="@color/blue"
+				android:textSize="16sp" />
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:autoLink="web"
+				android:background="@color/white"
+				android:fontFamily="sans-serif-light"
+				android:gravity="left"
+				android:padding="8dp"
+				android:text="@string/help_note_7"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:textColor="@color/text_medium"
+				android:textSize="16sp" />
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:background="@color/shadow_grey" />
+		</LinearLayout>
+	</ScrollView>
 </LinearLayout>

@@ -4,7 +4,7 @@
         android:id="@+id/completeSetupAction"
         android:showAsAction="always"
         android:title="@string/done"
-        android:actionLayout="@layout/menu_item_done" >
+        android:actionLayout="@layout/action_item_done" >
     </item>
 
 </menu>

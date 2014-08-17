@@ -1,21 +1,26 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="4dp" >
-
-    <TextView
-        android:id="@+id/drawer_list_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/activatedBackgroundIndicator"
-        android:clickable="false"
-        android:gravity="center_vertical"
-        android:minHeight="?android:attr/listPreferredItemHeightSmall"
-        android:paddingLeft="12dp"
-        android:paddingRight="12dp"
-        android:textAppearance="?android:attr/textAppearanceListItemSmall"
-        android:textColor="#505050"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-
-</FrameLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginTop="4dp"
+	android:background="@color/shadow_white"
+	android:orientation="vertical" >
+	<TextView
+		android:id="@+id/drawer_list_header"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@color/almost_white"
+		android:clickable="false"
+		android:fontFamily="sans-serif-light"
+		android:gravity="center_vertical"
+		android:minHeight="?android:attr/listPreferredItemHeightSmall"
+		android:paddingLeft="20dp"
+		android:paddingRight="20dp"
+		android:textAppearance="?android:attr/textAppearanceListItemSmall"
+		android:textColor="@android:color/primary_text_light"
+		android:textSize="18sp"
+		android:textStyle="bold" />
+	<View
+		android:layout_width="wrap_content"
+		android:layout_height="1dp"
+		android:background="@color/shadow_grey" />
+</LinearLayout>

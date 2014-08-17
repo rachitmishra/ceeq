@@ -1,26 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/ic_bg_main"
-    android:orientation="vertical" >
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:autoLink="web|email"
-        android:background="@drawable/ic_bg_white"
-        android:gravity="left"
-        android:text="@string/help_note_18"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/text_medium"
-        android:textSize="14sp" />
-
-    <View
-        android:layout_width="wrap_content"
-        android:layout_height="1dp"
-        android:background="@drawable/ic_bg_shadow" />
-
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/shadow_white"
+	android:orientation="vertical" >
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/shadow_white"
+		android:orientation="vertical"
+		android:padding="12dp" >
+		<ScrollView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="@color/shadow_white"
+			android:fillViewport="true" >
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:scrollbarAlwaysDrawVerticalTrack="true" >
+				<TextView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="10dp"
+					android:autoLink="web|email"
+					android:background="@color/white"
+					android:fontFamily="sans-serif-light"
+					android:gravity="left|fill_horizontal"
+					android:padding="8dp"
+					android:text="@string/help_note_18"
+					android:textAppearance="?android:attr/textAppearanceMedium"
+					android:textColor="@color/text_medium"
+					android:textSize="16sp" />
+				<View
+					android:layout_width="match_parent"
+					android:layout_height="1dp"
+					android:background="@color/shadow_grey" />
+			</LinearLayout>
+		</ScrollView>
+	</LinearLayout>
 </LinearLayout>

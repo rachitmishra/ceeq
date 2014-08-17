@@ -1,120 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res/in.ceeq"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background"
-    android:fillViewport="true"
-    android:scrollbars="vertical" >
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:orientation="vertical"
-        android:padding="16dp" >
-
-        <in.ceeq.views.CircularImageView
-            android:id="@+id/user_image"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/ic_bg_white"
-            android:contentDescription="@string/hint_user"
-            android:padding="0dp"
-            android:scaleType="fitXY" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:layout_weight="0" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:fontFamily="sans-serif-light"
-                android:gravity="center"
-                android:text="@string/app_welcome"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#09c"
-                android:textSize="28sp" />
-
-            <TextView
-                android:id="@+id/user_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:fontFamily="sans-serif-light"
-                android:gravity="left"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#09c"
-                android:textSize="28sp"
-                tools:ignore="SelectableText" />
-
-        </LinearLayout>
-
-        <EditText
-            android:id="@+id/pinNumber"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="12dp"
-            android:ems="10"
-            android:hint="@string/enter_6_digit_pin"
-            android:inputType="numberPassword"
-            android:padding="12dp"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/help_note_36"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/text_medium"
-            android:textSize="14sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_weight="0"
-            tools:ignore="UselessParent" >
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:fontFamily="sans-serif-light"
-                android:padding="8dp"
-                android:text="@string/device_admin"
-                android:textColor="@color/blue"
-                android:textSize="20sp" />
-
-            <ToggleButton
-                android:id="@+id/toggle_admin"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="right"
-                android:onClick="onButtonPressed" />
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/chooseContact"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="12dp"
-            android:layout_weight="0"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/choose_a_contact" />
-
-    </LinearLayout>
-
+	xmlns:tools="http://schemas.android.com/tools"
+	xmlns:app="http://schemas.android.com/apk/res/in.ceeq"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/shadow_white"
+	android:fillViewport="true"
+	android:scrollbars="vertical" >
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:orientation="vertical"
+		android:padding="16dp" >
+		<in.ceeq.views.CircularImageView
+			android:id="@+id/user_image"
+			android:layout_width="100dp"
+			android:layout_height="100dp"
+			android:layout_gravity="center"
+			android:layout_marginTop="8dp"
+			android:background="@color/white"
+			android:contentDescription="@string/hint_user"
+			android:padding="0dp"
+			android:scaleType="fitXY" />
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:layout_marginTop="8dp"
+			android:layout_weight="0" >
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:fontFamily="sans-serif-light"
+				android:gravity="center"
+				android:text="@string/app_welcome"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:textColor="#09c"
+				android:textSize="28sp" />
+			<TextView
+				android:id="@+id/user_name"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:fontFamily="sans-serif-light"
+				android:gravity="left"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:textColor="#09c"
+				android:textSize="28sp"
+				tools:ignore="SelectableText" />
+		</LinearLayout>
+		<EditText
+			android:id="@+id/pinNumber"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:layout_marginTop="12dp"
+			android:ems="10"
+			android:hint="@string/enter_6_digit_pin"
+			android:inputType="numberPassword"
+			android:padding="12dp"
+			android:textSize="16sp" />
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="12dp"
+			android:fontFamily="sans-serif-light"
+			android:text="@string/help_note_36"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:textColor="@color/text_medium"
+			android:textSize="14sp" />
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="12dp"
+			android:layout_weight="0"
+			tools:ignore="UselessParent" >
+			<TextView
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:layout_weight="1"
+				android:fontFamily="sans-serif-light"
+				android:padding="8dp"
+				android:text="@string/device_admin"
+				android:textColor="@color/blue"
+				android:textSize="20sp" />
+			<ToggleButton
+				android:id="@+id/toggle_admin"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_gravity="right"
+				android:onClick="onButtonPressed" />
+		</LinearLayout>
+		<Button
+			android:id="@+id/chooseContact"
+			android:layout_width="match_parent"
+			android:layout_height="48dp"
+			android:layout_marginTop="12dp"
+			android:layout_weight="0"
+			android:fontFamily="sans-serif-light"
+			android:text="@string/choose_a_contact" />
+	</LinearLayout>
 </ScrollView>

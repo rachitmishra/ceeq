@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="green">#9c0 </color>
-    <color name="red">#FC3632</color>
-    <color name="blue">#09c</color>
-    <color name="background">#fafafa</color>
-    <color name="light_blue">#500099cc</color>
-    <color name="transparent">#ffffffff</color>
-    <color name="text_dark">#252525</color>
-    <color name="text_medium">#454545</color>
-    <color name="text_light">#606060</color>
-    <color name="text_white">#fafafa</color>
-    <color name="white">#fefefe</color>
-    <color name="pressed_actionbar">#CC0099CC</color>
+	<color name="green">#9c0 </color>
+	<color name="red">#fc3632</color>
+	<color name="blue">#09c</color>
+	<color name="almost_white">#fafafa</color>
+	<color name="shadow_white">#f5f5f5</color>
+	<color name="shadow_grey">#dadada</color>
+	<color name="shadow_blue">#100099cc</color>
+	<color name="light_blue">#500099cc</color>
+	<color name="transparent">#ffffffff</color>
+	<color name="text_dark">#252525</color>
+	<color name="text_medium">#505050</color>
+	<color name="text_light">#606060</color>
+	<color name="text_white">#fafafa</color>
+	<color name="white">#fefefe</color>
+	<color name="pressed_actionbar">#CC0099CC</color>
 </resources>
